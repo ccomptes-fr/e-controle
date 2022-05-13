@@ -1,10 +1,9 @@
 __docformat__ = "reStructuredText"
 import django
-from dotenv import load_dotenv
 import logging
 import os
+from dotenv import load_dotenv
 from wsgidav.fs_dav_provider import FilesystemProvider
-from wsgidav._version import __version__
 from wsgidav.wsgidav_app import DEFAULT_CONFIG, WsgiDAVApp
 
 
@@ -50,9 +49,11 @@ def make_config(filesystem_provider, domain_controller_class):
       "default_to_digest": False,
     },
     "verbose": 4,
-    "enable_loggers": [],
     "property_manager": True,  # True: use property_manager.PropertyManager
-    "lock_manager": True,  # True: use lock_manager.LockManager
+    "lock_storage": True,  # True: use lock_manager.LockManager
+    "logging": {
+      "enable_loggers": [],
+    },
   })
   return config
 

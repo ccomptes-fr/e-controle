@@ -64,17 +64,22 @@ Les users non-admin n'ont pas de mot de passe, ils recoivent un lien par mail po
  - Les informations de connection SMTP se trouve dans les "settings" de debugmail
  - Modifier `.env` avec les informations de connection SMTP
 
+Créer variable d'environnement pour docker-compose :
+
+    cp .env.docker-compose.sample .env.docker-compose
+
+
 Builder l'image Docker pour django (`build` utilise la `Dockerfile`):
 
-     docker-compose build
+     docker-compose --env-file .env.docker-compose build
 
-Lancer le container `django`, et lui passer la commande `dev`. Comme le container postgres est défini comme un dépendance (voir `links` dans docker-compose.yml), il est lancé aussi.
+Lancer le container `django`. Comme le container postgres est défini comme un dépendance (voir `links` dans docker-compose.yml), il est lancé aussi.
 
-    docker-compose django dev
+    docker-compose --env-file .env.docker-compose django
 
 On doit pouvoir se connecter au serveur django, en utilisant soit :
  - (linux only, ne marche pas sur macos) l'adresse IP et le numéro de port du serveur qui s'affiche sur le terminal. Par example : http://172.18.0.3:8080/admin/
- - le port forwarding. Pour cela, lancer le serveur avec le flag `-p` : `docker-compose run -p 8080:8080 django dev`. On peut accéder sur le port 8080 de localhost, qui forwarde au port 8080 du container django : http://localhost:8080/admin
+ - le port forwarding. Pour cela, lancer le serveur avec le flag `-p` : `docker-compose run -p 8080:8080 django`. On peut accéder sur le port 8080 de localhost, qui forwarde au port 8080 du container django : http://localhost:8080/admin
 
 # Environnement de développement sans Docker
 
@@ -178,12 +183,11 @@ Instructions d'installation données par django-magic, le package que nous utili
 # Des commandes utiles
 Pour l'install docker :
 
-    docker-compose run django dev
-    docker-compose run django uwsgi
-    docker-compose run django python3.6 manage.py runserver 0:8080
-    docker-compose run django python3.6 manage.py shell_plus
-    docker-compose run django <any-command>
-    docker-compose up -d
+    docker-compose --env-file .env.docker-compose run django
+    docker-compose --env-file .env.docker-compose run django python3.6 manage.py runserver 0:8080
+    docker-compose --env-file .env.docker-compose run django python3.6 manage.py shell_plus
+    docker-compose --env-file .env.docker-compose run django <any-command>
+    docker-compose --env-file .env.docker-compose up -d
 
     # lancer les tests unitaires sur un container django :
     docker-compose run django bash # l'environnement est sourcé par le docker-entrypoint.sh
@@ -192,7 +196,7 @@ Pour l'install docker :
 
 # Lancement en prod
 
-- Une base PostgreSQL 10 doit être fournie.
+- Une base PostgreSQL 11 doit être fournie.
 
 
 # Définition des locales
@@ -237,9 +241,9 @@ Si le serveur Redis n'est pas fournit, on peut l'installer:
     systemctl enable redis
     redis-cli ping
 
-# uWSGI
-Le server d'application uWSGI est utilisé sur Heroku.
-Pour plus de détail : https://uwsgi-docs.readthedocs.io/en/latest/
+# Gunicorn
+Le server d'application Gunicorn est utilisé.
+Pour plus de détail : https://docs.gunicorn.org/en/stable/
 
 # Parcel : Bundler JS
 
