@@ -1,6 +1,7 @@
 import xlsxwriter
 
 from datetime import date
+from dateutil import tz
 from .models import ResponseFile
 from tempfile import NamedTemporaryFile
 
@@ -60,7 +61,7 @@ def generate_response_file_list_in_xlsx(questionnaire):
                 {'header': 'Heure de dépôt'},
                 {'header': 'Commentaires'}
             ]
-
+            to_zone = tz.gettz('Europe/Paris')
             data = [
                 (
                     file.question.theme.numbering,
@@ -69,8 +70,8 @@ def generate_response_file_list_in_xlsx(questionnaire):
                     file.question.description,
                     file.basename,
                     f"{file.author.first_name} {file.author.last_name}",
-                    file.created.strftime('%Y-%m-%d'),
-                    file.created.strftime('%H:%M:%S')
+                    file.created.astimezone(to_zone).strftime('%Y-%m-%d'),
+                    file.created.astimezone(to_zone).strftime('%H:%M:%S')
                 )
                 for file in get_files_for_export(questionnaire)
             ]
