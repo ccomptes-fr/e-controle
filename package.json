@@ -1,7 +1,8 @@
 {
   "name": "e-controle",
   "engines": {
-    "node": "10.x"
+    "node": "16.x",
+    "npm": ">=8.x.x"
   },
   "scripts": {
     "build-all": "npm run build-control-detail && npm run build-questionnaire-create && npm run build-questionnaire-detail && npm run build-session-management && npm run build-sidebar",
@@ -15,7 +16,6 @@
     "watch-questionnaire-detail": "parcel watch static/src/questionnaire-detail.js --out-dir ./static/dist/ --out-file questionnaire-detail-bundle.js",
     "watch-session-management": "parcel watch static/src/session-management.js --out-dir ./static/dist/ --out-file session-management-bundle.js",
     "watch-sidebar": "parcel watch static/src/sidebar.js --out-dir ./static/dist/ --out-file sidebar-bundle.js",
-    "postinstall": "npm run build-all",
     "test": "jest"
   },
   "dependencies": {
@@ -62,7 +62,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.3.1",
     "eslint-plugin-standard": "^4.0.1",
-    "eslint-plugin-vue": "^6.2.2",
+    "eslint-plugin-vue": "^7.20.0",
     "flush-promises": "^1.0.2",
     "htmlhint": "^0.14.0",
     "jest": "^26.1.0",
@@ -73,6 +73,9 @@
     "typescript": "^3.9.10",
     "vue-jest": "^3.0.5",
     "vue-template-compiler": "^2.6.14"
+  },
+  "overrides": {
+    "coa": "2.0.2"
   },
   "jest": {
     "setupFiles": [
