@@ -1,22 +1,45 @@
 version: '3'
+
 services:
+  rabbitmq:
+    restart: always
+    image: ${DOCKER_REGISTRY}rabbitmq:3.8.2-management
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=ecc
+      - RABBITMQ_DEFAULT_PASS=ecc
+    ports:
+      - '127.0.0.1:5672:5672'
+      - '127.0.0.1:15672:15672'
+
   postgres:
-    image: 'postgres:11'
+    image: ${DOCKER_REGISTRY}postgres:11
     environment:
       - POSTGRES_USER=ecc
       - POSTGRES_PASSWORD=ecc
       - POSTGRES_DB=ecc
+    ports:
+      - '5432:5432'
+
   django:
+    image: ecc-django
     build:
       context: .
-      dockerfile: docker/Dockerfile.python
+      dockerfile: ./Dockerfile
+      args:
+        DOCKER_REGISTRY: ${DOCKER_REGISTRY}
+        PROXY_CC_URL: ${PROXY_CC_URL}
+        REGISTRY_DOMAINE: ${REGISTRY_DOMAINE}
     volumes:
-      - '.:/app'
+      - '.:/code'
     ports:
       - '8080:8080'
     links:
       - postgres
+      - rabbitmq
+    depends_on:
+      - postgres
+      - rabbitmq
     environment:
       - PORT=8080
-    image: ecc-django
-    command: dev
+    command: "./startLocal.sh"
