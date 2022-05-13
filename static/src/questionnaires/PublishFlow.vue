@@ -132,6 +132,7 @@
 
 <script>
 import axios from "axios";
+import { toEmailFormat } from '../utils/DateFormat'
 import backend from "../utils/backend";
 import { mapFields } from "vuex-map-fields";
 import { mapState } from "vuex";
@@ -157,7 +158,7 @@ export default Vue.extend({
     },
   },
   computed: {
-    ...mapFields(["config"]),
+    ...mapFields(["config", 'config.site_url']),
     ...mapState({
       controls: "controls",
     }),
@@ -189,10 +190,10 @@ export default Vue.extend({
       const expiryDateString =
         this.questionnaire.end_date === null
           ? ""
-          : `${newline}${newline}La date limite de réponse est le ${this.questionnaire.end_date}.`;
+          : `${newline}${newline}La date limite de réponse est le ${toEmailFormat(this.questionnaire.end_date)}.`;
 
       if (currentControl) {
-        return `Bonjour,${newline}${newline}Un nouveau questionnaire vient d'être ajouté au contrôle ${currentControl.title}. Il s'agit du questionnaire numéro ${this.questionnaire.id} : ${this.questionnaire.title}.${expiryDateString}${newline}${newline}Nous vous invitons à vous connecter à e-contrôle pour le voir et apporter vos réponses, au lien ci-dessous :${newline}${newline}https://e-controle-beta.ccomptes.fr${newline}${newline}Cordialement,`;
+        return `Bonjour,${newline}${newline}Un nouveau questionnaire vient d'être ajouté au contrôle ${currentControl.title}. Il s'agit du questionnaire numéro ${this.questionnaire.id} : ${this.questionnaire.title}.${expiryDateString}${newline}${newline}Nous vous invitons à vous connecter à e-contrôle pour le voir et apporter vos réponses, au lien ci-dessous :${newline}${newline}${this.site_url}${newline}${newline}Cordialement,`;
       }
 
       return "";
