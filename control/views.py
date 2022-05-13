@@ -232,26 +232,6 @@ class UploadResponseFile(LoginRequiredMixin, CreateView):
         file_object = self.object.file
         file_extension = os.path.splitext(file_object.name)[1]
 
-        # Set metadata for docx, xlsx files
-        metadata_type = self.file_extension_is_metadata(file_extension)
-
-        if metadata_type == ".docx":
-            document = Document(self.object.file)
-            prop = document.core_properties
-            prop.author = self.object.author
-            prop.modified = datetime.now()
-            document.save(self.object.file)
-        elif metadata_type == ".xlsx":
-            wb = openpyxl.load_workbook(self.object.file)
-            wb.properties.creator = self.object.author
-            wb.properties.modified = datetime.now()
-            wb.save(self.object.file)
-        elif metadata_type == ".pdf":
-            pdf = PdfReader(self.object.file)
-            pdf.Info.Author = "batman"
-            pdf.Info.Author = str(self.object.author)
-            pdf.Info.ModDate = str(datetime.now())
-            PdfWriter(trailer=pdf).write(self.object.file)
         if not self.file_extension_is_valid(file_extension):
             self.add_invalid_extension_log(file_extension)
             return HttpResponseForbidden(
@@ -265,7 +245,31 @@ class UploadResponseFile(LoginRequiredMixin, CreateView):
             return HttpResponseForbidden(
                 f"La taille du fichier dépasse la limite autorisée "
                 f"de {settings.UPLOAD_FILE_MAX_SIZE_MB}Mo.")
+        
+        # you must save the files first to set metadata after
+        # else the files are corrupted
         self.object.save()
+
+        # Set metadata for docx, xlsx and pdf files
+        metadata_type = self.file_extension_is_metadata(file_extension)
+
+        if metadata_type == ".docx":
+            document = Document(self.object.file.path)
+            prop = document.core_properties
+            prop.author = self.object.author
+            prop.modified = datetime.now()
+            document.save(self.object.file.path)
+        elif metadata_type == ".xlsx":
+            wb = openpyxl.load_workbook(self.object.file.path)
+            wb.properties.creator = self.object.author
+            wb.properties.modified = datetime.now()
+            wb.save(self.object.file.path)
+        elif metadata_type == ".pdf":
+            pdf = PdfReader(self.object.file.path)
+            pdf.Info.Author = str(self.object.author)
+            pdf.Info.ModDate = str(datetime.now())
+            PdfWriter(trailer=pdf).write(self.object.file.path)
+
         self.add_upload_action_log()
         data = {'status': 'success'}
         response = JsonResponse(data)
