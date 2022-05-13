@@ -385,7 +385,8 @@ export default Vue.extend({
             return { title: t.title, questions: qq }
           })
 
-          let newQ = { ...curQ, control: ctrl.id, is_draft: true, id: null, themes: [] }
+          // new questionnaire not finalized and not replied
+          let newQ = { ...curQ, control: ctrl.id, is_draft: true, is_finalized: false, is_replied: false, id: null, themes: [] }
           getCreateMethod()(newQ).then(response => {
             const qId = response.data.id
             newQ = { ...newQ, themes: themes }
