@@ -1,0 +1,39 @@
+.default_rules:
+  rules: &default_rules
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_TAG
+      when: always
+    - if: $CI_COMMIT_BRANCH
+      when: manual
+
+.quality:sonarqube:
+  image: ${DOCKER_REGISTRY}docker:20.10.12
+  services:
+    - name: ${DOCKER_REGISTRY}cicd/docker-dind:1.0.1
+      alias: docker
+  stage: quality
+  cache:
+    key: $CI_COMMIT_REF_SLUG
+    paths:
+      - .cache/pip
+      - venv/
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  interruptible: true
+  allow_failure: false
+  script:
+    - docker run --rm -v $(pwd):/usr/src -e SONAR_HOST_URL=${SONAR_HOST_URL} ${DOCKER_REGISTRY}sonarqube
+
+quality:sonarqube:
+  extends:
+    - .quality:sonarqube
+  rules: *default_rules
+
+quality:sonarqube:mr:
+  extends:
+    - .quality:sonarqube
+  when: always
+  only:
+    - merge_requests
+  except:
+    variables:
+      - $CI_MERGE_REQUEST_TITLE =~ /^Skip:.*/
