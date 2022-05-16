@@ -14,10 +14,10 @@ ARG PROXY_CC_URL
 ARG REGISTRY_DOMAINE
 RUN export http_proxy=${PROXY_CC_URL} && apt-get clean && apt-get update && apt-get install -y locales
 RUN sed -i -e 's/# fr_FR.UTF-8 UTF-8/fr_FR.UTF-8 UTF-8/' /etc/locale.gen && locale-gen
-ENV LANG fr_FR.UTF-8 \
-    LANGUAGE fr_FR:fr \
-    LC_ALL fr_FR.UTF-8 \
-    TZ Europe/Paris
+ENV LANG fr_FR.UTF-8
+ENV LANGUAGE fr_FR:fr
+ENV LC_ALL fr_FR.UTF-8
+ENV TZ Europe/Paris
 WORKDIR /code
 COPY poetry_req.txt ./
 RUN pip install -r poetry_req.txt --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
