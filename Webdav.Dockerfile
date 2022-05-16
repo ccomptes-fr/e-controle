@@ -15,7 +15,7 @@ RUN mkdir /code/webdav-files
 RUN mkdir /code/e-controle-media
 COPY poetry_req.txt ./
 RUN pip install -r poetry_req.txt --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
-RUN pip install WsgiDAV==4.0.1 --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
+RUN pip install WsgiDAV==4.0.1 gunicorn==20.1.0 --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
 COPY . .
 RUN chmod u+x ./startWebdav.sh
 
