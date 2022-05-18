@@ -240,6 +240,8 @@ except locale.Error as e:
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 ADMIN_URL = env('ADMIN_URL', default='admin/')
+# URL of e-controle in questionnaire
+QUESTIONNAIRE_SITE_URL = env ('QUESTIONNAIRE_SITE_URL', default='')
 
 # Exclude incoming file if its mime type contains any of the following text
 UPLOAD_FILE_MIME_TYPE_BLACKLIST = env(
