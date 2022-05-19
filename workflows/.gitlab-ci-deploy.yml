@@ -1,0 +1,114 @@
+.deploy:
+  image: ${DOCKER_REGISTRY}cicd/cicd-tool:5.2.1
+  stage: deploy
+  variables: &deploy_variables
+    DOCKER_TLS_CERTDIR: "/certs"
+  script:
+    - set -o allexport
+    - source ${CONFIG_FILE}
+    - set +o allexport
+    - >
+      cd-tools --host ${SSH_HOST} --user ${SSH_USER} --password ${SSH_PASSWORD}
+      ssh-command "docker rm -f ${IMAGE_NAME} || true"
+    - |
+      export COMMAND
+      COMMAND="docker run --name ${IMAGE_NAME} --network=\"host\" --user ${USER_ID}:${GROUP_ID} --restart always -d"
+      COMMAND="$COMMAND -v /opt/e-controle/e-controle-media:/code/e-controle-media"
+      COMMAND="$COMMAND -v /opt/e-controle/static:/var/ecc/static"
+      COMMAND="$COMMAND -v /opt/e-controle/log:/var/log"
+      COMMAND="$COMMAND -e DEBUG=False"
+      COMMAND="$COMMAND -e SHOW_DEBUG_TOOLBAR=False"
+      COMMAND="$COMMAND -e DATABASE_URL=\"${DATABASE_URL}\""
+      COMMAND="$COMMAND -e SECRET_KEY=\"${SECRET_KEY}\""
+      COMMAND="$COMMAND -e CELERY_BROKER_URL=${CELERY_BROKER_URL}"
+      COMMAND="$COMMAND -e MEDIA_ROOT=/code/e-controle-media"
+      COMMAND="$COMMAND -e STATIC_ROOT=/var/ecc/static"
+      COMMAND="$COMMAND -e EMAIL_HOST=${EMAIL_HOST}"
+      COMMAND="$COMMAND -e EMAIL_PORT=${EMAIL_PORT}"
+      COMMAND="$COMMAND -e EMAIL_HOST_USER=${EMAIL_HOST_USER}"
+      COMMAND="$COMMAND -e EMAIL_HOST_PASSWORD=\"${EMAIL_HOST_PASSWORD}\""
+      COMMAND="$COMMAND -e EMAIL_TIMEOUT=${EMAIL_TIMEOUT}"
+      COMMAND="$COMMAND -e EMAIL_USE_TLS=True"
+      COMMAND="$COMMAND -e DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}"
+      COMMAND="$COMMAND -e SUPPORT_TEAM_EMAIL=${SUPPORT_TEAM_EMAIL}"
+      COMMAND="$COMMAND -e SEND_EMAIL_WHEN_USER_ADDED=${SEND_EMAIL_WHEN_USER_ADDED}"
+      COMMAND="$COMMAND -e SEND_EMAIL_WHEN_USER_REMOVED=${SEND_EMAIL_WHEN_USER_REMOVED}"
+      COMMAND="$COMMAND -e LDAP_SERVER=${LDAP_SERVER}"
+      COMMAND="$COMMAND -e LDAP_DOMAIN=${LDAP_DOMAIN}"
+      COMMAND="$COMMAND -e HTTP_AUTHORIZATION=\"${HTTP_AUTHORIZATION}\""
+      COMMAND="$COMMAND -e LDAP_USER=${LDAP_USER}"
+      COMMAND="$COMMAND -e LDAP_PASSWORD=\"${LDAP_PASSWORD}\""
+      COMMAND="$COMMAND -e LDAP_DC=${LDAP_DC}"
+      COMMAND="$COMMAND -e AUTH_LDAP_REQUIRE_GROUP=${AUTH_LDAP_REQUIRE_GROUP}"
+      COMMAND="$COMMAND -e WEBDAV_URL=${WEBDAV_URL}"
+      COMMAND="$COMMAND -e ADMIN_URL=\"${ADMIN_URL}\""
+      COMMAND="$COMMAND -e SESSION_EXPIRE_SECONDS=86400"
+      COMMAND="$COMMAND -e UPLOAD_FILE_EXTENSION_BLACKLIST=\"${UPLOAD_FILE_EXTENSION_BLACKLIST}\""
+      COMMAND="$COMMAND -e DEMO_INSPECTOR_USERNAME=${DEMO_INSPECTOR_USERNAME}"
+      COMMAND="$COMMAND -e DEMO_AUDITED_USERNAME=${DEMO_AUDITED_USERNAME}"
+      COMMAND="$COMMAND -e ALLOW_DEMO_LOGIN=${ALLOW_DEMO_LOGIN}"
+      COMMAND="$COMMAND -e PORT=${SERVER_PORT}"
+      COMMAND="$COMMAND -e HOSTNAME=${SSH_HOST}"
+      COMMAND="$COMMAND ${DOCKER_REGISTRY}${IMAGE_NAME}:${IMAGE_TAG}"
+    - >
+      cd-tools --host ${SSH_HOST} --user ${SSH_USER} --password ${SSH_PASSWORD}
+      ssh-command "${COMMAND}"
+
+.deploy_rabbitmq:
+  image: ${DOCKER_REGISTRY}cicd/cicd-tool:5.2.1
+  stage: deploy
+  variables: &deploy_rabbitmq_variables
+    DOCKER_TLS_CERTDIR: "/certs"
+    IMAGE_NAME: "rabbitmq"
+  script:
+    - >
+      cd-tools --host ${SSH_HOST} --user ${SSH_USER} --password ${SSH_PASSWORD}
+      ssh-command "docker rm -f ${IMAGE_NAME} || true"
+    - |
+      export COMMAND
+      COMMAND="docker run --name ${IMAGE_NAME} --network=\"host\" -p 15672:15672 -p 5672:5672 --restart always -d"
+      COMMAND="$COMMAND -e RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}"
+      COMMAND="$COMMAND -e RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}"
+      COMMAND="$COMMAND ${DOCKER_REGISTRY}${IMAGE_NAME}:${IMAGE_TAG}"
+    - >
+      cd-tools --host ${SSH_HOST} --user ${SSH_USER} --password ${SSH_PASSWORD}
+      ssh-command "${COMMAND}"
+
+# Deploy to dev2 env
+deploy:commit:dev2_econtrole:
+  extends:
+    - .deploy
+  when: manual
+  variables:
+    <<: *deploy_variables
+    IMAGE_TAG: $CI_COMMIT_SHA
+    IMAGE_NAME: econtrole
+    SERVER_PORT: 8080
+  needs:
+    - build:commit
+  environment:
+    name: Dev2
+
+deploy:commit:dev2_econtrole-webdav:
+  extends:
+    - .deploy
+  when: manual
+  variables:
+    <<: *deploy_variables
+    IMAGE_TAG: $CI_COMMIT_SHA
+    IMAGE_NAME: econtrole-webdav
+    SERVER_PORT: 8081
+  needs:
+    - build:commit_webdav
+  environment:
+    name: Dev2
+
+deploy:commit:rabbitmq:
+  extends:
+    - .deploy_rabbitmq
+  when: manual
+  variables:
+    <<: *deploy_rabbitmq_variables
+    IMAGE_TAG: 3.8.2-management
+  environment:
+    name: Dev2

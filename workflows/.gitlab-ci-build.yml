@@ -1,0 +1,65 @@
+.build:
+  image: ${DOCKER_REGISTRY}docker:20.10.12
+  services:
+    - name: ${DOCKER_REGISTRY}cicd/docker-dind:1.0.1
+      alias: docker
+  stage: build
+  allow_failure: false
+  interruptible: true
+  variables: &build_variables
+    DOCKER_TLS_CERTDIR: "/certs"
+  script:
+    # build image docker image econtrole or econtrole-webdav
+    - echo ${PROXY_CC_URL}
+    - docker build --build-arg PROXY_CC_URL=${PROXY_CC_URL} --build-arg DOCKER_REGISTRY=${DOCKER_REGISTRY} --build-arg REGISTRY_DOMAINE=${REGISTRY_DOMAINE} -t ${DOCKER_REGISTRY}${IMAGE_NAME}:${IMAGE_TAG} -f ${DOCKER_FILE} .
+    - docker push ${DOCKER_REGISTRY}${IMAGE_NAME}:${IMAGE_TAG}
+    # cleaning to save disk space
+    - docker rmi ${DOCKER_REGISTRY}${IMAGE_NAME}:${IMAGE_TAG}
+
+# Build econtrole
+build:commit:
+  extends:
+    - .build
+  when: manual
+  variables:
+    <<: *build_variables
+    IMAGE_TAG: $CI_COMMIT_SHA
+    IMAGE_NAME: econtrole
+    DOCKER_FILE: Dockerfile
+
+build:tag:
+  extends:
+    - .build
+  when: manual
+  only:
+    refs:
+      - tags
+  variables:
+    <<: *build_variables
+    IMAGE_TAG: $CI_COMMIT_TAG
+    IMAGE_NAME: econtrole
+    DOCKER_FILE: Dockerfile
+
+# Build econtrole-webdav
+build:commit_webdav:
+  extends:
+    - .build
+  when: manual
+  variables:
+    <<: *build_variables
+    IMAGE_TAG: $CI_COMMIT_SHA
+    IMAGE_NAME: econtrole-webdav
+    DOCKER_FILE: Webdav.Dockerfile
+
+build:tag_webdav:
+  extends:
+    - .build
+  when: manual
+  only:
+    refs:
+      - tags
+  variables:
+    <<: *build_variables
+    IMAGE_TAG: $CI_COMMIT_TAG
+    IMAGE_NAME: econtrole-webdav
+    DOCKER_FILE: Webdav.Dockerfile

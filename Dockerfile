@@ -21,7 +21,7 @@ ENV TZ Europe/Paris
 WORKDIR /code
 COPY poetry_req.txt ./
 RUN pip install -r poetry_req.txt --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
-RUN pip install gunicorn==20.1.0 --index-url http://nexus.ccomptes.fr/repository/python/simple/ --trusted-host nexus.ccomptes.fr
+RUN pip install gunicorn==20.1.0 --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
 COPY . .
 COPY --from=front /code/static/ /code/static
 COPY --from=front /code/node_modules/ /code/node_modules
