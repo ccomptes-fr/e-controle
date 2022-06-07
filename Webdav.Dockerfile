@@ -1,5 +1,5 @@
 ARG DOCKER_REGISTRY
-FROM ${DOCKER_REGISTRY}python:3.9.11
+FROM ${DOCKER_REGISTRY}python:3.9.13
 
 ENV PYTHONUNBUFFERED 1
 ARG PROXY_CC_URL
@@ -11,11 +11,10 @@ ENV LANGUAGE fr_FR:fr
 ENV LC_ALL fr_FR.UTF-8
 ENV TZ Europe/Paris
 WORKDIR /code
-RUN mkdir /code/webdav-files
-RUN mkdir /code/e-controle-media
-COPY poetry_req.txt ./
-RUN pip install -r poetry_req.txt --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
-RUN pip install WsgiDAV==4.0.1 gunicorn==20.1.0 --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
+RUN mkdir /code/webdav-files /code/e-controle-media
+COPY requirements.txt ./
+RUN pip install -r requirements.txt --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
+RUN pip install WsgiDAV==4.0.1 --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
 COPY . .
 RUN chmod u+x ./startWebdav.sh
 

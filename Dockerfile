@@ -8,7 +8,7 @@ RUN npm ci --registry=http://${REGISTRY_DOMAINE}/repository/npm/
 COPY . .
 RUN npm run build-all
 
-FROM ${DOCKER_REGISTRY}python:3.9.11
+FROM ${DOCKER_REGISTRY}python:3.9.13
 ENV PYTHONUNBUFFERED 1
 ARG PROXY_CC_URL
 ARG REGISTRY_DOMAINE
@@ -19,9 +19,8 @@ ENV LANGUAGE fr_FR:fr
 ENV LC_ALL fr_FR.UTF-8
 ENV TZ Europe/Paris
 WORKDIR /code
-COPY poetry_req.txt ./
-RUN pip install -r poetry_req.txt --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
-RUN pip install gunicorn==20.1.0 --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
+COPY requirements.txt ./
+RUN pip install -r requirements.txt --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
 COPY . .
 COPY --from=front /code/static/ /code/static
 COPY --from=front /code/node_modules/ /code/node_modules
