@@ -177,9 +177,9 @@ SESSION_COOKIE_SAMESITE = 'Lax'
 X_FRAME_OPTIONS = 'DENY'
 SECURE_HSTS_SECONDS = 30
 # Content-Security-Policy
-CSP_DEFAULT_SRC = env('CSP_DEFAULT_SRC', default=("'self'",))
+CSP_DEFAULT_SRC = env('CSP_DEFAULT_SRC', default=("'self'", "https://webanalytics.ccomptes.fr"))
 CSP_STYLE_SRC = env('CSP_STYLE_SRC', default=("'self'", "'unsafe-inline'"))
-CSP_SCRIPT_SRC = env('CSP_SCRIPT_SRC', default=("'self'", "'unsafe-eval'", "'unsafe-inline'"))
+CSP_SCRIPT_SRC = env('CSP_SCRIPT_SRC', default=("'self'", "'unsafe-eval'", "'unsafe-inline'", "https://webanalytics.ccomptes.fr"))
 
 if DEBUG:
     CSRF_COOKIE_SECURE = False
