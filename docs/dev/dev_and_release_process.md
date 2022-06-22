@@ -72,7 +72,7 @@ Pour créer une branche de release, on suivra le processus suivant :
     $ git push
 ```
 
-Il y a 2 taches à faire dans cette nouvelle branche (on peut regarder [ce commit](https://github.com/betagouv/e-controle/commit/85a165b8) pour avoir un exemple) :
+Il y a 2 taches à faire dans cette nouvelle branche (on peut regarder [ce commit](https://github.com/ccomptes-fr/e-controle/commit/85a165b8) pour avoir un exemple) :
  - Ajouter des release notes dans le dossier docs/releases. On peut imiter le format des releases precedentes. On peut décider d'un nom pour la release dans ce fichier.
  - Mettre à jour la version affichée sur le site dans templates/footer.html.
 
@@ -113,7 +113,7 @@ git push prod
 ```
 On peut au besoin utiliser `git push --force prod`.
 
-On peut aussi vérifier que ça a bien marché : `git log` doit donner quelque chose comme ça : 
+On peut aussi vérifier que ça a bien marché : `git log` doit donner quelque chose comme ça :
 ```
 commit 35ab1e277d6f38c18a964427b7d9827d13c0812c (HEAD -> prod, origin/release/1.20, origin/prod, release/1.20)
 ```
@@ -132,7 +132,7 @@ Pour garder la trace de cette release, on merge la branche release dans la branc
     $ git push
 ```
 
-On va aussi tagger le commit de master : ca fait apparaitre [une release dans la page de github](https://github.com/betagouv/e-controle/releases), et ca nous permet de garder des traces. On crée le tag en local, puis on le push sur github.
+On va aussi tagger le commit de master : ca fait apparaitre [une release dans la page de github](https://github.com/ccomptes-fr/e-controle/releases), et ca nous permet de garder des traces. On crée le tag en local, puis on le push sur github.
 ```
     $ git tag -a 1.20
     $ git push origin 1.20
@@ -168,7 +168,7 @@ On commit le fix dans la branche (ou ou plusieurs commits) :
     $ git push
 ```
 
-Le fix doit aussi changer le numéro de version et faire des release notes pour cette nouvelle version. Si on était précédemment à la version 1.20, alors on fait une version 1.20.1 (version "patch"). S'inspirer de [ce commit](https://github.com/betagouv/e-controle/commit/85a165b8) (les release notes sont faciles : il n'y a que le fix qui a changé!)
+Le fix doit aussi changer le numéro de version et faire des release notes pour cette nouvelle version. Si on était précédemment à la version 1.20, alors on fait une version 1.20.1 (version "patch"). S'inspirer de [ce commit](https://github.com/ccomptes-fr/e-controle/commit/85a165b8) (les release notes sont faciles : il n'y a que le fix qui a changé!)
 
 ## Tester le hotfix
 On fait un processus similaire à quand on teste une feature.

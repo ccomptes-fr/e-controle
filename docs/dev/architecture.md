@@ -5,23 +5,23 @@ The README.md file also contains info on how things work, check it out.
 
 ## Database
 
-Our backend is in Postgres. We define the tables through Django files. Look at : https://github.com/betagouv/e-controle/blob/develop/control/models.py and https://github.com/betagouv/e-controle/blob/develop/user_profiles/models.py for the main ones.
+Our backend is in Postgres. We define the tables through Django files. Look at : https://github.com/ccomptes-fr/e-controle/blob/develop/control/models.py and https://github.com/ccomptes-fr/e-controle/blob/develop/user_profiles/models.py for the main ones.
 
 Here is the database schema - december 2019 :
-https://github.com/betagouv/e-controle/blob/develop/docs/dev/e-controle-database.png
+https://github.com/ccomptes-fr/e-controle/blob/develop/docs/dev/e-controle-database.png
 
 ## Backend
 The backend is in python, using Django. It is split up into several Django apps.
 
-We also have an API with Django Rest Framework. You can see the documentation (list of API endpoints and helpers to call them) /api/docs (works on localhost too). Here is an example of documentation (could be outdated) :  https://github.com/betagouv/e-controle/blob/develop/docs/dev/e-controle_API_30-06-2020.pdf.
+We also have an API with Django Rest Framework. You can see the documentation (list of API endpoints and helpers to call them) /api/docs (works on localhost too). Here is an example of documentation (could be outdated) :  https://github.com/ccomptes-fr/e-controle/blob/develop/docs/dev/e-controle_API_30-06-2020.pdf.
 
 ### ecc
-Root app. Contains the urls.py file (https://github.com/betagouv/e-controle/blob/develop/ecc/urls.py) which is useful to see how views are mapped to urls.
+Root app. Contains the urls.py file (https://github.com/ccomptes-fr/e-controle/blob/develop/ecc/urls.py) which is useful to see how views are mapped to urls.
 
 ### control
-Contains the main model (https://github.com/betagouv/e-controle/blob/develop/control/models.py) which is useful to understand the main objects in our database.
+Contains the main model (https://github.com/ccomptes-fr/e-controle/blob/develop/control/models.py) which is useful to understand the main objects in our database.
 
-Most of the views are also there (https://github.com/betagouv/e-controle/blob/develop/control/views.py) : look at them to understand how the DB objects are passed into templates to the clients. The API views (used by Django REST API) are also there (https://github.com/betagouv/e-controle/blob/develop/control/api_views.py)
+Most of the views are also there (https://github.com/ccomptes-fr/e-controle/blob/develop/control/views.py) : look at them to understand how the DB objects are passed into templates to the clients. The API views (used by Django REST API) are also there (https://github.com/ccomptes-fr/e-controle/blob/develop/control/api_views.py)
 
 
 ### Other things
@@ -49,13 +49,13 @@ Our CSS is in static/css/custom.css and in Vue.js files (Vue.js allows declaring
 Why this complex (and weird) Django+Vue structure? Because we started with only Django templates, and gradually added Vue as the JS became more complex and required it. We did not do a full rewrite as a Vue single-page app, but we are gradually working towards more Vue and less Django templates, so it could happen later. If it's not broken, don't fix it! :)
 
 ### An example of how Django templates and Vue interact : the control-detail page
- - The server serves the Django template at templates/ecc/control_detail.html. The corresponding view in the django code is ControlDetail (https://github.com/betagouv/e-controle/blob/develop/control/views.py#L30).
+ - The server serves the Django template at templates/ecc/control_detail.html. The corresponding view in the django code is ControlDetail (https://github.com/ccomptes-fr/e-controle/blob/develop/control/views.py#L30).
   - The django view fills in the template with data : controls_json, user_json, etc (everything in double brackets : {{ }}). Then send it to the client.
-  - In the client, the JS file linked in the html gets (dist/control-detail-bundle.css) executed. This is Vue component, whose root file is https://github.com/betagouv/e-controle/blob/develop/static/src/control-detail.js.
-   - The Vue root file loads the main component : https://github.com/betagouv/e-controle/blob/develop/static/src/controls/ControlPage.vue. It displays data that was passed as props from the django template. For example, the list of controls was passed at https://github.com/betagouv/e-controle/blob/develop/templates/ecc/control_detail.html#L7, and becomes the prop at https://github.com/betagouv/e-controle/blob/develop/static/src/controls/ControlPage.vue#L64.
+  - In the client, the JS file linked in the html gets (dist/control-detail-bundle.css) executed. This is Vue component, whose root file is https://github.com/ccomptes-fr/e-controle/blob/develop/static/src/control-detail.js.
+   - The Vue root file loads the main component : https://github.com/ccomptes-fr/e-controle/blob/develop/static/src/controls/ControlPage.vue. It displays data that was passed as props from the django template. For example, the list of controls was passed at https://github.com/ccomptes-fr/e-controle/blob/develop/templates/ecc/control_detail.html#L7, and becomes the prop at https://github.com/ccomptes-fr/e-controle/blob/develop/static/src/controls/ControlPage.vue#L64.
    - From then on, it's normal Vue code :)
 
-   Note that on the same page, there are other Vue bundles loaded : the sidebar bundle (https://github.com/betagouv/e-controle/blob/develop/templates/base.html#L74) which displays the left side menu, and the session management bundle (https://github.com/betagouv/e-controle/blob/develop/templates/base.html#L84) which logs out the user after a time.
+   Note that on the same page, there are other Vue bundles loaded : the sidebar bundle (https://github.com/ccomptes-fr/e-controle/blob/develop/templates/base.html#L74) which displays the left side menu, and the session management bundle (https://github.com/ccomptes-fr/e-controle/blob/develop/templates/base.html#L84) which logs out the user after a time.
 
    Each bundle is a separate JS file, and they do now have shared variables.
 
@@ -66,12 +66,12 @@ We have several Parcel bundles, which are linked and run in several pages. The b
 Linked on every page (or almost). This displays the menu sidebar on the left. It fetches the data to fill the sidebar with a backend call (using the axios library).
 
 #### session-management-bundle.js
-Linked on every page (from the base django template https://github.com/betagouv/e-controle/blob/develop/templates/base.html#L84). It sets a timer, and after a given time it will log out the user unless they take action.
+Linked on every page (from the base django template https://github.com/ccomptes-fr/e-controle/blob/develop/templates/base.html#L84). It sets a timer, and after a given time it will log out the user unless they take action.
 
 #### control-detail-bundle.js and control-detail-bundle.css
 Displays each control ("Espace de dépôt").
 
-Root file : https://github.com/betagouv/e-controle/blob/develop/static/src/control-detail.js
+Root file : https://github.com/ccomptes-fr/e-controle/blob/develop/static/src/control-detail.js
 
 When the user clicks in the menu, it changes the displayed control and the hash in the URL, without server reload, in this same Vue bundle (like a kind of mini multi-page app...)
 
@@ -80,12 +80,12 @@ The component gets the list of controls and the current user from server through
 #### questionnaire-detail-bundle.js and questionnaire-detail-bundle.css
 Displays a questionnaire. Straightforward.
 
-Root file : https://github.com/betagouv/e-controle/blob/develop/static/src/questionnaire-detail.js
+Root file : https://github.com/ccomptes-fr/e-controle/blob/develop/static/src/questionnaire-detail.js
 
 #### questionnaire-create-bundle.js and questionnaire-create-bundle.css
 Displays a Wizard in 3 steps for creating a questionnaire. No server reload between the wizard steps (mini multi-page app).
 
-Root file : https://github.com/betagouv/e-controle/blob/develop/static/src/questionnaire-create.js
+Root file : https://github.com/ccomptes-fr/e-controle/blob/develop/static/src/questionnaire-create.js
 
 
 ### Vue subcomponents

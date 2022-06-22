@@ -29,11 +29,11 @@ Autres technos utilisées (pas besoin de les installer localement, elles sont su
 
 
 ## Présentation des containers
-Nous utilisons deux containers Dockers : un pour postgres, un pour django (définis dans https://github.com/betagouv/e-controle/blob/develop/docker-compose.yml).
+Nous utilisons deux containers Dockers : un pour postgres, un pour django (définis dans https://github.com/ccomptes-fr/e-controle/blob/develop/docker-compose.yml).
 
-Le container postgres a une image standard, le django une image faite maison (défini par la https://github.com/betagouv/e-controle/blob/develop/Dockerfile).
+Le container postgres a une image standard, le django une image faite maison (défini par la https://github.com/ccomptes-fr/e-controle/blob/develop/Dockerfile).
 
-Quand on lance le container django avec `docker-compose run django`, il commence par exécuter https://github.com/betagouv/e-controle/blob/develop/docker-entrypoint.sh. Ce script source l'environnement, migre la base postgres si necessaire, puis exécute une commande si elle est donnée (par exemple la commande `dev`, avec `docker-compose run django dev`, lance le serveur django.).
+Quand on lance le container django avec `docker-compose run django`, il commence par exécuter https://github.com/ccomptes-fr/e-controle/blob/develop/docker-entrypoint.sh. Ce script source l'environnement, migre la base postgres si necessaire, puis exécute une commande si elle est donnée (par exemple la commande `dev`, avec `docker-compose run django dev`, lance le serveur django.).
 
 Le filesystem de la machine hôte est partagé avec le container django : le dossier `.` en local (root du repo github) est le même que le dossier `\app` sur le container. Les modifs en local apparaissent dans le container sans le relancer.
 

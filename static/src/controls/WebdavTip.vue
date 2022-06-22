@@ -113,7 +113,7 @@ Vue.use(Vuex)
 const SUCCESS_MESSAGE_FADE_SECONDS = 5
 const VIDEO_FILE_PATH_MP4 = 'videos/file-explorer.mp4'
 const VIDEO_FILE_PATH_WEBM = 'videos/file-explorer.webm'
-const PDF_FILE_URL = 'https://github.com/betagouv/e-controle/raw/develop/docs/guides/e-controle-explorateur-de-fichiers.pdf'
+const PDF_FILE_URL = 'https://github.com/ccomptes-fr/e-controle/raw/develop/docs/guides/e-controle-explorateur-de-fichiers.pdf'
 
 export default Vue.extend({
   props: {
