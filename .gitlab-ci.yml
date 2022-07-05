@@ -8,6 +8,6 @@ stages:
 
 include:
   #- template: Security/SAST.gitlab-ci.yml
-  - local: "/workflows/.gitlab-ci-integration.yml"
+  #- local: "/workflows/.gitlab-ci-integration.yml"
   - local: "/workflows/.gitlab-ci-build.yml"
   - local: "/workflows/.gitlab-ci-deploy.yml"
