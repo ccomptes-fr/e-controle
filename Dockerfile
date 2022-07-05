@@ -24,6 +24,6 @@ RUN pip install -r requirements.txt --index-url http://${REGISTRY_DOMAINE}/repos
 COPY . .
 COPY --from=front /code/static/ /code/static
 COPY --from=front /code/node_modules/ /code/node_modules
-RUN chmod u+x ./start.sh
+RUN chmod a+x ./start.sh
 
 CMD ["./start.sh"]

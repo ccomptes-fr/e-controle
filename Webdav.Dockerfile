@@ -16,7 +16,7 @@ COPY requirements.txt ./
 RUN pip install -r requirements.txt --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
 RUN pip install WsgiDAV==4.0.1 --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
 COPY . .
-RUN chmod u+x ./startWebdav.sh
+RUN chmod a+x ./startWebdav.sh
 
 EXPOSE 8081
 CMD ["./startWebdav.sh"]

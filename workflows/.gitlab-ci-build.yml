@@ -23,7 +23,7 @@ build:commit:
   when: manual
   variables:
     <<: *build_variables
-    IMAGE_TAG: $CI_COMMIT_SHA
+    IMAGE_TAG: "1.32"
     IMAGE_NAME: econtrole
     DOCKER_FILE: Dockerfile
 
@@ -47,7 +47,7 @@ build:commit_webdav:
   when: manual
   variables:
     <<: *build_variables
-    IMAGE_TAG: $CI_COMMIT_SHA
+    IMAGE_TAG: "1.32"
     IMAGE_NAME: econtrole-webdav
     DOCKER_FILE: Webdav.Dockerfile
 
