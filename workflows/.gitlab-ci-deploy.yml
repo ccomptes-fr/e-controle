@@ -13,9 +13,9 @@
     - |
       export COMMAND
       COMMAND="docker run --name ${IMAGE_NAME} --network=\"host\" --user ${USER_ID}:${GROUP_ID} --restart always -d"
-      COMMAND="$COMMAND -v /opt/e-controle/e-controle-media:/code/e-controle-media"
-      COMMAND="$COMMAND -v /opt/e-controle/static:/var/ecc/static"
-      COMMAND="$COMMAND -v /opt/e-controle/log:/var/log"
+      COMMAND="$COMMAND -v /opt/e-controle-media:/code/e-controle-media"
+      COMMAND="$COMMAND -v /opt/e-controle-static:/var/ecc/static"
+      COMMAND="$COMMAND -v /opt/e-controle-log:/var/log"
       COMMAND="$COMMAND -e DEBUG=False"
       COMMAND="$COMMAND -e SHOW_DEBUG_TOOLBAR=False"
       COMMAND="$COMMAND -e DATABASE_URL=\"${DATABASE_URL}\""
@@ -33,6 +33,7 @@
       COMMAND="$COMMAND -e SUPPORT_TEAM_EMAIL=${SUPPORT_TEAM_EMAIL}"
       COMMAND="$COMMAND -e SEND_EMAIL_WHEN_USER_ADDED=${SEND_EMAIL_WHEN_USER_ADDED}"
       COMMAND="$COMMAND -e SEND_EMAIL_WHEN_USER_REMOVED=${SEND_EMAIL_WHEN_USER_REMOVED}"
+      COMMAND="$COMMAND -e MAGICAUTH_TOKEN_DURATION_SECONDS=${MAGICAUTH_TOKEN_DURATION_SECONDS}"
       COMMAND="$COMMAND -e LDAP_SERVER=${LDAP_SERVER}"
       COMMAND="$COMMAND -e LDAP_DOMAIN=${LDAP_DOMAIN}"
       COMMAND="$COMMAND -e HTTP_AUTHORIZATION=\"${HTTP_AUTHORIZATION}\""
