@@ -1,4 +1,5 @@
 import os
+import sys
 import environ
 
 env = environ.Env(
@@ -119,6 +120,34 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'ecc.wsgi.application'
+
+# LOGGING
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
+        },
+    },
+    "handlers": {
+        "console": {
+            "level": "WARNING",
+            "class": "logging.StreamHandler",
+            "stream": sys.stderr,
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        # Default logger for all modules
+        "": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": True,
+        }
+    },
+}
 
 
 # Database

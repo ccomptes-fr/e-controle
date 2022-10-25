@@ -10,6 +10,6 @@ def max_workers():
 bind = "0.0.0.0:" + environ.get("PORT", "8080")
 max_requests = 1000
 workers = max_workers()
-accesslog = "/var/log/gunicorn_debug.log"
+#accesslog = "/var/log/gunicorn_debug.log"
 loglevel = "info"
 timeout = 300
