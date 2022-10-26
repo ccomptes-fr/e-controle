@@ -1,0 +1,37 @@
+{% extends "base_email.html" %}
+{% block email_content %}
+<h2 class="align-center">Notification mensuelle suppression</h2>
+
+{% if control.depositing_organization %}
+<p class="text-strong mb0">{{ control.depositing_organization }}</p>
+<p>{{ control.title }}</p>
+{% else %}
+<p class="text-strong">{{ control.title }}</p>
+{% endif %}
+
+<hr />
+
+{% if has_file %}
+Le dernier dépôt de fichier sur l'espace de dépot date depuis au moins 2 ans, il faut peut être supprimer votre espace de dépot.
+{% else %}
+Votre espace de dépot date depuis plus de 2 ans et ne contient pas de fichier, il faut peut être supprimer votre espace de dépot.
+{% endif %}
+
+<hr/>
+
+<table border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
+  <tbody>
+    <tr>
+      <td align="center">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tbody>
+            <tr>
+              <td align="center"> <a href="https://{{ site.domain }}/"><strong>Continuer sur e-contrôle</strong></a> </td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+    </tr>
+  </tbody>
+</table>
+{% endblock email_content %}

@@ -30,6 +30,7 @@ DEBUG_TOOLBAR_CONFIG = {
 # Application definition
 
 INSTALLED_APPS = [
+    'admin_confirm',
     # Django apps
     'django.contrib.admin',
     'django.contrib.auth',

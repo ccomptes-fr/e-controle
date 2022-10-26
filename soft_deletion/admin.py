@@ -1,7 +1,10 @@
 from django.contrib import admin
+from admin_confirm import AdminConfirmMixin
+from admin_confirm.admin import confirm_action
 
 from control.models import Control, Questionnaire
 from logs.actions import add_log_entry
+from utils.file import delete_control_folder
 
 
 def find_parent_control(obj):
@@ -11,23 +14,24 @@ def find_parent_control(obj):
         return obj.control
     return obj
 
-
-def soft_delete(modeladmin, request, queryset):
-    for item in queryset:
-        item.soft_delete()
-        parent = find_parent_control(item)
-        add_log_entry(verb='admin soft deleted', session_user=request.user, obj=item, target=parent)
-
-
 def undelete(modeladmin, request, queryset):
     for item in queryset:
         item.undelete()
         add_log_entry(verb='admin undeleted', session_user=request.user, obj=item, target=item)
 
+@confirm_action
+def soft_delete(modeladmin, request, queryset):
+    for item in queryset:
+        item.soft_delete()
+        parent = find_parent_control(item)
+        if isinstance(parent, Control):
+            delete_control_folder(parent.reference_code)
+        add_log_entry(verb='admin soft deleted', session_user=request.user, obj=item, target=parent)
 
-soft_delete.short_description = "Deactivate selected items - soft delete"
+
 undelete.short_description = "Re-activate seleted items - undelete"
-
+soft_delete.short_description = "Deactivate selected items - soft delete"
+soft_delete.allowed_permissions = ['soft_delete']
 
 class IsActiveFilter(admin.SimpleListFilter):
     title = 'active'
@@ -48,7 +52,7 @@ class IsActiveFilter(admin.SimpleListFilter):
         return queryset
 
 
-class SoftDeletedAdmin(object):
+class SoftDeletedAdmin(AdminConfirmMixin, object):
     actions = [soft_delete, undelete]
 
     def is_active(self, instance):
@@ -64,3 +68,6 @@ class SoftDeletedAdmin(object):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+    def has_soft_delete_permission(self, request, obj=None):
+        return True

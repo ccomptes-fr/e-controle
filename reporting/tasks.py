@@ -1,17 +1,17 @@
 import logging
 import time
-from datetime import timedelta
-
-from django.conf import settings
-from django.utils import timezone
+from datetime import timedelta, datetime
 
 from actstream import action
 from celery import task
 from celery.utils.log import get_task_logger
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.utils import timezone
 
 from control.models import Control, ResponseFile
 from utils.email import send_email
-
+from utils.file import get_last_file_metadata_in_control_folder
 
 logger = get_task_logger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -25,6 +25,8 @@ logger.addHandler(console_handler)
 ACTION_LOG_VERB_SENT = 'files report email sent'
 ACTION_LOG_VERB_NOT_SENT = 'files report email not sent'
 
+ACTION_LOG_VERB_SENT_CLEAN = 'clean files report email sent'
+ACTION_LOG_VERB_NOT_SENT_CLEAN = 'clean files report email not sent'
 
 def get_date_cutoff(control):
     """
@@ -103,3 +105,63 @@ def send_files_report():
         logger.info(
             f'Waiting {EMAIL_SPACING_TIME_SECONDS}s after emailing for control {control.id}')
         time.sleep(EMAIL_SPACING_TIME_SECONDS)
+
+@task
+def send_clean_controls_report():
+    html_template = 'reporting/email/clean_controls_report.html'
+    text_template = 'reporting/email/clean_controls_report.txt'
+
+    # get admin user(s)
+    admin_list = list(User.objects.filter(is_staff=True).values_list('email', flat=True))
+
+    for control in Control.objects.active():
+        logger.info(f'Processing active control: {control.id}')
+        # files uploaded 2 years from now
+        date_cutoff = datetime.now() - timedelta(weeks=2 * 52, days=3, seconds=34)
+
+        last_file = get_last_file_metadata_in_control_folder(control.reference_code)
+        logger.debug(f'Last_file: {last_file}')
+        if last_file and last_file[1] < date_cutoff:
+            recipients = control.user_profiles.filter(send_files_report=True)
+            recipient_list = list(recipients.values_list('user__email', flat=True)) + admin_list
+            logger.info(f'Recipients: {recipient_list}')
+
+            if control.depositing_organization:
+                subject = control.depositing_organization
+            else:
+                subject = control.title
+            subject += ' - ancien espace de dépôt à supprimer ! !'
+
+            context = {
+                'control': control,
+                'date_cutoff': date_cutoff.strftime("%A %d %B %Y"),
+                'has_file': last_file[0] > 0
+            }
+
+            number_of_sent_email = send_email(
+                to=recipient_list,
+                subject=subject,
+                html_template=html_template,
+                text_template=text_template,
+                extra_context=context,
+            )
+            logger.info(f"Sent {number_of_sent_email} emails")
+            number_of_recipients = len(recipient_list)
+            if number_of_sent_email != number_of_recipients:
+                logger.warning(
+                    f'There was {number_of_recipients} recipient(s), '
+                    f'but {number_of_sent_email} email(s) sent.')
+            if number_of_sent_email > 0:
+                logger.info(f'Email sent for clean control {control.id}')
+                action.send(sender=control, verb=ACTION_LOG_VERB_SENT_CLEAN)
+            else:
+                logger.info(f'No email was sent for clean control {control.id}')
+                action.send(sender=control, verb=ACTION_LOG_VERB_NOT_SENT_CLEAN)
+
+            EMAIL_SPACING_TIME_SECONDS = settings.EMAIL_SPACING_TIME_MILLIS / 1000
+            logger.info(
+                f'Waiting {EMAIL_SPACING_TIME_SECONDS}s after emailing for clean control {control.id}')
+            time.sleep(EMAIL_SPACING_TIME_SECONDS)
+        else:
+            logger.info(f'Active control not too old: {control.id}')
+

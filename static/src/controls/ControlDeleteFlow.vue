@@ -5,7 +5,7 @@
       <div class="modal-header border-bottom-0">
         <h4 class="modal-title">
           <div class="mb-4">
-            Vous êtes sur le point de supprimer l'espace de dépôt :
+            Vous êtes sur le point de supprimer définitivement l'espace de dépôt :
           </div>
           <div>
             "{{ control.title }}"
@@ -33,9 +33,8 @@
                   class="custom-control-input"
                   required>
           <span class="custom-control-label">
-            En cas de contrôle juridictionnel, je confirme que la suppression
-            des données, n'impacte pas la suite de la procédure, en cas de
-            contentieux notamment.
+            Je confirme avoir transféré dans le DLR les réponses utiles, notamment en cas de contentieux,
+            les autres documents peuvent être supprimés définitivement.
           </span>
         </label>
       </div>

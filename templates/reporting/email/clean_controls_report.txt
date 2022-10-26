@@ -1,0 +1,18 @@
+Notification mensuelle suppression
+
+{% if control.depositing_organization %}
+{{ control.depositing_organization }}
+{{ control.title }}
+{% else %}
+{{ control.title }}
+{% endif %}
+
+* * *
+
+{% if has_file %}
+Le dernier dépôt de fichier sur l'espace de dépot date depuis au moins 2 ans, il faut peut être supprimer votre espace de dépot.
+{% else %}
+Votre espace de dépot date depuis plus de 2 ans et ne contient pas de fichier, il faut peut être supprimer votre espace de dépot.
+{% endif %}
+
+Continuer sur e-contrôle: https://{{ site.domain }}/
