@@ -21,7 +21,7 @@ from .docx import generate_questionnaire_file
 from docx import Document
 from .export_response_files import generate_response_file_list_in_xlsx
 import openpyxl
-from pdfrw import PdfReader, PdfWriter
+from pdfrw import PdfReader, PdfWriter, IndirectPdfDict
 from datetime import datetime
 
 from .models import Control, Questionnaire, QuestionFile, ResponseFile, Question
@@ -245,7 +245,7 @@ class UploadResponseFile(LoginRequiredMixin, CreateView):
             return HttpResponseForbidden(
                 f"La taille du fichier dépasse la limite autorisée "
                 f"de {settings.UPLOAD_FILE_MAX_SIZE_MB}Mo.")
-        
+
         # you must save the files first to set metadata after
         # else the files are corrupted
         self.object.save()
@@ -257,17 +257,30 @@ class UploadResponseFile(LoginRequiredMixin, CreateView):
             document = Document(self.object.file.path)
             prop = document.core_properties
             prop.author = self.object.author
-            prop.modified = datetime.now()
+            prop.modified = datetime.utcnow()
             document.save(self.object.file.path)
         elif metadata_type == ".xlsx":
             wb = openpyxl.load_workbook(self.object.file.path)
             wb.properties.creator = self.object.author
-            wb.properties.modified = datetime.now()
+            wb.properties.modified = datetime.utcnow()
             wb.save(self.object.file.path)
         elif metadata_type == ".pdf":
             pdf = PdfReader(self.object.file.path)
-            pdf.Info.Author = str(self.object.author)
-            pdf.Info.ModDate = str(datetime.now())
+            author = str(self.object.author)
+            # https://stackoverflow.com/questions/16503075/convert-creationtime-of-pdf-to-a-readable-format-in-python
+            # D:20171109144521-05'00'
+            pdf_date = datetime.now().astimezone().strftime("D:%Y%m%d%H%M%S%z");
+            # replace minutes tz: -0500 to 05'00'
+            mod_date = f"{pdf_date[:-2]}'{pdf_date[-2:]}'"
+
+            if pdf.Info:
+                pdf.Info.Author = author
+                pdf.Info.ModDate = mod_date
+            else:
+                pdf.Info = IndirectPdfDict(
+                    Author = author,
+                    ModDate = mod_date,
+                )
             PdfWriter(trailer=pdf).write(self.object.file.path)
 
         self.add_upload_action_log()
