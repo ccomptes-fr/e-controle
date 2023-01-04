@@ -12,12 +12,12 @@
 			<input type="checkbox" id="humain-check" name="humain" value="humain">
 			<label for="humain-check">Je suis un humain</label>
 		  </div>
-		  <button id="confirm-humain" type="button">Confirmer</button>
+		  <button id="confirm-humain" class="btn btn-primary btn-block" type="button">Confirmer</button>
         </div>
       </div>
     </div>
   </div>
-  
+
   <script>
     var url = '{{ next_step_url }}';
 	document.getElementById("confirm-humain").addEventListener("click", function () {
