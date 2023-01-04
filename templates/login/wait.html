@@ -2,25 +2,31 @@
 {% load static %}
 
 {% block page_main_container_with_sidebar %}
-  <script>
-    var url = '{{ next_step_url }}'
-    var waitSeconds = {{ WAIT_SECONDS }}
-
-    console.debug('Redirecting to', url, 'in', waitSeconds, 'seconds')
-    setTimeout(function(){
-      window.location.replace(url);
-    }, waitSeconds * 1000);
-
-  </script>
   <div class="page">
     <div class="mt-9 flex-column justify-content-center align-items-center">
       <div class="card col-login">
         <div class="card-body flex-column align-items-center bg-info text-white">
-          <h1>En chargement...</h1>
-          <div class="mb-6">Veuillez patienter quelques instants</div>
-          <div class="loader"></div>
+          <h1>Vérification de sécurité</h1>
+          <div class="mb-6">Veuillez confirmer que vous êtes un humain en cochant la case à cocher "Je suis un humain" puis en cliquant sur le bouton "Confirmer"</div>
+		  <div>
+			<input type="checkbox" id="humain-check" name="humain" value="humain">
+			<label for="humain-check">Je suis un humain</label>
+		  </div>
+		  <button id="confirm-humain" type="button">Confirmer</button>
         </div>
       </div>
     </div>
   </div>
+  
+  <script>
+    var url = '{{ next_step_url }}';
+	document.getElementById("confirm-humain").addEventListener("click", function () {
+		var checkox = document.getElementById("humain-check");
+		if (checkox.checked == true){
+			window.location.replace(url);
+		} else {
+		    alert('Confirmez que vous êtes un humain en cochant la case à cocher "Je suis un humain"');
+		}
+	});
+  </script>
 {% endblock page_main_container_with_sidebar %}
