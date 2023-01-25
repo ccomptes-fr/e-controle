@@ -339,3 +339,37 @@ ALLOW_DEMO_LOGIN = env('ALLOW_DEMO_LOGIN', default=False)
 
 SESSION_EXPIRE_SECONDS = env('SESSION_EXPIRE_SECONDS', default=24*60*60)
 SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
+
+# Logging config for production, APP_NAME come from gunicorn config
+# we must check filename not none to run 2 separates logs files
+# 1 file for econtrole and 1 file for econtrole-webdav
+# https://mattsegal.dev/django-gunicorn-nginx-logging.html
+# https://mattsegal.dev/file-logging-django.html
+FILENANE = env('APP_NAME', default=None)
+
+if not DEBUG and FILENANE:
+    LOGGING = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "root": {"level": "ERROR", "handlers": ["file"]},
+        "formatters": {
+            "verbose": {
+                "format": "%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
+            },
+        },
+        "handlers": {
+            "file": {
+                "level": "ERROR",
+                "class": "logging.FileHandler",
+                "filename": f"/var/log/{FILENANE}.log",
+                "formatter": "verbose",
+            },
+        },
+        "loggers": {
+            "django": {
+                "handlers": ["file"],
+                "level": "ERROR",
+                "propagate": True
+            },
+        },
+    }
