@@ -349,27 +349,29 @@ FILENANE = env('APP_NAME', default=None)
 
 if not DEBUG and FILENANE:
     LOGGING = {
-        "version": 1,
-        "disable_existing_loggers": False,
-        "root": {"level": "ERROR", "handlers": ["file"]},
-        "formatters": {
-            "verbose": {
-                "format": "%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
+        'version': 1,
+        'disable_existing_loggers': False,
+        'root': {'level': 'ERROR', 'handlers': ['file']},
+        'formatters': {
+            'verbose': {
+                'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
             },
         },
-        "handlers": {
-            "file": {
-                "level": "ERROR",
-                "class": "logging.FileHandler",
-                "filename": f"/var/log/{FILENANE}.log",
-                "formatter": "verbose",
+        'handlers': {
+            'file': {
+                'level': 'ERROR',
+                'class': 'logging.handlers.TimedRotatingFileHandler',
+                'filename': f'/var/log/{FILENANE}.log',
+                'when': 'midnight',
+                'backupCount': 30,
+                'formatter': 'verbose',
             },
         },
-        "loggers": {
-            "django": {
-                "handlers": ["file"],
-                "level": "ERROR",
-                "propagate": True
+        'loggers': {
+            'django': {
+                'handlers': ['file'],
+                'level': 'ERROR',
+                'propagate': True
             },
         },
     }

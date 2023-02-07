@@ -1,0 +1,10 @@
+/var/log/e-controle/ecc-celery.log {
+    daily
+    rotate 30
+    missingok
+    compress
+    delaycompress
+    notifempty
+    copytruncate
+    dateext
+}
