@@ -157,6 +157,7 @@ class QuestionnaireViewSet(mixins.CreateModelMixin,
         try:
             return [permission() for permission in self.permission_classes_by_action[self.action]]
         except KeyError:
+            # TODO: default n'existe pas dans permission_classes_by_action
             return [permission() for permission in self.permission_classes_by_action['default']]
 
     def get_queryset(self):

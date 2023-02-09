@@ -267,10 +267,19 @@ Quelques commandes bash utiles:
 
 ## Backend tests
 
+La config est dans le fichier setup.cfg, cf partie `[tool:pytest]`
+
 Lancer les tests :
 `pytest -s <dossier>`
-(le flag -s sert a laisser le debugger prendre le controle si besoin).
+(le flag -s sert a laisser le debugger prendre le controle si besoin).   
+Exemple : 
+`pytest -s user_profiles`
 
+Lancer un fichier de tests en particulier, exemple :  
+`pytest control/tests/test_api_questionnaire.py`
+
+Lancer tous les tests : 
+`pytest`
 
 ## Frontend tests
 Ils se situent dans `static/src/` avec le code, dans des dossiers `test`. Ce sont des tests Jest, pour trouver de la doc googler "test Vue with Jest" par exemple.
