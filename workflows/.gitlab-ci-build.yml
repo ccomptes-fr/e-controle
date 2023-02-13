@@ -6,15 +6,43 @@
   stage: build
   allow_failure: false
   interruptible: true
+  needs:
+    - test:tests_back
+    - quality:sonarqube
   variables: &build_variables
     DOCKER_TLS_CERTDIR: "/certs"
+    TRIVY_NO_PROGRESS: "true"
+    TRIVY_CACHE_DIR: ".trivycache/"
+    TRIVY_VERSION: "0.37.2"
+  before_script:
+    - echo ${PROXY_CC_URL}
+    - export http_proxy=${PROXY_CC_URL}
+    - export https_proxy=${PROXY_CC_URL}
+    # re install wget car celui par defaut ne supporte pas le proxy avec une erreur 400 Bad Request https://github.com/alpinelinux/docker-alpine/issues/51
+    - apk --no-cache add openssl wget
+    - wget --no-verbose https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz -O - | tar -zxvf -
+    # remove proxy for docker
+    - unset http_proxy
+    - unset https_proxy
   script:
     # build image docker image econtrole or econtrole-webdav
-    - echo ${PROXY_CC_URL}
     - docker build --build-arg PROXY_CC_URL=${PROXY_CC_URL} --build-arg DOCKER_REGISTRY=${DOCKER_REGISTRY} --build-arg REGISTRY_DOMAINE=${REGISTRY_DOMAINE} -t ${DOCKER_REGISTRY}${IMAGE_NAME}:${IMAGE_TAG} -f ${DOCKER_FILE} .
     - docker push ${DOCKER_REGISTRY}${IMAGE_NAME}:${IMAGE_TAG}
+    # scan image report
+    - export http_proxy=${PROXY_CC_URL}
+    - export https_proxy=${PROXY_CC_URL}
+    - ./trivy image --download-db-only
+    - unset http_proxy
+    - unset https_proxy
+    - ./trivy image --exit-code 0 --severity CRITICAL --format template --template "@contrib/html.tpl" -o report-trivy.html ${DOCKER_REGISTRY}${IMAGE_NAME}:${IMAGE_TAG}
     # cleaning to save disk space
     - docker rmi ${DOCKER_REGISTRY}${IMAGE_NAME}:${IMAGE_TAG}
+  cache:
+    paths:
+      - .trivycache/
+  artifacts:
+    paths:
+      - report-trivy.html
 
 # Build econtrole
 build:commit:

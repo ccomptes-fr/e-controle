@@ -5,23 +5,116 @@
     - if: $CI_COMMIT_BRANCH
       when: manual
 
+.test:tests_back:
+  image: ${DOCKER_REGISTRY}python:3.9.13
+  stage: test
+  interruptible: true
+  allow_failure: false
+  services:
+    - name: ${DOCKER_REGISTRY}postgres:11
+      alias: postgres
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+    POSTGRES_USER: ecc
+    POSTGRES_PASSWORD: ecc
+    POSTGRES_DB: ecc
+    POSTGRES_HOST_AUTH_METHOD: trust
+    DB_PORT: 5432
+    DB_HOST: postgres
+    DEFAULT_TABLESPACE: None
+    DATABASE_URL: postgres://ecc:ecc@postgres:5432/ecc
+    SECRET_KEY: "TODO"
+    CELERY_BROKER_URL: ""
+    EMAIL_HOST: debugmail.io
+    EMAIL_PORT: 25
+    EMAIL_HOST_USER: TODO
+    EMAIL_HOST_PASSWORD: TODO
+    DEFAULT_FROM_EMAIL: test@ccomptes.fr
+    EMAIL_BACKEND: 'django.core.mail.backends.console.EmailBackend'
+    SITE_ID: 1
+  cache:
+    key: $CI_COMMIT_REF_SLUG
+    paths:
+      - .cache/pip
+  before_script:
+    - pip install -r requirements.txt --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
+    # conflict version with soft-delete
+    - pip install coverage==5.5 --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
+    - python manage.py migrate
+    - python manage.py makemigrations
+  script:
+    - coverage run -m pytest
+    - coverage xml
+  artifacts:
+    paths:
+    - coverage.xml
+    expire_in: 10 min
+
 .quality:sonarqube:
   image: ${DOCKER_REGISTRY}docker:20.10.12
   services:
     - name: ${DOCKER_REGISTRY}cicd/docker-dind:1.0.1
       alias: docker
   stage: quality
-  cache:
-    key: $CI_COMMIT_REF_SLUG
-    paths:
-      - .cache/pip
-      - venv/
   variables:
     DOCKER_TLS_CERTDIR: "/certs"
   interruptible: true
   allow_failure: false
   script:
     - docker run --rm -v $(pwd):/usr/src -e SONAR_HOST_URL=${SONAR_HOST_URL} ${DOCKER_REGISTRY}sonarqube
+
+.security:bandit:
+  image: ${DOCKER_REGISTRY}python:3.9.13
+  interruptible: true
+  allow_failure: true
+  stage: security
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  cache:
+    key: $CI_COMMIT_REF_SLUG
+    paths:
+      - .cache/pip
+  before_script:
+    - pip install bandit --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
+  script:
+    - bandit -r .
+
+.security:safety:
+  image: ${DOCKER_REGISTRY}python:3.9.13
+  interruptible: true
+  allow_failure: true
+  stage: security
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  cache:
+    key: $CI_COMMIT_REF_SLUG
+    paths:
+      - .cache/pip
+  before_script:
+    - pip install safety --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
+    - export http_proxy=${PROXY_CC_URL}
+    - export https_proxy=${PROXY_CC_URL}
+  script:
+    - safety check
+
+# https://medium.com/devops-with-valentine/using-the-osv-scanner-from-google-to-scan-your-open-source-dependencies-in-gitlab-ci-pipelines-2b01067daa12
+.security:osv-scanner:
+  image: ${DOCKER_REGISTRY}tools/golang:1.19.4-alpine3.17
+  interruptible: true
+  allow_failure: true
+  stage: security
+  before_script:
+    - export http_proxy=${PROXY_CC_URL}
+    - export https_proxy=${PROXY_CC_URL}
+    - apk add git
+    - go install github.com/google/osv-scanner/cmd/osv-scanner@v1
+  script:
+    - osv-scanner --lockfile=requirements.txt
+
+test:tests_back:
+  extends:
+    - .test:tests_back
+  rules: *default_rules
 
 quality:sonarqube:
   extends:
@@ -37,3 +130,18 @@ quality:sonarqube:mr:
   except:
     variables:
       - $CI_MERGE_REQUEST_TITLE =~ /^Skip:.*/
+
+security:bandit:
+  extends:
+    - .security:bandit
+  rules: *default_rules
+
+security:safety:
+  extends:
+    - .security:safety
+  rules: *default_rules
+
+security:osv-scanner:
+  extends:
+    - .security:osv-scanner
+  rules: *default_rules
