@@ -22,7 +22,7 @@ services:
       - '5432:5432'
 
   django:
-    image: ecc-django
+    image: econtrole
     build:
       context: .
       dockerfile: ./Dockerfile
