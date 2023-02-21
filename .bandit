@@ -1,0 +1,2 @@
+[bandit]
+exclude: /test,/static,tests.py,test_*.py,/config,utils/bugfix_order.py,print_mime_types.py

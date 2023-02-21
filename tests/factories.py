@@ -29,7 +29,7 @@ dummy_text_file_with_sh_extension = SimpleUploadedFile(
 
 
 @register
-class UserFactory(factory.DjangoModelFactory):
+class UserFactory(factory.django.DjangoModelFactory):
     first_name = factory.LazyFunction(faker.first_name)
     last_name = factory.LazyFunction(faker.last_name)
     email = factory.LazyFunction(faker.email)
@@ -43,7 +43,7 @@ class UserFactory(factory.DjangoModelFactory):
 
 
 @register
-class UserProfileFactory(factory.DjangoModelFactory):
+class UserProfileFactory(factory.django.DjangoModelFactory):
     user = factory.SubFactory(UserFactory)
     agreed_to_tos = True
 
@@ -52,7 +52,7 @@ class UserProfileFactory(factory.DjangoModelFactory):
 
 
 @register
-class ControlFactory(factory.DjangoModelFactory):
+class ControlFactory(factory.django.DjangoModelFactory):
     title = factory.LazyFunction(faker.name)
     reference_code = factory.LazyAttribute(lambda c: slugify(c.title))
 
@@ -61,7 +61,7 @@ class ControlFactory(factory.DjangoModelFactory):
 
 
 @register
-class QuestionnaireFactory(factory.DjangoModelFactory):
+class QuestionnaireFactory(factory.django.DjangoModelFactory):
     title = factory.LazyFunction(faker.name)
     control = factory.SubFactory(ControlFactory)
     uploaded_file = dummy_file
@@ -72,7 +72,7 @@ class QuestionnaireFactory(factory.DjangoModelFactory):
 
 
 @register
-class ThemeFactory(factory.DjangoModelFactory):
+class ThemeFactory(factory.django.DjangoModelFactory):
     title = factory.LazyFunction(faker.name)
     questionnaire = factory.SubFactory(QuestionnaireFactory)
 
@@ -81,7 +81,7 @@ class ThemeFactory(factory.DjangoModelFactory):
 
 
 @register
-class QuestionFactory(factory.DjangoModelFactory):
+class QuestionFactory(factory.django.DjangoModelFactory):
     description = factory.LazyFunction(faker.name)
     theme = factory.SubFactory(ThemeFactory)
 
@@ -90,7 +90,7 @@ class QuestionFactory(factory.DjangoModelFactory):
 
 
 @register
-class ResponseFileFactory(factory.DjangoModelFactory):
+class ResponseFileFactory(factory.django.DjangoModelFactory):
     question = factory.SubFactory(QuestionFactory)
     author = factory.SubFactory(UserFactory)
     file = dummy_file
@@ -100,7 +100,7 @@ class ResponseFileFactory(factory.DjangoModelFactory):
 
 
 @register
-class QuestionFileFactory(factory.DjangoModelFactory):
+class QuestionFileFactory(factory.django.DjangoModelFactory):
     question = factory.SubFactory(QuestionFactory)
     file = dummy_file
 

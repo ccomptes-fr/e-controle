@@ -13,6 +13,7 @@
 **/Dockerfile*
 **/npm-debug.log
 **/obj
+**/workflows
 media
 docs
 deploy
@@ -23,3 +24,5 @@ sonar-project.properties
 latest.dump.gpg
 db.dump
 Webdav.Dockerfile
+print_mime_types.py
+media.zip

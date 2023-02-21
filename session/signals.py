@@ -11,17 +11,19 @@ def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:
         ip = x_forwarded_for.split(',')[0]
-    else:
+    elif request.META.get('REMOTE_ADDR'):
         ip = request.META.get('REMOTE_ADDR')
+    else:
+        ip = "127.0.0.1"
     return ip
 
-def save_ip_address(request):
-    userIp = UserIpAddress(ip=get_client_ip(request), username=request.user)
+def save_ip_address(request, user):
+    userIp = UserIpAddress(ip=get_client_ip(request), username=user.email)
     userIp.save()
 
 @receiver(user_logged_in, sender=User)
 def add_action_log_for_login(sender, user, request, **kwargs):
-    save_ip_address(request)
+    save_ip_address(request, user)
 
     action_details = {
         'sender': user,

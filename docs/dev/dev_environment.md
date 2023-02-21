@@ -5,54 +5,69 @@
 Certaines variables d'environnement doivent être positionnées pour que l'application fonctionne.
 
 On définit les variables d'environnement dans le fichier `.env`.
-On peut utiliser le fichier d'example comme ceci:
+On peut utiliser le fichier d'example `.env.sample` comme ceci:
 
     cd /my/project/folder/
     cp .env.sample .env
 
+Puis changer les valeurs dans le fichier `.env` pour votre environnement.   
 Les variables d'environnement sont automatiquement intégrées au process uWSGI via
-le fichier `ecc/wsgi.py` - de même pour le fichier `ecc/manage.py`.
+le fichier `ecc/wsgi.py` de même pour le fichier `webdav/wsgi.py`.
 
 
 # Environnement de développement avec Docker
-On peut utiliser Docker pour gagner du temps d'installation. Par contre ca utilise plus de mémoire. C'est un choix!
+On peut utiliser Docker pour gagner du temps d'installation. Par contre ca utilise plus de mémoire. 
 
 Si vous ne voulez pas utiliser Docker, voir le paragraphe suivant.
 
 ## Prérequis
 
-- Nous utilisons [Docker](https://www.docker.com/) pour installer l'environnement de dévelopement
+- Nous utilisons [Docker](https://www.docker.com/) et [Docker Compose](https://docs.docker.com/compose/) pour installer l'environnement de dévelopement
 
 Autres technos utilisées (pas besoin de les installer localement, elles sont sur docker):
  - Python
  - Django
+ - RabbitMQ
+ - PostgreSQL
 
 
 ## Présentation des containers
-Nous utilisons deux containers Dockers : un pour postgres, un pour django (définis dans https://github.com/ccomptes-fr/e-controle/blob/develop/docker-compose.yml).
+Nous utilisons trois containers Docker : un pour postgres, un pour rabbitmq et un pour django (cf https://github.com/ccomptes-fr/e-controle/blob/develop/docker-compose.yml).
 
-Le container postgres a une image standard, le django une image faite maison (défini par la https://github.com/ccomptes-fr/e-controle/blob/develop/Dockerfile).
+Les containers postgres et rabbitmq ont une image standard, le django est une image fait maison (cf https://github.com/ccomptes-fr/e-controle/blob/develop/Dockerfile).
 
-Quand on lance le container django avec `docker-compose run django`, il commence par exécuter https://github.com/ccomptes-fr/e-controle/blob/develop/docker-entrypoint.sh. Ce script source l'environnement, migre la base postgres si necessaire, puis exécute une commande si elle est donnée (par exemple la commande `dev`, avec `docker-compose run django dev`, lance le serveur django.).
+Quand on lance le container django avec `docker-compose run django`, il commence par exécuter https://github.com/ccomptes-fr/e-controle/blob/develop/startLocal.sh. Ce script migre la base postgres si necessaire, lance le serveur django et le process celery.
 
-Le filesystem de la machine hôte est partagé avec le container django : le dossier `.` en local (root du repo github) est le même que le dossier `\app` sur le container. Les modifs en local apparaissent dans le container sans le relancer.
+Le filesystem de la machine hôte est partagé avec le container django : le dossier `.` en local (root du repo git) est le même que le dossier `/code` sur le container. Les modifs en local apparaissent dans le container sans le relancer.
+
+L'application webdav n'est pas utilisable en dev.
 
 ## Notre Docker Django
 
-L'image docker pour Django peut être construite à partir de plusieurs images :
-
-- sur la base d'une image Centos
-- sur la base une image Python/Node
+L'image docker pour Django peut être construite à partir de plusieurs images :  
+- sur la base une image Node pour builder la partie front
+- sur la base une image Python
 
 Pour changer l'image de base, il faut changer l'option `dockerfile` specifiée dans `docker-compose.yml`.
 
 ## Lancement en dev avec docker-compose
 
 Installer node et npm.
+```
+node --version
+scoop install nodejs@16.14.2
+```
 
-Installer les dependances node : npm install
+Installer les dependances node :  
+```
+npm install
+```
 
-Builder le front : npm bun build-all (pour developper par la suite, on pourra utiliser les commandes watch qui rebuildent au fur et à mesure des modifications. Voir package.json)
+Builder le front :  
+```
+npm run build-all 
+```
+(pour developper par la suite, on pourra utiliser les commandes watch qui rebuildent au fur et à mesure des modifications. Voir package.json)
 
 Créer le fichier avec les variables d'environnement :
 
@@ -64,7 +79,7 @@ Les users non-admin n'ont pas de mot de passe, ils recoivent un lien par mail po
  - Les informations de connection SMTP se trouve dans les "settings" de debugmail
  - Modifier `.env` avec les informations de connection SMTP
 
-Créer variable d'environnement pour docker-compose :
+Créer les variables d'environnement pour docker-compose :
 
     cp .env.docker-compose.sample .env.docker-compose
 
@@ -73,13 +88,43 @@ Builder l'image Docker pour django (`build` utilise la `Dockerfile`):
 
      docker-compose --env-file .env.docker-compose build
 
-Lancer le container `django`. Comme le container postgres est défini comme un dépendance (voir `links` dans docker-compose.yml), il est lancé aussi.
+Dezipper les fichiers de `media.zip` dans un dossier `media` à la racine de ce projet.
 
-    docker-compose --env-file .env.docker-compose django
+Lancer le container `django`. Comme les container postgres et rabbitmq sont défini comme un dépendance (voir `links` dans docker-compose.yml), ils sont lancés aussi.
 
-On doit pouvoir se connecter au serveur django, en utilisant soit :
- - (linux only, ne marche pas sur macos) l'adresse IP et le numéro de port du serveur qui s'affiche sur le terminal. Par example : http://172.18.0.3:8080/admin/
- - le port forwarding. Pour cela, lancer le serveur avec le flag `-p` : `docker-compose run -p 8080:8080 django`. On peut accéder sur le port 8080 de localhost, qui forwarde au port 8080 du container django : http://localhost:8080/admin
+    docker-compose --env-file .env.docker-compose up -d
+
+(en cas d'erreur `standard_init_linux.go:228: exec user process caused: no such file or directory` vérifier le type de retour chariot du fichier startLocal.sh, il doit être de type LF)
+
+On peut accéder au site sur le port 8080 du localhost :  
+http://localhost:8080/  
+http://localhost:8080/admin  
+
+L'email pour se connecter au site s'affiche dans les logs, recuperer le lien de connexion et le récuperer le code, exemple :  
+https://example.com/chargement/code/dbd5ded602763add30832106cf676fca4bff9cce/  
+=>   
+http://localhost:8080/chargement/code/dbd5ded602763add30832106cf676fca4bff9cce/  
+
+Pour construire les fichiers bundles du front en mode watch, en fonction des fichiers js/vue/css qui sont utilisés par la page, executer la commande npm run watch-XXX qui convient, exemple :  
+```
+npm run watch-questionnaire-detail  
+```
+
+## Configurer IDE pour utiliser un interpréteur depuis une image docker
+
+Pour récupérer les dépendances, votre IDE va générer des fichiers dans un répertoire. Il est possible que le répertoire utilisé 
+par défaut soit bloqué par l'antivirus. Il faut donc personnaliser le chemin d'accès et sélectionner celui que vous désirez.   
+Veuillez consulter la page https://www.jetbrains.com/help/pycharm/directories-used-by-the-ide-to-store-settings-caches-plugins-and-logs.html pour plus d'informations et accéder au paramétrage des chemins d'accès.
+
+Exemple de configuration : 
+```
+idea.base.path=C:/Workspace/Pycharm
+idea.config.path=${idea.base.path}/config
+idea.system.path=${idea.base.path}/system
+idea.plugins.path=${idea.config.path}/plugins
+idea.log.path=${idea.system.path}/log
+```
+
 
 # Environnement de développement sans Docker
 
@@ -149,8 +194,6 @@ Note : Pour créer un nouveau dump :
 
     pg_dump --verbose --clean --no-acl --no-owner -h postgres -U ecc -d ecc > db.dump
 
-Ensuite, ajouter dezipper les fichiers de `media.zip` dans un dossier `media` à la racine de ce projet.
-
 # Login et envoi d'emails
 
 Les utlisateurs admin peuvent se logger sans envoi d'email à http://localhost:8080/admin.
@@ -201,8 +244,7 @@ Pour l'install docker :
 
 # Définition des locales
 
-Cette plateforme utilise l'encodage UTF-8 à plusieurs endroit, notament pour les nom de
-fichiers uploadés.
+Cette plateforme utilise l'encodage UTF-8 à plusieurs endroit, notament pour les nom de fichiers uploadés.
 
 Pour que cela fonctionne, il faut rendre configurer correctement les 'locales',
 par example comme ceci:
@@ -213,36 +255,17 @@ par example comme ceci:
 
 # Envoi d'emails périodiques
 
-On utilise Celery Beat et Redis pour gérer l'envoi d'emails périodiques.
+On utilise Celery Beat et RabbitMQ pour gérer l'envoi d'emails périodiques.
 
 La fréquence des envois est configurée dans django admin, avec l'applicaiton 'django_celery_beat'.
 
 Pour démarrer celery beat, il y a la commande suivante:
 
-
     celery worker --beat -A ecc -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler &
 
 
-Un autre façon de faire, est d'installer un service systemd:
-
-
-    ln -s /opt/e-controle/deploy/conf/celery.service /etc/systemd/system/celery.service
-    systemctl daemon-reload
-    systemctl start celery
-    systemctl restart status
-    tail /var/log/ecc-celery.log
-
-
-Si le serveur Redis n'est pas fournit, on peut l'installer:
-
-
-    yum -y install redis
-    systemctl start redis
-    systemctl enable redis
-    redis-cli ping
-
 # Gunicorn
-Le server d'application Gunicorn est utilisé.
+Le server d'application Gunicorn est utilisé.   
 Pour plus de détail : https://docs.gunicorn.org/en/stable/
 
 # Parcel : Bundler JS
@@ -267,15 +290,26 @@ Quelques commandes bash utiles:
 
 ## Backend tests
 
+La config est dans le fichier setup.cfg, cf partie `[tool:pytest]`
+
 Lancer les tests :
 `pytest -s <dossier>`
 (le flag -s sert a laisser le debugger prendre le controle si besoin).
+Exemple :
+`pytest -s user_profiles`
 
+Lancer un fichier de tests en particulier, exemple :
+`pytest control/tests/test_api_questionnaire.py`
+
+Lancer tous les tests :
+`pytest`
 
 ## Frontend tests
 Ils se situent dans `static/src/` avec le code, dans des dossiers `test`. Ce sont des tests Jest, pour trouver de la doc googler "test Vue with Jest" par exemple.
 
 Lancer les tests : `npm test`
+
+(npm install -g jest@26.1.0)
 
 Tester un fichier en particulier :
 
