@@ -105,7 +105,17 @@ https://example.com/chargement/code/dbd5ded602763add30832106cf676fca4bff9cce/
 =>   
 http://localhost:8080/chargement/code/dbd5ded602763add30832106cf676fca4bff9cce/  
 
-Pour construire les fichiers bundles du front en mode watch, en fonction des fichiers js/vue/css qui sont utilisés par la page, executer la commande npm run watch-XXX qui convient, exemple :  
+Pour demarrer celery : 
+```
+cd /code
+celery multi start worker1\
+        --beat -A ecc -l info\
+        --scheduler=django_celery_beat.schedulers:DatabaseScheduler\
+        --pidfile=/var/log/celery.pid\
+        --logfile=/var/log/ecc-celery.log
+```        
+
+Pour construire les fichiers bundles du front en mode watch, en fonction des fichiers js/vue/css qui sont utilisés par la page, executer depuis votre PC, la commande npm run watch-XXX qui convient, exemple :  
 ```
 npm run watch-questionnaire-detail  
 ```
