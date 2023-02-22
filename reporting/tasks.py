@@ -44,8 +44,7 @@ def get_date_cutoff(control):
 
 def get_files(control):
     date_cutoff = get_date_cutoff(control)
-    logger.info("Looking for files uploaded after this timestamp: {}".format(
-        date_cutoff.strftime("%Y-%m-%d %H:%M:%S")))
+    logger.info(f'Looking for files uploaded after this timestamp: {date_cutoff.strftime("%Y-%m-%d %H:%M:%S")}')
     files = ResponseFile.objects.filter(
         question__theme__questionnaire__control=control,
         created__gt=date_cutoff,
@@ -53,6 +52,15 @@ def get_files(control):
     logger.info(f'Number of files: {len(files)}')
     return files
 
+
+def add_log_entry(control, verb, to, subject):
+    log_message = f'Sending email "{subject}" to: {to}.'
+    action_details = {
+        'sender': control,
+        'verb': verb,
+        'description': log_message,
+    }
+    action.send(**action_details)
 
 @task
 def send_files_report():
@@ -96,10 +104,12 @@ def send_files_report():
                 f'but {number_of_sent_email} email(s) sent.')
         if number_of_sent_email > 0:
             logger.info(f'Email sent for control {control.id}')
-            action.send(sender=control, verb=ACTION_LOG_VERB_SENT)
+            verb = ACTION_LOG_VERB_SENT
         else:
             logger.info(f'No email was sent for control {control.id}')
-            action.send(sender=control, verb=ACTION_LOG_VERB_NOT_SENT)
+            verb = ACTION_LOG_VERB_NOT_SENT
+
+        add_log_entry(control, verb, recipient_list, subject)
 
         EMAIL_SPACING_TIME_SECONDS = settings.EMAIL_SPACING_TIME_MILLIS / 1000
         logger.info(
@@ -130,7 +140,7 @@ def send_clean_controls_report():
                 subject = control.depositing_organization
             else:
                 subject = control.title
-            subject += ' - ancien espace de dépôt à supprimer ! !'
+            subject += " - proposition d'espace de dépôt à supprimer"
 
             context = {
                 'control': control,
@@ -153,10 +163,12 @@ def send_clean_controls_report():
                     f'but {number_of_sent_email} email(s) sent.')
             if number_of_sent_email > 0:
                 logger.info(f'Email sent for clean control {control.id}')
-                action.send(sender=control, verb=ACTION_LOG_VERB_SENT_CLEAN)
+                verb = ACTION_LOG_VERB_SENT_CLEAN
             else:
                 logger.info(f'No email was sent for clean control {control.id}')
-                action.send(sender=control, verb=ACTION_LOG_VERB_NOT_SENT_CLEAN)
+                verb = ACTION_LOG_VERB_NOT_SENT_CLEAN
+
+            add_log_entry(control, verb, recipient_list, subject)
 
             EMAIL_SPACING_TIME_SECONDS = settings.EMAIL_SPACING_TIME_MILLIS / 1000
             logger.info(
