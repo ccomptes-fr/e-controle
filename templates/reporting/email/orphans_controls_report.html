@@ -1,0 +1,45 @@
+{% extends "base_email.html" %}
+{% block email_content %}
+<h2 class="align-center">Notification mensuelle contrôles orphelins</h2>
+
+Liste des contrôles orphelins.
+<hr />
+<table border="1" cellpadding="0" cellspacing="0">
+  <thead>
+    <tr class="align-left">
+      <th>Id</th>
+      <th>Titre</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for control in controls %}
+    <tr>
+      <td class="text-small">{{ control.id }}</td>
+      <td class="text-small">{{ control.title }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<hr/>
+
+<table border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
+  <tbody>
+    <tr>
+      <td align="center">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tbody>
+            <tr>
+              <td align="center"> <a href="https://{{ site.domain }}/"><strong>Continuer sur e-contrôle</strong></a> </td>
+            </tr>
+          </tbody>
+        </table>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+{% endblock email_content %}
+

@@ -108,6 +108,7 @@ http://localhost:8080/chargement/code/dbd5ded602763add30832106cf676fca4bff9cce/
 Pour demarrer celery : 
 ```
 cd /code
+rm -rf /var/log/celery.pid
 celery multi start worker1\
         --beat -A ecc -l info\
         --scheduler=django_celery_beat.schedulers:DatabaseScheduler\

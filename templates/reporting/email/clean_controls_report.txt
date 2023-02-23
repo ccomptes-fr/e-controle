@@ -21,4 +21,4 @@ Recommandations :
 
 Continuer sur e-contrôle: https://{{ site.domain }}/
 
-L'équipe d'e-contrôle reste à votre disposition e-controle@ccomptes.fr
+L'équipe d'e-contrôle reste à votre disposition {{ email }}

@@ -28,6 +28,11 @@ ACTION_LOG_VERB_NOT_SENT = 'files report email not sent'
 ACTION_LOG_VERB_SENT_CLEAN = 'clean files report email sent'
 ACTION_LOG_VERB_NOT_SENT_CLEAN = 'clean files report email not sent'
 
+ACTION_LOG_VERB_SENT_ORPHANS = 'orphans controls report email sent'
+ACTION_LOG_VERB_NOT_SENT_ORPHANS = 'orphans controls report email not sent'
+
+EMAIL_SPACING_TIME_SECONDS = settings.EMAIL_SPACING_TIME_MILLIS / 1000
+
 def get_date_cutoff(control):
     """
     The reporting tool looks for files uploaded after a certain date cutoff, which could be :
@@ -111,7 +116,6 @@ def send_files_report():
 
         add_log_entry(control, verb, recipient_list, subject)
 
-        EMAIL_SPACING_TIME_SECONDS = settings.EMAIL_SPACING_TIME_MILLIS / 1000
         logger.info(
             f'Waiting {EMAIL_SPACING_TIME_SECONDS}s after emailing for control {control.id}')
         time.sleep(EMAIL_SPACING_TIME_SECONDS)
@@ -124,16 +128,17 @@ def send_clean_controls_report():
     # get admin user(s)
     admin_list = list(User.objects.filter(is_staff=True).values_list('email', flat=True))
 
+    # files uploaded 2 years from now
+    date_cutoff = datetime.now() - timedelta(weeks=2 * 52, days=3, seconds=34)
+
     for control in Control.objects.active():
         logger.info(f'Processing active control: {control.id}')
-        # files uploaded 2 years from now
-        date_cutoff = datetime.now() - timedelta(weeks=2 * 52, days=3, seconds=34)
 
         last_file = get_last_file_metadata_in_control_folder(control.reference_code)
-        logger.debug(f'Last_file: {last_file}')
+        logger.debug(f'Last file: {last_file}')
         if last_file and last_file[1] < date_cutoff:
             recipients = control.user_profiles.filter(send_files_report=True)
-            recipient_list = list(recipients.values_list('user__email', flat=True)) + admin_list
+            recipient_list = list(set(list(recipients.values_list('user__email', flat=True)) + admin_list))
             logger.info(f'Recipients: {recipient_list}')
 
             if control.depositing_organization:
@@ -144,6 +149,7 @@ def send_clean_controls_report():
 
             context = {
                 'control': control,
+                'email': settings.DEFAULT_FROM_EMAIL,
                 'date_cutoff': date_cutoff.strftime("%A %d %B %Y"),
                 'has_file': last_file[0] > 0
             }
@@ -170,10 +176,59 @@ def send_clean_controls_report():
 
             add_log_entry(control, verb, recipient_list, subject)
 
-            EMAIL_SPACING_TIME_SECONDS = settings.EMAIL_SPACING_TIME_MILLIS / 1000
             logger.info(
                 f'Waiting {EMAIL_SPACING_TIME_SECONDS}s after emailing for clean control {control.id}')
             time.sleep(EMAIL_SPACING_TIME_SECONDS)
         else:
             logger.info(f'Active control not too old: {control.id}')
+
+
+@task
+def send_orphans_controls_report():
+    html_template = 'reporting/email/orphans_controls_report.html'
+    text_template = 'reporting/email/orphans_controls_report.txt'
+
+    logger.info(f'Processing orphans controls')
+
+    # get admin users
+    recipient_list = list(User.objects.filter(is_staff=True).values_list('email', flat=True))
+
+    # get "orphans" controls (equipe de controle and organisme interroge empty)
+    orphan_controls = []
+    for control in Control.objects.active():
+        if not control.user_profiles.exists():
+            orphan_controls.append(control)
+
+    if orphan_controls:
+        subject = "Liste des contrôles orphelins"
+
+        context = {
+            'controls': orphan_controls
+        }
+
+        number_of_sent_email = send_email(
+            to=recipient_list,
+            subject=subject,
+            html_template=html_template,
+            text_template=text_template,
+            extra_context=context,
+        )
+        logger.info(f"Sent {number_of_sent_email} emails")
+        number_of_recipients = len(recipient_list)
+        if number_of_sent_email != number_of_recipients:
+            logger.warning(
+                f'There was {number_of_recipients} recipient(s), '
+                f'but {number_of_sent_email} email(s) sent.')
+        if number_of_sent_email > 0:
+            logger.info(f'Email sent for orphans controls')
+            verb = ACTION_LOG_VERB_SENT_ORPHANS
+        else:
+            logger.info(f'No email was sent for orphans controls')
+            verb = ACTION_LOG_VERB_NOT_SENT_ORPHANS
+
+        add_log_entry(orphan_controls[0], verb, recipient_list, subject)
+
+        logger.info(
+            f'Waiting {EMAIL_SPACING_TIME_SECONDS}s after emailing for orphans controls')
+        time.sleep(EMAIL_SPACING_TIME_SECONDS)
 

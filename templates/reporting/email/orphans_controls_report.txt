@@ -1,0 +1,11 @@
+Notification mensuelle contrôles orphelins
+
+Liste des contrôles orphelins.
+
+* * *
+
+{% for control in controls %}
+* Id : {{ control.id }} | Titre : {{ control.title }}
+{% endfor %}
+
+Continuer sur e-contrôle: https://{{ site.domain }}/
