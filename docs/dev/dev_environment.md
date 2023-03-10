@@ -22,7 +22,7 @@ Si vous ne voulez pas utiliser Docker, voir le paragraphe suivant.
 
 ## Prérequis
 
-- Nous utilisons [Docker](https://www.docker.com/) et [Docker Compose](https://docs.docker.com/compose/) pour installer l'environnement de dévelopement
+- Nous utilisons [Docker](https://www.docker.com/) et [Docker Compose](https://docs.docker.com/compose/) pour installer l'environnement de développement
 
 Autres technos utilisées (pas besoin de les installer localement, elles sont sur docker):
  - Python
@@ -40,17 +40,17 @@ Quand on lance le container django avec `docker-compose run django`, il commence
 
 Le filesystem de la machine hôte est partagé avec le container django : le dossier `.` en local (root du repo git) est le même que le dossier `/code` sur le container. Les modifs en local apparaissent dans le container sans le relancer.
 
-L'application webdav n'est pas utilisable en dev.
+**L'application webdav n'est pas utilisable en local.**
 
 ## Notre Docker Django
 
-L'image docker pour Django peut être construite à partir de plusieurs images :  
+L'image docker pour Django est construite à partir de plusieurs images :  
 - sur la base une image Node pour builder la partie front
 - sur la base une image Python
 
 Pour changer l'image de base, il faut changer l'option `dockerfile` specifiée dans `docker-compose.yml`.
 
-## Lancement en dev avec docker-compose
+## Lancement en local avec docker-compose
 
 Installer node et npm.
 ```
@@ -73,11 +73,6 @@ Créer le fichier avec les variables d'environnement :
 
     cp .env.sample .env
 
-Optionnel, mais pratique : configurer l'envoi de mails.
-Les users non-admin n'ont pas de mot de passe, ils recoivent un lien par mail pour se logger. Sans config mail, vous ne pourrez utiliser que des users admin (avec mot de passe, depuis l'interface admin : `<server url>/admin`).
- - Se créer un compte sur debug mail : https://debugmail.io
- - Les informations de connection SMTP se trouve dans les "settings" de debugmail
- - Modifier `.env` avec les informations de connection SMTP
 
 Créer les variables d'environnement pour docker-compose :
 
@@ -88,7 +83,7 @@ Builder l'image Docker pour django (`build` utilise la `Dockerfile`):
 
      docker-compose --env-file .env.docker-compose build
 
-Dezipper les fichiers de `media.zip` dans un dossier `media` à la racine de ce projet.
+Créer un dossier `media` et `backup` à la racine de ce projet.
 
 Lancer le container `django`. Comme les container postgres et rabbitmq sont défini comme un dépendance (voir `links` dans docker-compose.yml), ils sont lancés aussi.
 
@@ -96,11 +91,32 @@ Lancer le container `django`. Comme les container postgres et rabbitmq sont déf
 
 (en cas d'erreur `standard_init_linux.go:228: exec user process caused: no such file or directory` vérifier le type de retour chariot du fichier startLocal.sh, il doit être de type LF)
 
+Inserer des utilisateurs de test :  
+- Admin: admin@demo.com / demo12345
+- Controlé: robert@demo.com / demo12345
+- Contrôleur: martine@demo.com / demo12345  
+
+```sql
+INSERT INTO public.auth_user ("password", is_superuser, username, first_name, last_name, email, is_staff, is_active, date_joined)
+VALUES('pbkdf2_sha256$150000$v9d7KGnCcBqK$7QfPQhdY6ukpo4oS0qVTWskVn4+opBPEM6niRYh4Xbw=', true, 'admin@demo.com', 'admin', 'demo', 'admin@demo.com', true, true, '2019-10-29 08:56:44+00');
+INSERT INTO public.auth_user ("password", is_superuser, username, first_name, last_name, email, is_staff, is_active, date_joined)
+VALUES('pbkdf2_sha256$150000$9mUdav5TGI9T$+OPDsIqpDxkzAhKZtS3UbtViH2ucBLikAfCoDJyGJck=', false, 'robert@demo.com', 'Robert', 'Lolo', 'robert@demo.com', false, true, '2019-10-29 08:56:44+00');
+INSERT INTO public.auth_user ("password", is_superuser, username, first_name, last_name, email, is_staff, is_active, date_joined)
+VALUES('pbkdf2_sha256$150000$w13ypXasN0sx$TnqY8myvf29ol3ioXToA4MW9EG4m3w0b1D6PoKz7gxk=', false, 'martine@demo.com', 'Martine', 'Lilu', 'martine@demo.com', false, true, '2019-10-29 08:56:44+00');
+
+INSERT INTO public.user_profiles_userprofile (user_id, profile_type, organization, send_files_report, agreed_to_tos)
+VALUES (2, 'inspector', '',false, true);
+INSERT INTO public.user_profiles_userprofile (user_id, profile_type, organization, send_files_report, agreed_to_tos)
+VALUES (3, 'audited', 'Ministère des sports',false, true);
+INSERT INTO public.user_profiles_userprofile (user_id, profile_type, organization, send_files_report, agreed_to_tos)
+VALUES (1, 'inspector', '',false, true);
+```
+
 On peut accéder au site sur le port 8080 du localhost :  
 http://localhost:8080/  
 http://localhost:8080/admin  
 
-L'email pour se connecter au site s'affiche dans les logs, recuperer le lien de connexion et le récuperer le code, exemple :  
+Le contenu du mail pour se connecter au site s'affiche dans les logs du service django, récuperer le lien de connexion, exemple :  
 https://example.com/chargement/code/dbd5ded602763add30832106cf676fca4bff9cce/  
 =>   
 http://localhost:8080/chargement/code/dbd5ded602763add30832106cf676fca4bff9cce/  
@@ -176,10 +192,10 @@ Lancer le serveur local sur le port 8080 : `python manage.py runserver 0:8080`
 Aller sur `http://localhost:8080/admin` et se logger avec un des utilisateurs mentionnés ci-dessous.
 
 
-# Restaurer/Sauvegarder la base de données en dev
+# Restaurer/Sauvegarder la base de données en local
 
 ## Docker only : Se connecter à postgres
-Pour se connecter à postgres avec l'installation docker, une méthode simple est de lancer un autre container, depuis lequel on se connecte à postgres. Par exemple le container `django`, sans la commande `dev` (on ne lance pas le serveur), avec la commande `bash` pour obtenir un terminal :
+Pour se connecter à postgres avec l'installation docker :
 
     docker-compose run django bash
 
@@ -188,27 +204,19 @@ Ensuite charger le dump dans la base.
 
 Pour l'installation avec docker :
 
-    psql -h postgres -U ecc -d ecc < db.dump
+    docker-compose exec postgres /bin/sh -c 'psql -U "ecc" -d "ecc" -f /backup/2023-03-10-backup.sql'
 
-Pour l'installation sans docker :
+Pour créer un nouveau dump :
 
-    psql -h localhost -U ecc -d ecc < db.dump
+    docker-compose exec postgres pg_dumpall -U "ecc" -f /backup/2023-03-10-backup.sql
 
-Le mot de passe est `ecc` (défini dans docker-compose.yml pour Docker, et créé plus haut si pas de Docker)
+Pour mettre à jour le mot de passe :   
 
-Voilà des utilisateurs admin qui existent par défaut quand on utilise le dump de démo:
-- Admin: admin@demo.com / demo12345
-- Controlé: robert@demo.com / demo12345
-- Contrôleur: martine@demo.com / demo12345
-
-Note : Pour créer un nouveau dump :
-
-    pg_dump --verbose --clean --no-acl --no-owner -h postgres -U ecc -d ecc > db.dump
+    docker-compose exec postgres /bin/sh -c 'PASS=ecc && psql -U ecc -c \"ALTER USER ecc WITH PASSWORD ''"${PASS}''";\"';
 
 # Login et envoi d'emails
 
 Les utlisateurs admin peuvent se logger sans envoi d'email à http://localhost:8080/admin.
-(Si vous avez utilisé le dump ci-dessus, essayez admin@demo.com / demo12345)
 
 Les utilisateurs non-admin n'ont pas de mot de passe, ils recoivent un email contenant un lien de connexion. Votre serveur doit donc être configuré pour envoyer des mails.
 
@@ -238,19 +246,14 @@ Instructions d'installation données par django-magic, le package que nous utili
 Pour l'install docker :
 
     docker-compose --env-file .env.docker-compose run django
-    docker-compose --env-file .env.docker-compose run django python3.6 manage.py runserver 0:8080
-    docker-compose --env-file .env.docker-compose run django python3.6 manage.py shell_plus
+    docker-compose --env-file .env.docker-compose run django python manage.py runserver 0:8080
+    docker-compose --env-file .env.docker-compose run django python manage.py shell_plus
     docker-compose --env-file .env.docker-compose run django <any-command>
     docker-compose --env-file .env.docker-compose up -d
 
     # lancer les tests unitaires sur un container django :
     docker-compose run django bash # l'environnement est sourcé par le docker-entrypoint.sh
     pytest
-
-
-# Lancement en prod
-
-- Une base PostgreSQL 11 doit être fournie.
 
 
 # Définition des locales
@@ -268,7 +271,7 @@ par example comme ceci:
 
 On utilise Celery Beat et RabbitMQ pour gérer l'envoi d'emails périodiques.
 
-La fréquence des envois est configurée dans django admin, avec l'applicaiton 'django_celery_beat'.
+La fréquence des envois est configurée dans django admin, avec l'application 'django_celery_beat'.
 
 Pour démarrer celery beat, il y a la commande suivante:
 
