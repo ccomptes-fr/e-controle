@@ -3,6 +3,7 @@
   stage: deploy
   variables: &deploy_variables
     DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_REGISTRY_IMAGE: ${DOCKER_REGISTRY}${DOCKER_REGISTRY_NAMESPACE}${IMAGE_NAME}:${IMAGE_TAG}
   script:
     - set -o allexport
     - source ${CONFIG_FILE}
@@ -53,7 +54,7 @@
       COMMAND="$COMMAND -e HOSTNAME=${SSH_HOST}"
       COMMAND="$COMMAND -e PIWIK_TRACKER_BASE_URL=\"${PIWIK_TRACKER_BASE_URL}\""
       COMMAND="$COMMAND -e PIWIK_SITE_ID=${PIWIK_SITE_ID}"
-      COMMAND="$COMMAND ${DOCKER_REGISTRY}${IMAGE_NAME}:${IMAGE_TAG}"
+      COMMAND="$COMMAND ${DOCKER_REGISTRY_IMAGE}"
     - >
       cd-tools --host ${SSH_HOST} --user ${SSH_USER} --password ${SSH_PASSWORD}
       ssh-command "${COMMAND}"
@@ -79,28 +80,28 @@
       ssh-command "${COMMAND}"
 
 # Deploy to dev2 env
-deploy:commit:dev2_econtrole:
+deploy:commit:dev2_e-controle:
   extends:
     - .deploy
   when: manual
   variables:
     <<: *deploy_variables
     IMAGE_TAG: $CI_COMMIT_SHA
-    IMAGE_NAME: econtrole
+    IMAGE_NAME: e-controle
     SERVER_PORT: 8080
   needs:
     - build:commit
   environment:
     name: Dev2
 
-deploy:commit:dev2_econtrole-webdav:
+deploy:commit:dev2_e-controle-webdav:
   extends:
     - .deploy
   when: manual
   variables:
     <<: *deploy_variables
     IMAGE_TAG: $CI_COMMIT_SHA
-    IMAGE_NAME: econtrole-webdav
+    IMAGE_NAME: e-controle-webdav
     SERVER_PORT: 8081
   needs:
     - build:commit_webdav
