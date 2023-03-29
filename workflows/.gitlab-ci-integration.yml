@@ -50,7 +50,7 @@
     - coverage.xml
     expire_in: 10 min
 
-.lint:linter_fontend:
+.lint:linter_frontend:
   image: ${DOCKER_REGISTRY}node/node16:16.13.1
   interruptible: true
   allow_failure: false
