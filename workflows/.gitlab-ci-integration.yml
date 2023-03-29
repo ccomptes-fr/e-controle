@@ -151,12 +151,12 @@ test:tests_back:
 
 lint:linter_frontend:
   extends:
-    - .linter_frontend
+    - .lint:linter_frontend
   rules: *default_rules
 
 lint:linter_backend:
   extends:
-    - .linter_backend
+    - .lint:linter_backend
   rules: *default_rules
 
 quality:sonarqube:
