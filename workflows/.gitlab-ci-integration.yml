@@ -50,6 +50,21 @@
     - coverage.xml
     expire_in: 10 min
 
+.lint:eslint:
+  image: ${DOCKER_REGISTRY}node/node16:16.13.1
+  interruptible: true
+  allow_failure: false
+  stage: lint
+  cache:
+    key: $CI_COMMIT_REF_SLUG
+    paths:
+      - .npm/
+      - node_modules/
+  before_script:
+    - npm i --cache .npm --prefer-offline --force --registry=http://nexus.ccomptes.fr/repository/npm/
+  script:
+    - npm run lint || true
+
 .quality:sonarqube:
   image: ${DOCKER_REGISTRY}docker:20.10.12
   services:
@@ -114,6 +129,11 @@
 test:tests_back:
   extends:
     - .test:tests_back
+  rules: *default_rules
+
+lint:eslint:
+  extends:
+    - .lint:eslint
   rules: *default_rules
 
 quality:sonarqube:
