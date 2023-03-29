@@ -79,7 +79,9 @@
       - .cache/pip
       - venv/
   before_script:
-    - pip install -r requirements.txt --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
+    - version=$(cat requirements/dev.txt | grep 'black==' | cut -d'=' -f3)
+    - echo $version
+    - pip install black==$version --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
   script:
     - black --check .
 
