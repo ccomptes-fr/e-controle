@@ -65,7 +65,7 @@
   script:
     - npm run lint || true
 
-  .lint:linter_backend:
+.lint:linter_backend:
   image: ${DOCKER_REGISTRY}python/python3:latest
   interruptible: true
   allow_failure: false
