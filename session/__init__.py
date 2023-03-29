@@ -1,1 +1,1 @@
-default_app_config = 'session.apps.SessionConfig'
+default_app_config = "session.apps.SessionConfig"

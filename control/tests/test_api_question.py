@@ -9,7 +9,7 @@ client = APIClient()
 
 
 def get_question(user, id):
-    return utils.get_resource(client, user, 'question', id)
+    return utils.get_resource(client, user, "question", id)
 
 
 def test_can_access_question_api_if_control_is_associated_with_the_user():
@@ -30,7 +30,7 @@ def test_no_access_to_question_api_if_control_is_not_associated_with_the_user():
 
 def test_no_access_to_question_api_for_anonymous():
     question = factories.QuestionFactory()
-    response = utils.get_resource_without_login(client, 'question', question.id)
+    response = utils.get_resource_without_login(client, "question", question.id)
     assert response.status_code == 403
 
 
@@ -62,4 +62,4 @@ def test_no_access_to_question_api_for_deleted_control():
 
 def test_cannot_list_questions():
     with raises(NoReverseMatch):
-        utils.list_resource_without_login(client, 'question')
+        utils.list_resource_without_login(client, "question")

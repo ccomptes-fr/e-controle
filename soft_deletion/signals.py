@@ -14,21 +14,22 @@ def send_email_after_control_soft_delete(session_user, obj, *args, **kwargs):
     """
     control = obj
     inspectors = control.user_profiles.filter(profile_type=UserProfile.INSPECTOR)
-    inspectors_emails = inspectors.values_list('user__email', flat=True)
+    inspectors_emails = inspectors.values_list("user__email", flat=True)
     context = {
-        'deleter_user': session_user,
-        'control': control,
-        'inspectors': inspectors
+        "deleter_user": session_user,
+        "control": control,
+        "inspectors": inspectors,
     }
-    subject = f'e.contrôle - Suppression de l\'espace - {control.title_display}'
+    subject = f"e.contrôle - Suppression de l'espace - {control.title_display}"
 
     send_email(
         to=inspectors_emails,
         subject=subject,
-        html_template='soft_deletion/email_delete_control.html',
-        text_template='soft_deletion/email_delete_control.txt',
+        html_template="soft_deletion/email_delete_control.html",
+        text_template="soft_deletion/email_delete_control.txt",
         extra_context=context,
     )
+
 
 @receiver(soft_delete_signal, sender=Control)
 def delete_control_folder_after_control_soft_delete(session_user, obj, *args, **kwargs):
@@ -37,6 +38,3 @@ def delete_control_folder_after_control_soft_delete(session_user, obj, *args, **
     """
     control = obj
     delete_control_folder(control.reference_code)
-
-
-

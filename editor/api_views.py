@@ -10,7 +10,7 @@ class UpdateEditor(generics.UpdateAPIView):
     permission_classes = (OnlyInspectorCanChange,)
 
     def get_queryset(self):
-        queryset = Questionnaire.objects  \
-            .filter(control__in=self.request.user.profile.controls.active())  \
-            .filter(is_draft=True)
+        queryset = Questionnaire.objects.filter(
+            control__in=self.request.user.profile.controls.active()
+        ).filter(is_draft=True)
         return queryset

@@ -6,10 +6,10 @@ from control.models import Questionnaire
 class UpdateEditorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Questionnaire
-        fields = ('editor',)
+        fields = ("editor",)
         extra_kwargs = {
-            'editor': {
-                'required': True,
-                'allow_null': True,
+            "editor": {
+                "required": True,
+                "allow_null": True,
             }
         }

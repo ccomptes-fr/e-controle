@@ -5,16 +5,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('control', '0018_change_question_fle_meta_options'),
+        ("control", "0018_change_question_fle_meta_options"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='questionnaire',
-            name='file',
-            field=models.FileField(default='', upload_to=control.upload_path.questionnaire_file_path, verbose_name='fichier'),
+            model_name="questionnaire",
+            name="file",
+            field=models.FileField(
+                default="",
+                upload_to=control.upload_path.questionnaire_file_path,
+                verbose_name="fichier",
+            ),
             preserve_default=False,
         ),
     ]

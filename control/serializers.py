@@ -11,35 +11,41 @@ User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'id')
+        fields = ("first_name", "last_name", "id")
 
 
 class ResponseFileSerializer(serializers.ModelSerializer):
     author = UserSerializer()
-    creation_date = DateTimeFieldWihTZ(source='created', format='%a %d %B %Y')
-    creation_time = DateTimeFieldWihTZ(source='created', format='%X')
+    creation_date = DateTimeFieldWihTZ(source="created", format="%a %d %B %Y")
+    creation_time = DateTimeFieldWihTZ(source="created", format="%X")
 
     class Meta:
         model = ResponseFile
         fields = (
-            'id', 'url', 'basename', 'created', 'creation_date', 'creation_time', 'author',
-            'is_deleted', 'question')
+            "id",
+            "url",
+            "basename",
+            "created",
+            "creation_date",
+            "creation_time",
+            "author",
+            "is_deleted",
+            "question",
+        )
 
 
 class ResponseFileTrashSerializer(serializers.ModelSerializer):
     class Meta:
         model = ResponseFile
-        fields = ('id', 'is_deleted')
+        fields = ("id", "is_deleted")
 
 
 class QuestionFileSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = QuestionFile
-        fields = ('id', 'url', 'basename', 'file', 'question')
+        fields = ("id", "url", "basename", "file", "question")
 
 
 class QuestionSerializer(serializers.ModelSerializer):
@@ -48,7 +54,14 @@ class QuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Question
-        fields = ('id', 'description', 'order', 'question_files', 'response_files', 'theme')
+        fields = (
+            "id",
+            "description",
+            "order",
+            "question_files",
+            "response_files",
+            "theme",
+        )
 
 
 class ThemeSerializer(serializers.ModelSerializer):
@@ -57,31 +70,50 @@ class ThemeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Theme
-        fields = ('id', 'title', 'order', 'questionnaire', 'questions')
+        fields = ("id", "title", "order", "questionnaire", "questions")
 
 
 # Serializers for displaying control_detail.html
 class ControlDetailUserSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = User
-        fields = ('first_name', 'last_name', 'email', 'id',)
+        fields = (
+            "first_name",
+            "last_name",
+            "email",
+            "id",
+        )
 
 
 class QuestionnaireSerializer(serializers.ModelSerializer):
     themes = ThemeSerializer(many=True, read_only=True)
     editor = ControlDetailUserSerializer(read_only=True, required=False)
-    modified_date = DateTimeFieldWihTZ(source='modified', format='%a %d %B %Y', read_only=True)
-    modified_time = DateTimeFieldWihTZ(source='modified', format='%X', read_only=True)
+    modified_date = DateTimeFieldWihTZ(
+        source="modified", format="%a %d %B %Y", read_only=True
+    )
+    modified_time = DateTimeFieldWihTZ(source="modified", format="%X", read_only=True)
 
     class Meta:
         model = Questionnaire
         fields = (
-            'id', 'title', 'sent_date', 'end_date', 'description', 'control', 'themes',
-            'is_draft', 'is_replied', 'is_finalized', 'editor', 'title_display', 'numbering', 'modified_date',
-            'modified_time')
+            "id",
+            "title",
+            "sent_date",
+            "end_date",
+            "description",
+            "control",
+            "themes",
+            "is_draft",
+            "is_replied",
+            "is_finalized",
+            "editor",
+            "title_display",
+            "numbering",
+            "modified_date",
+            "modified_time",
+        )
 
-        extra_kwargs = {'control': {'required': True}}
+        extra_kwargs = {"control": {"required": True}}
         # not serialized (yet) : file, order
 
 
@@ -90,7 +122,13 @@ class ControlSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Control
-        fields = ('id', 'title', 'depositing_organization', 'reference_code', 'questionnaires')
+        fields = (
+            "id",
+            "title",
+            "depositing_organization",
+            "reference_code",
+            "questionnaires",
+        )
 
 
 class ControlSerializerWithoutDraft(ControlSerializer):
@@ -98,6 +136,7 @@ class ControlSerializerWithoutDraft(ControlSerializer):
     Questionnaires are filtered to exclude draft.
     This is suiatable for audited users.
     """
+
     questionnaires = serializers.SerializerMethodField()
 
     def get_questionnaires(self, obj):
@@ -109,7 +148,7 @@ class ControlSerializerWithoutDraft(ControlSerializer):
 class ControlUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Control
-        fields = ('id', 'title', 'depositing_organization')
+        fields = ("id", "title", "depositing_organization")
 
 
 class QuestionUpdateSerializer(serializers.ModelSerializer):
@@ -118,7 +157,7 @@ class QuestionUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Question
-        fields = ('id', 'order', 'description')
+        fields = ("id", "order", "description")
 
 
 class ThemeUpdateSerializer(serializers.ModelSerializer):
@@ -127,7 +166,7 @@ class ThemeUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Theme
-        fields = ('id', 'title', 'questions')
+        fields = ("id", "title", "questions")
 
 
 class QuestionnaireUpdateSerializer(serializers.ModelSerializer):
@@ -135,24 +174,45 @@ class QuestionnaireUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Questionnaire
-        fields = ('id', 'title', 'sent_date', 'end_date', 'description', 'control', 'themes', 'is_draft')
+        fields = (
+            "id",
+            "title",
+            "sent_date",
+            "end_date",
+            "description",
+            "control",
+            "themes",
+            "is_draft",
+        )
         extra_kwargs = {
-            'control': {
-                'required': True,
-                'allow_null': True,
+            "control": {
+                "required": True,
+                "allow_null": True,
             }
         }
 
 
 class ControlDetailQuestionnaireSerializer(serializers.ModelSerializer):
     editor = ControlDetailUserSerializer(read_only=True, required=False)
-    modified_date = DateTimeFieldWihTZ(source='modified', format='%a %d %B %Y', read_only=True)
-    modified_time = DateTimeFieldWihTZ(source='modified', format='%X', read_only=True)
+    modified_date = DateTimeFieldWihTZ(
+        source="modified", format="%a %d %B %Y", read_only=True
+    )
+    modified_time = DateTimeFieldWihTZ(source="modified", format="%X", read_only=True)
 
     class Meta:
         model = Questionnaire
-        fields = ('id', 'title', 'numbering', 'url', 'is_draft', 'sent_date', 'end_date', 'editor',
-            'modified_date', 'modified_time')
+        fields = (
+            "id",
+            "title",
+            "numbering",
+            "url",
+            "is_draft",
+            "sent_date",
+            "end_date",
+            "editor",
+            "modified_date",
+            "modified_time",
+        )
 
 
 class ControlDetailControlSerializer(serializers.ModelSerializer):
@@ -160,4 +220,10 @@ class ControlDetailControlSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Control
-        fields = ('id', 'title', 'depositing_organization', 'reference_code', 'questionnaires')
+        fields = (
+            "id",
+            "title",
+            "depositing_organization",
+            "reference_code",
+            "questionnaires",
+        )

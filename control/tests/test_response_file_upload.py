@@ -18,13 +18,10 @@ def test_audited_can_upload_question_file(client):
     question.theme.questionnaire.is_draft = False
     question.theme.questionnaire.save()
     utils.login(client, user=audited.user)
-    url = reverse('response-upload')
+    url = reverse("response-upload")
     count_before = ResponseFile.objects.count()
-    post_data = {
-        'file': factories.dummy_file.open(),
-        'question_id': [question.id]
-    }
-    response = client.post(url, post_data, format='multipart')
+    post_data = {"file": factories.dummy_file.open(), "question_id": [question.id]}
+    response = client.post(url, post_data, format="multipart")
     assert response.status_code == 200
     count_after = ResponseFile.objects.count()
     assert count_after == count_before + 1
@@ -37,14 +34,11 @@ def test_cannot_upload_question_file_if_control_is_deleted(client):
     question.theme.questionnaire.is_draft = False
     question.theme.questionnaire.save()
     utils.login(client, user=audited.user)
-    url = reverse('response-upload')
+    url = reverse("response-upload")
     count_before = ResponseFile.objects.count()
-    post_data = {
-        'file': factories.dummy_file.open(),
-        'question_id': [question.id]
-    }
+    post_data = {"file": factories.dummy_file.open(), "question_id": [question.id]}
     question.theme.questionnaire.control.delete()
-    response = client.post(url, post_data, format='multipart')
+    response = client.post(url, post_data, format="multipart")
     assert 400 <= response.status_code < 500
     count_after = ResponseFile.objects.count()
     assert count_after == count_before
@@ -57,13 +51,10 @@ def test_audited_cannot_upload_question_file_if_questionnaire_is_draft(client):
     question.theme.questionnaire.is_draft = True
     question.theme.questionnaire.save()
     utils.login(client, user=audited.user)
-    url = reverse('response-upload')
+    url = reverse("response-upload")
     count_before = ResponseFile.objects.count()
-    post_data = {
-        'file': factories.dummy_file.open(),
-        'question_id': [question.id]
-    }
-    response = client.post(url, post_data, format='multipart')
+    post_data = {"file": factories.dummy_file.open(), "question_id": [question.id]}
+    response = client.post(url, post_data, format="multipart")
     assert response.status_code == 404
     count_after = ResponseFile.objects.count()
     assert count_after == count_before
@@ -76,13 +67,10 @@ def test_cannot_upload_question_file_in_a_control_user_is_not_in(client):
     question.theme.questionnaire.is_draft = False
     question.theme.questionnaire.save()
     utils.login(client, user=audited.user)
-    url = reverse('response-upload')
+    url = reverse("response-upload")
     count_before = ResponseFile.objects.count()
-    post_data = {
-        'file': factories.dummy_file.open(),
-        'question_id': [question.id]
-    }
-    response = client.post(url, post_data, format='multipart')
+    post_data = {"file": factories.dummy_file.open(), "question_id": [question.id]}
+    response = client.post(url, post_data, format="multipart")
     assert 400 <= response.status_code < 500
     count_after = ResponseFile.objects.count()
     assert count_after == count_before
@@ -95,13 +83,10 @@ def test_inspector_cannot_upload_question_file(client):
     question.theme.questionnaire.is_draft = False
     question.theme.questionnaire.save()
     utils.login(client, user=inspector.user)
-    url = reverse('response-upload')
+    url = reverse("response-upload")
     count_before = ResponseFile.objects.count()
-    post_data = {
-        'file': factories.dummy_file.open(),
-        'question_id': [question.id]
-    }
-    response = client.post(url, post_data, format='multipart')
+    post_data = {"file": factories.dummy_file.open(), "question_id": [question.id]}
+    response = client.post(url, post_data, format="multipart")
     assert 400 <= response.status_code < 500
     count_after = ResponseFile.objects.count()
     assert count_after == count_before
@@ -114,13 +99,10 @@ def test_audited_cannot_upload_exe_file(client):
     question.theme.questionnaire.is_draft = False
     question.theme.questionnaire.save()
     utils.login(client, user=audited.user)
-    url = reverse('response-upload')
+    url = reverse("response-upload")
     count_before = ResponseFile.objects.count()
-    post_data = {
-        'file': factories.dummy_exe_file.open(),
-        'question_id': [question.id]
-    }
-    response = client.post(url, post_data, format='multipart')
+    post_data = {"file": factories.dummy_exe_file.open(), "question_id": [question.id]}
+    response = client.post(url, post_data, format="multipart")
     assert response.status_code == 403
     count_after = ResponseFile.objects.count()
     assert count_after == count_before
@@ -133,13 +115,10 @@ def test_missing_question_id_raise_bad_request(client):
     question.theme.questionnaire.is_draft = False
     question.theme.questionnaire.save()
     utils.login(client, user=audited.user)
-    url = reverse('response-upload')
+    url = reverse("response-upload")
     count_before = ResponseFile.objects.count()
-    post_data = {
-        'file': factories.dummy_file.open(),
-        'no_question_id': [question.id]
-    }
-    response = client.post(url, post_data, format='multipart')
+    post_data = {"file": factories.dummy_file.open(), "no_question_id": [question.id]}
+    response = client.post(url, post_data, format="multipart")
     assert response.status_code == 400
     count_after = ResponseFile.objects.count()
     assert count_after == count_before
@@ -153,19 +132,16 @@ def test_audited_cannot_upload_file_if_size_exceed(client):
     question.theme.questionnaire.is_draft = False
     question.theme.questionnaire.save()
     utils.login(client, user=audited.user)
-    url = reverse('response-upload')
+    url = reverse("response-upload")
     count_before = ResponseFile.objects.count()
-    post_data = {
-        'file': factories.dummy_file.open(),
-        'question_id': [question.id]
-    }
-    response = client.post(url, post_data, format='multipart')
+    post_data = {"file": factories.dummy_file.open(), "question_id": [question.id]}
+    response = client.post(url, post_data, format="multipart")
     assert response.status_code == 403
     count_after = ResponseFile.objects.count()
     assert count_after == count_before
 
 
-@override_settings(UPLOAD_FILE_EXTENSION_BLACKLIST=('.sh',))
+@override_settings(UPLOAD_FILE_EXTENSION_BLACKLIST=(".sh",))
 def test_audited_cannot_upload_file_if_blaklist_extension(client):
     audited = factories.UserProfileFactory(profile_type=UserProfile.AUDITED)
     question = factories.QuestionFactory()
@@ -173,13 +149,13 @@ def test_audited_cannot_upload_file_if_blaklist_extension(client):
     question.theme.questionnaire.is_draft = False
     question.theme.questionnaire.save()
     utils.login(client, user=audited.user)
-    url = reverse('response-upload')
+    url = reverse("response-upload")
     count_before = ResponseFile.objects.count()
     post_data = {
-        'file': factories.dummy_text_file_with_sh_extension.open(),
-        'question_id': [question.id]
+        "file": factories.dummy_text_file_with_sh_extension.open(),
+        "question_id": [question.id],
     }
-    response = client.post(url, post_data, format='multipart')
+    response = client.post(url, post_data, format="multipart")
     assert response.status_code == 403
     count_after = ResponseFile.objects.count()
     assert count_after == count_before

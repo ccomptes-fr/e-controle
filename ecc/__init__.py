@@ -1,1 +1,1 @@
-default_app_config = 'ecc.apps.EccConfig'
+default_app_config = "ecc.apps.EccConfig"

@@ -2,5 +2,5 @@ from django.apps import AppConfig
 
 
 class ReportingConfig(AppConfig):
-    name = 'reporting'
+    name = "reporting"
     verbose_name = "Reporting"

@@ -4,14 +4,17 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('control', '0012_remove_mptt_on_theme'),
+        ("control", "0012_remove_mptt_on_theme"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='questionnaire',
-            options={'ordering': ('control', 'order'), 'verbose_name': 'Questionnaire', 'verbose_name_plural': 'Questionnaires'},
+            name="questionnaire",
+            options={
+                "ordering": ("control", "order"),
+                "verbose_name": "Questionnaire",
+                "verbose_name_plural": "Questionnaires",
+            },
         ),
     ]

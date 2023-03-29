@@ -5,25 +5,41 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='FAQItem',
+            name="FAQItem",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('order', models.PositiveIntegerField(db_index=True, editable=False, verbose_name='order')),
-                ('title', models.CharField(max_length=255, verbose_name='title')),
-                ('slug', models.SlugField(max_length=255, verbose_name='slug')),
-                ('description', ckeditor.fields.RichTextField(blank=True, verbose_name='description')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "order",
+                    models.PositiveIntegerField(
+                        db_index=True, editable=False, verbose_name="order"
+                    ),
+                ),
+                ("title", models.CharField(max_length=255, verbose_name="title")),
+                ("slug", models.SlugField(max_length=255, verbose_name="slug")),
+                (
+                    "description",
+                    ckeditor.fields.RichTextField(
+                        blank=True, verbose_name="description"
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Item de F.A.Q',
-                'verbose_name_plural': 'Items de F.A.Q',
+                "verbose_name": "Item de F.A.Q",
+                "verbose_name_plural": "Items de F.A.Q",
             },
         ),
     ]

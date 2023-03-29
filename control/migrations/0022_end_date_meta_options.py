@@ -4,15 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('control', '0021_questionnaire_sent_date'),
+        ("control", "0021_questionnaire_sent_date"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='questionnaire',
-            name='end_date',
-            field=models.DateField(blank=True, help_text='Date de réponse souhaitée', null=True, verbose_name='échéance'),
+            model_name="questionnaire",
+            name="end_date",
+            field=models.DateField(
+                blank=True,
+                help_text="Date de réponse souhaitée",
+                null=True,
+                verbose_name="échéance",
+            ),
         ),
     ]

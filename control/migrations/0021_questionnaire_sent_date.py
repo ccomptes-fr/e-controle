@@ -4,15 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('control', '0020_optional_questionnaire_file'),
+        ("control", "0020_optional_questionnaire_file"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='questionnaire',
-            name='sent_date',
-            field=models.DateField(blank=True, help_text='Date de transmission du questionnaire', null=True, verbose_name="date d'envoie"),
+            model_name="questionnaire",
+            name="sent_date",
+            field=models.DateField(
+                blank=True,
+                help_text="Date de transmission du questionnaire",
+                null=True,
+                verbose_name="date d'envoie",
+            ),
         ),
     ]

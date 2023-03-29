@@ -6,22 +6,43 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('control', '0001_initial'),
+        ("control", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ResponseFile',
+            name="ResponseFile",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('file', models.FileField(upload_to=control.upload_path.response_file_path, verbose_name='fichier')),
-                ('question', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='question', to='control.Question', verbose_name='question')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "file",
+                    models.FileField(
+                        upload_to=control.upload_path.response_file_path,
+                        verbose_name="fichier",
+                    ),
+                ),
+                (
+                    "question",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="question",
+                        to="control.Question",
+                        verbose_name="question",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Fichier Réponse Attaché',
-                'verbose_name_plural': 'Fichiers Réponse Attachés',
+                "verbose_name": "Fichier Réponse Attaché",
+                "verbose_name_plural": "Fichiers Réponse Attachés",
             },
         ),
     ]

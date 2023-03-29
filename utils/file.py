@@ -22,10 +22,20 @@ def get_last_file_metadata_in_control_folder(reference_code):
                 latest_file = max(files, key=os.path.getmtime)
                 latest_file_path = pathlib.Path(latest_file)
                 last_modification_ts = latest_file_path.stat().st_mtime
-                return nb_files, datetime.datetime.fromtimestamp(last_modification_ts), latest_file_path
+                return (
+                    nb_files,
+                    datetime.datetime.fromtimestamp(last_modification_ts),
+                    latest_file_path,
+                )
             else:
                 # no file, return control folder modification date
-                return nb_files, datetime.datetime.fromtimestamp(pathlib.Path(control_dir_path).stat().st_mtime), control_dir_path
+                return (
+                    nb_files,
+                    datetime.datetime.fromtimestamp(
+                        pathlib.Path(control_dir_path).stat().st_mtime
+                    ),
+                    control_dir_path,
+                )
 
 
 def delete_control_folder(reference_code):

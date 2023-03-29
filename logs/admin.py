@@ -27,13 +27,9 @@ def get_object_display_line(obj):
     For the given object, return a display line with HTML link to the admin page.
     """
     if not obj:
-        return '-'
+        return "-"
     url = get_admin_url(obj)
-    return format_html(
-        '<a href="{}">{}</a>',
-        url,
-        obj
-    )
+    return format_html('<a href="{}">{}</a>', url, obj)
 
 
 def action_display(obj):
@@ -52,32 +48,51 @@ def action_object_display(obj):
     return get_object_display_line(obj.action_object)
 
 
-action_display.short_description = 'action'
-actor_display.short_description = 'actor'
-target_display.short_description = 'target'
-action_object_display.short_description = 'action_object'
+action_display.short_description = "action"
+actor_display.short_description = "actor"
+target_display.short_description = "target"
+action_object_display.short_description = "action_object"
 
 
 @admin.register(Action)
 class ActionAdmin(ReadOnlyModelAdmin, admin.ModelAdmin):
-    date_hierarchy = 'timestamp'
+    date_hierarchy = "timestamp"
     list_display = (
-        'id', action_display, actor_display, 'verb', target_display, 'target_content_type',
-        action_object_display, 'action_object_content_type', 'timestamp')
-    list_filter = ('timestamp', 'verb')
-    fieldsets = (
-        (None, {
-            'fields': ('verb', 'timestamp', 'description')
-        }),
-        ('Actor', {
-            'fields': ('actor', 'actor_content_type', 'actor_object_id'),
-        }),
-        ('Action', {
-            'fields': ('action_object', 'action_object_content_type', 'action_object_object_id'),
-        }),
-        ('Target', {
-            'fields': ('target', 'target_content_type', 'target_object_id'),
-        }),
+        "id",
+        action_display,
+        actor_display,
+        "verb",
+        target_display,
+        "target_content_type",
+        action_object_display,
+        "action_object_content_type",
+        "timestamp",
     )
-    search_fields = ('verb', 'description', 'actor_object_id')
-    readonly_fields = ('actor', 'action_object', 'target')
+    list_filter = ("timestamp", "verb")
+    fieldsets = (
+        (None, {"fields": ("verb", "timestamp", "description")}),
+        (
+            "Actor",
+            {
+                "fields": ("actor", "actor_content_type", "actor_object_id"),
+            },
+        ),
+        (
+            "Action",
+            {
+                "fields": (
+                    "action_object",
+                    "action_object_content_type",
+                    "action_object_object_id",
+                ),
+            },
+        ),
+        (
+            "Target",
+            {
+                "fields": ("target", "target_content_type", "target_object_id"),
+            },
+        ),
+    )
+    search_fields = ("verb", "description", "actor_object_id")
+    readonly_fields = ("actor", "action_object", "target")

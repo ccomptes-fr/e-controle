@@ -15,9 +15,9 @@ def login(client, user=None):
     """
     if not user:
         user = factories.UserFactory()
-    user.set_password('123')
+    user.set_password("123")
     user.save()
-    login_success = client.login(username=user.username, password='123')
+    login_success = client.login(username=user.username, password="123")
     assert login_success
     return user
 
@@ -49,7 +49,10 @@ def make_audited_user(control=None):
 
 def make_inspector_user(control=None, assign_questionnaire_editor=True):
     return make_user(
-        UserProfile.INSPECTOR, control, assign_questionnaire_editor=assign_questionnaire_editor)
+        UserProfile.INSPECTOR,
+        control,
+        assign_questionnaire_editor=assign_questionnaire_editor,
+    )
 
 
 def get_resource(client, user, resource_type, resource_id):
@@ -66,7 +69,7 @@ def get_resource(client, user, resource_type, resource_id):
 
 
 def get_resource_without_login(client, resource_type, resource_id):
-    url = reverse('api:' + resource_type + '-detail', args=[resource_id])
+    url = reverse("api:" + resource_type + "-detail", args=[resource_id])
     response = client.get(url)
     return response
 
@@ -85,8 +88,8 @@ def create_resource(client, user, resource_type, payload):
 
 
 def create_resource_without_login(client, resource_type, payload):
-    url = reverse('api:' + resource_type + '-list')
-    response = client.post(url, payload, format='json')
+    url = reverse("api:" + resource_type + "-list")
+    response = client.post(url, payload, format="json")
     return response
 
 
@@ -104,8 +107,8 @@ def update_resource(client, user, resource_type, payload):
 
 
 def update_resource_without_login(client, resource_type, payload):
-    url = reverse('api:' + resource_type + '-detail', args=[payload['id']])
-    response = client.put(url, payload, format='json')
+    url = reverse("api:" + resource_type + "-detail", args=[payload["id"]])
+    response = client.put(url, payload, format="json")
     return response
 
 
@@ -123,7 +126,7 @@ def delete_resource(client, user, resource_type, resource_id):
 
 
 def delete_resource_without_login(client, resource_type, resource_id):
-    url = reverse('api:' + resource_type + '-detail', args=[resource_id])
+    url = reverse("api:" + resource_type + "-detail", args=[resource_id])
     response = client.delete(url)
     return response
 
@@ -141,6 +144,6 @@ def list_resource(client, user, resource_type):
 
 
 def list_resource_without_login(client, resource_type):
-    url = reverse('api:' + resource_type + '-list')
+    url = reverse("api:" + resource_type + "-list")
     response = client.get(url)
     return response

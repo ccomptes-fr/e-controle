@@ -5,28 +5,43 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('control', '0005_theme_reference_code'),
+        ("control", "0005_theme_reference_code"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='questionfile',
-            options={'verbose_name': 'Question: Fichier Attaché', 'verbose_name_plural': 'Question: Fichiers Attachés'},
+            name="questionfile",
+            options={
+                "verbose_name": "Question: Fichier Attaché",
+                "verbose_name_plural": "Question: Fichiers Attachés",
+            },
         ),
         migrations.AlterModelOptions(
-            name='responsefile',
-            options={'verbose_name': 'Réponse: Fichier Attaché', 'verbose_name_plural': 'Réponse: Fichiers Attachés'},
+            name="responsefile",
+            options={
+                "verbose_name": "Réponse: Fichier Attaché",
+                "verbose_name_plural": "Réponse: Fichiers Attachés",
+            },
         ),
         migrations.AlterField(
-            model_name='questionfile',
-            name='question',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='question_files', to='control.Question', verbose_name='question'),
+            model_name="questionfile",
+            name="question",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="question_files",
+                to="control.Question",
+                verbose_name="question",
+            ),
         ),
         migrations.AlterField(
-            model_name='responsefile',
-            name='question',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='response_files', to='control.Question', verbose_name='question'),
+            model_name="responsefile",
+            name="question",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="response_files",
+                to="control.Question",
+                verbose_name="question",
+            ),
         ),
     ]

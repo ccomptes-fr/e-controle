@@ -5,19 +5,25 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('control', '0040_control_deleted_at'),
+        ("control", "0040_control_deleted_at"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='control',
-            options={'verbose_name': 'Contrôle', 'verbose_name_plural': 'Contrôles'},
+            name="control",
+            options={"verbose_name": "Contrôle", "verbose_name_plural": "Contrôles"},
         ),
         migrations.AlterField(
-            model_name='questionnaire',
-            name='control',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='questionnaires', to='control.Control', verbose_name='contrôle'),
+            model_name="questionnaire",
+            name="control",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="questionnaires",
+                to="control.Control",
+                verbose_name="contrôle",
+            ),
         ),
     ]

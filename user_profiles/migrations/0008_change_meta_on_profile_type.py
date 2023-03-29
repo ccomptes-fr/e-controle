@@ -4,15 +4,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('user_profiles', '0007_remove_userprofile_control'),
+        ("user_profiles", "0007_remove_userprofile_control"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='userprofile',
-            name='profile_type',
-            field=models.CharField(choices=[('audited', 'Organisme Contrôlé'), ('inspector', 'Contrôleur')], max_length=255),
+            model_name="userprofile",
+            name="profile_type",
+            field=models.CharField(
+                choices=[
+                    ("audited", "Organisme Contrôlé"),
+                    ("inspector", "Contrôleur"),
+                ],
+                max_length=255,
+            ),
         ),
     ]

@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('control', '0032_reference_code_not_blank'),
+        ("control", "0032_reference_code_not_blank"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='responsefile',
-            name='is_deleted',
-            field=models.BooleanField(default=False, help_text='Ce fichier est=il dans la corbeille?', verbose_name='Supprimé'),
+            model_name="responsefile",
+            name="is_deleted",
+            field=models.BooleanField(
+                default=False,
+                help_text="Ce fichier est=il dans la corbeille?",
+                verbose_name="Supprimé",
+            ),
         ),
     ]

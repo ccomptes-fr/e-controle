@@ -5,21 +5,31 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('control', '0020_optional_questionnaire_file'),
-        ('user_profiles', '0002_userprofile_send_files_report'),
+        ("control", "0020_optional_questionnaire_file"),
+        ("user_profiles", "0002_userprofile_send_files_report"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userprofile',
-            name='controls',
-            field=models.ManyToManyField(blank=True, related_name='user_profiles', to='control.Control', verbose_name='controles'),
+            model_name="userprofile",
+            name="controls",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="user_profiles",
+                to="control.Control",
+                verbose_name="controles",
+            ),
         ),
         migrations.AlterField(
-            model_name='userprofile',
-            name='control',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='control.Control', verbose_name='controle'),
+            model_name="userprofile",
+            name="control",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="control.Control",
+                verbose_name="controle",
+            ),
         ),
     ]

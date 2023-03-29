@@ -8,7 +8,7 @@ from .forms import WelcomeForm
 class Welcome(LoginRequiredMixin, FormView):
     template_name = "tos/welcome.html"
     form_class = WelcomeForm
-    success_url = reverse_lazy('control-detail')
+    success_url = reverse_lazy("control-detail")
 
     def form_valid(self, form):
         # This method is called when valid form data has been POSTed.
@@ -19,4 +19,4 @@ class Welcome(LoginRequiredMixin, FormView):
 
 
 # TOS view is accessible without login.
-tos = TemplateView.as_view(template_name='tos/tos.html')
+tos = TemplateView.as_view(template_name="tos/tos.html")

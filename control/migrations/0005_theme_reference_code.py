@@ -4,15 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('control', '0004_questionnaire_reference_code'),
+        ("control", "0004_questionnaire_reference_code"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='theme',
-            name='reference_code',
-            field=models.CharField(blank=True, help_text='Ce code est utilisé notamment pour le dossier de stockage des réponses', max_length=255, verbose_name='code de référence'),
+            model_name="theme",
+            name="reference_code",
+            field=models.CharField(
+                blank=True,
+                help_text="Ce code est utilisé notamment pour le dossier de stockage des réponses",
+                max_length=255,
+                verbose_name="code de référence",
+            ),
         ),
     ]

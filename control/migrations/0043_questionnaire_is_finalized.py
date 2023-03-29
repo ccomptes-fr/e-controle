@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('control', '0042_questionnaire_is_replied'),
+        ("control", "0042_questionnaire_is_replied"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='questionnaire',
-            name='is_finalized',
-            field=models.BooleanField(default=False, help_text='Ce questionnaire a-t-il été finalisé par le contrôleur ?', verbose_name='finalisé'),
+            model_name="questionnaire",
+            name="is_finalized",
+            field=models.BooleanField(
+                default=False,
+                help_text="Ce questionnaire a-t-il été finalisé par le contrôleur ?",
+                verbose_name="finalisé",
+            ),
         ),
     ]

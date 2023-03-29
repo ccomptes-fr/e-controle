@@ -10,22 +10,19 @@ client = APIClient()
 
 
 def get_theme(user, id):
-    return utils.get_resource(client, user, 'theme', id)
+    return utils.get_resource(client, user, "theme", id)
 
 
 def update_theme(user, payload):
-    return utils.update_resource(client, user, 'theme', payload)
+    return utils.update_resource(client, user, "theme", payload)
 
 
 def delete_theme(user, payload):
-    return utils.delete_resource(client, user, 'theme', id)
+    return utils.delete_resource(client, user, "theme", id)
 
 
 def make_update_theme_payload(theme):
-    return {
-        "id": str(theme.id),
-        "title": theme.title
-    }
+    return {"id": str(theme.id), "title": theme.title}
 
 
 def test_inspector_can_update_theme_if_control_is_associated_with_the_user():
@@ -51,7 +48,11 @@ def test_no_update_to_theme_if_control_is_not_associated_with_the_user():
     theme_in = factories.ThemeFactory()
     theme_out = factories.ThemeFactory()
     user = utils.make_inspector_user(theme_in.questionnaire.control)
-    assert 400 <= update_theme(user, make_update_theme_payload(theme_out)).status_code < 500
+    assert (
+        400
+        <= update_theme(user, make_update_theme_payload(theme_out)).status_code
+        < 500
+    )
 
 
 def test_inspector_cannot_update_theme_if_questionnaire_is_published():
@@ -73,7 +74,7 @@ def test_inspector_cannot_update_theme_if_control_is_deleted():
 
 def test_no_access_to_theme_api_for_anonymous():
     theme = factories.ThemeFactory()
-    response = utils.get_resource_without_login(client, 'theme', theme.id)
+    response = utils.get_resource_without_login(client, "theme", theme.id)
     assert response.status_code == 403
 
 
@@ -84,16 +85,12 @@ def test_inspector_can_update_theme_order():
     new_order = 123
     assert new_order != original_order
 
-    payload = {
-        "id": str(theme.id),
-        "order": str(new_order),
-        "title": theme.title
-    }
+    payload = {"id": str(theme.id), "order": str(new_order), "title": theme.title}
 
-    response = utils.update_resource(client, user, 'theme', payload)
+    response = utils.update_resource(client, user, "theme", payload)
 
     assert response.status_code == 200
-    assert response.data['order'] == new_order
+    assert response.data["order"] == new_order
 
 
 def test_inspector_has_no_access_to_theme_api_for_deleted_control():
@@ -112,7 +109,7 @@ def test_audited_has_access_to_theme_api_for_deleted_control():
 
 def test_cannot_list_themes():
     with raises(NoReverseMatch):
-        utils.list_resource_without_login(client, 'theme')
+        utils.list_resource_without_login(client, "theme")
 
 
 def test_cannot_retrieve_theme_even_if_user_belongs_to_control():

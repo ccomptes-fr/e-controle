@@ -8,24 +8,27 @@ from django.utils.text import slugify
 from pytest_factoryboy import register
 from faker import Factory as FakerFactory
 
-faker = FakerFactory.create('fr_FR')
+faker = FakerFactory.create("fr_FR")
 
 
 dummy_file = SimpleUploadedFile(
-    name='test.pdf',
-    content=open(settings.BASE_DIR + '/tests/data/test.pdf', 'rb').read(),
-    content_type='application/pdf')
+    name="test.pdf",
+    content=open(settings.BASE_DIR + "/tests/data/test.pdf", "rb").read(),
+    content_type="application/pdf",
+)
 
 
 dummy_exe_file = SimpleUploadedFile(
-    name='test.exe',
-    content=open(settings.BASE_DIR + '/tests/data/test.exe', 'rb').read(),
-    content_type='application/x-dosexec')
+    name="test.exe",
+    content=open(settings.BASE_DIR + "/tests/data/test.exe", "rb").read(),
+    content_type="application/x-dosexec",
+)
 
 dummy_text_file_with_sh_extension = SimpleUploadedFile(
-    name='test.sh',
-    content=open(settings.BASE_DIR + '/tests/data/test.sh', 'rb').read(),
-    content_type='text/plain')
+    name="test.sh",
+    content=open(settings.BASE_DIR + "/tests/data/test.sh", "rb").read(),
+    content_type="text/plain",
+)
 
 
 @register
@@ -34,7 +37,7 @@ class UserFactory(factory.django.DjangoModelFactory):
     last_name = factory.LazyFunction(faker.last_name)
     email = factory.LazyFunction(faker.email)
     username = factory.LazyAttribute(lambda a: a.email)
-    password = factory.PostGenerationMethodCall('set_password', '123')
+    password = factory.PostGenerationMethodCall("set_password", "123")
     is_active = True
     is_staff = True
 
@@ -48,7 +51,7 @@ class UserProfileFactory(factory.django.DjangoModelFactory):
     agreed_to_tos = True
 
     class Meta:
-        model = 'user_profiles.UserProfile'
+        model = "user_profiles.UserProfile"
 
 
 @register
@@ -57,7 +60,7 @@ class ControlFactory(factory.django.DjangoModelFactory):
     reference_code = factory.LazyAttribute(lambda c: slugify(c.title))
 
     class Meta:
-        model = 'control.Control'
+        model = "control.Control"
 
 
 @register
@@ -68,7 +71,7 @@ class QuestionnaireFactory(factory.django.DjangoModelFactory):
     is_draft = True
 
     class Meta:
-        model = 'control.Questionnaire'
+        model = "control.Questionnaire"
 
 
 @register
@@ -77,7 +80,7 @@ class ThemeFactory(factory.django.DjangoModelFactory):
     questionnaire = factory.SubFactory(QuestionnaireFactory)
 
     class Meta:
-        model = 'control.Theme'
+        model = "control.Theme"
 
 
 @register
@@ -86,7 +89,7 @@ class QuestionFactory(factory.django.DjangoModelFactory):
     theme = factory.SubFactory(ThemeFactory)
 
     class Meta:
-        model = 'control.Question'
+        model = "control.Question"
 
 
 @register
@@ -96,7 +99,7 @@ class ResponseFileFactory(factory.django.DjangoModelFactory):
     file = dummy_file
 
     class Meta:
-        model = 'control.ResponseFile'
+        model = "control.ResponseFile"
 
 
 @register
@@ -105,4 +108,4 @@ class QuestionFileFactory(factory.django.DjangoModelFactory):
     file = dummy_file
 
     class Meta:
-        model = 'control.QuestionFile'
+        model = "control.QuestionFile"

@@ -1,1 +1,1 @@
-default_app_config = 'editor.apps.EditorConfig'
+default_app_config = "editor.apps.EditorConfig"

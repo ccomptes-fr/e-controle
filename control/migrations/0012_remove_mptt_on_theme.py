@@ -4,30 +4,29 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('control', '0011_rebuild_theme_order'),
+        ("control", "0011_rebuild_theme_order"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='theme',
-            name='level',
+            model_name="theme",
+            name="level",
         ),
         migrations.RemoveField(
-            model_name='theme',
-            name='lft',
+            model_name="theme",
+            name="lft",
         ),
         migrations.RemoveField(
-            model_name='theme',
-            name='parent',
+            model_name="theme",
+            name="parent",
         ),
         migrations.RemoveField(
-            model_name='theme',
-            name='rght',
+            model_name="theme",
+            name="rght",
         ),
         migrations.RemoveField(
-            model_name='theme',
-            name='tree_id',
+            model_name="theme",
+            name="tree_id",
         ),
     ]
