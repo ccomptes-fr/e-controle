@@ -79,11 +79,11 @@
       - .cache/pip
       - venv/
   before_script:
-    - version=$(cat requirements.txt | grep 'black==' | cut -d'=' -f3)
+    - version=$(cat requirements.txt | grep 'flake8==' | cut -d'=' -f3)
     - echo $version
-    - pip install black==$version --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
+    - pip install flake8==$version --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
   script:
-    - black --check .
+    - flake8 .
 
 .quality:sonarqube:
   image: ${DOCKER_REGISTRY}docker:20.10.12
