@@ -5,15 +5,25 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('control', '0033_add_is_deleted_to_responsefile'),
+        ("control", "0033_add_is_deleted_to_responsefile"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='control',
-            name='reference_code',
-            field=models.CharField(error_messages={'unique': 'UNIQUE'}, help_text='Ce code est utilisé notamment pour le dossier de stockage des réponses', max_length=255, unique=True, validators=[django.core.validators.RegexValidator(message='INVALID', regex='^[\\.\\s\\w-]+$')], verbose_name='code de référence'),
+            model_name="control",
+            name="reference_code",
+            field=models.CharField(
+                error_messages={"unique": "UNIQUE"},
+                help_text="Ce code est utilisé notamment pour le dossier de stockage des réponses",
+                max_length=255,
+                unique=True,
+                validators=[
+                    django.core.validators.RegexValidator(
+                        message="INVALID", regex="^[\\.\\s\\w-]+$"
+                    )
+                ],
+                verbose_name="code de référence",
+            ),
         ),
     ]

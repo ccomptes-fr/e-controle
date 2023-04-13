@@ -13,7 +13,12 @@ from softdelete.models import SoftDeleteModel
 from soft_deletion.managers import DeletableQuerySet
 
 from .docx import DocxMixin
-from .upload_path import questionnaire_file_path, question_file_path, response_file_path, Prefixer
+from .upload_path import (
+    questionnaire_file_path,
+    question_file_path,
+    response_file_path,
+    Prefixer,
+)
 
 from user_profiles.models import UserProfile
 
@@ -26,7 +31,8 @@ class WithNumberingMixin(object):
     @property
     def numbering(self):
         return self.order + 1
-    numbering.fget.short_description = 'Numérotation'
+
+    numbering.fget.short_description = "Numérotation"
 
 
 class FileInfoMixin(object):
@@ -57,19 +63,20 @@ class FileInfoMixin(object):
         return self.file.name
 
     def __str__(self):
-        return f'id {self.id} - {self.file_name}'
+        return f"id {self.id} - {self.file_name}"
 
 
 class Control(SoftDeleteModel):
     # These error messages are used in the frontend (ConsoleCreate.vue),
     # if you change them you might break the frontend.
-    INVALID_ERROR_MESSAGE = 'INVALID'
-    UNIQUE_ERROR_MESSAGE = 'UNIQUE'
+    INVALID_ERROR_MESSAGE = "INVALID"
+    UNIQUE_ERROR_MESSAGE = "UNIQUE"
 
     title = models.CharField(
         "procédure",
         help_text="Procédure pour laquelle est ouvert cet espace de dépôt",
-        max_length=255)
+        max_length=255,
+    )
     depositing_organization = models.CharField(
         verbose_name="Organisme interrogé",
         help_text="Organisme qui va déposer les pièces dans cet espace de dépôt",
@@ -79,15 +86,16 @@ class Control(SoftDeleteModel):
     reference_code = models.CharField(
         verbose_name="code de référence",
         max_length=255,
-        help_text='Ce code est utilisé notamment pour le dossier de stockage des réponses',
+        help_text="Ce code est utilisé notamment pour le dossier de stockage des réponses",
         validators=[
             RegexValidator(
-                regex='^[\.\s\w-]+$',
+                regex="^[\.\s\w-]+$",
                 message=INVALID_ERROR_MESSAGE,
             ),
         ],
         unique=True,
-        error_messages={'unique': UNIQUE_ERROR_MESSAGE})
+        error_messages={"unique": UNIQUE_ERROR_MESSAGE},
+    )
 
     objects = DeletableQuerySet.as_manager()
 
@@ -97,9 +105,9 @@ class Control(SoftDeleteModel):
 
     def data(self):
         return {
-            'id': self.id,
-            'title': self.title,
-            'depositing_organization': self.depositing_organization,
+            "id": self.id,
+            "title": self.title,
+            "depositing_organization": self.depositing_organization,
         }
 
     @property
@@ -115,57 +123,85 @@ class Control(SoftDeleteModel):
     @property
     def title_display(self):
         if self.depositing_organization:
-            return f'{self.title} - {self.depositing_organization}'
+            return f"{self.title} - {self.depositing_organization}"
         return self.title
 
     def __str__(self):
         if self.depositing_organization:
-            return f'[ID{self.id}] - {self.title} - {self.depositing_organization}'
-        return f'[ID{self.id}] - {self.title}'
+            return f"[ID{self.id}] - {self.title} - {self.depositing_organization}"
+        return f"[ID{self.id}] - {self.title}"
 
 
 class Questionnaire(OrderedModel, WithNumberingMixin, DocxMixin):
     title = models.CharField("titre", max_length=255)
     sent_date = models.DateField(
-        verbose_name="date d'envoie", blank=True, null=True,
-        help_text="Date de transmission du questionnaire")
+        verbose_name="date d'envoie",
+        blank=True,
+        null=True,
+        help_text="Date de transmission du questionnaire",
+    )
     end_date = models.DateField(
-        verbose_name="échéance", blank=True, null=True,
-        help_text="Date de réponse souhaitée")
+        verbose_name="échéance",
+        blank=True,
+        null=True,
+        help_text="Date de réponse souhaitée",
+    )
     description = models.TextField("description", blank=True)
     editor = models.ForeignKey(
-        to=settings.AUTH_USER_MODEL, related_name='questionnaires', on_delete=models.PROTECT,
-        blank=True, null=True)
+        to=settings.AUTH_USER_MODEL,
+        related_name="questionnaires",
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+    )
     uploaded_file = models.FileField(
-        verbose_name="fichier du questionnaire", upload_to=questionnaire_file_path,
-        null=True, blank=True,
+        verbose_name="fichier du questionnaire",
+        upload_to=questionnaire_file_path,
+        null=True,
+        blank=True,
         help_text=(
             "Si ce fichier est renseigné, il sera proposé au téléchargement."
-            "Sinon, un fichier généré automatiquement sera disponible."))
+            "Sinon, un fichier généré automatiquement sera disponible."
+        ),
+    )
     generated_file = models.FileField(
         verbose_name="fichier du questionnaire généré automatiquement",
         upload_to=questionnaire_file_path,
-        null=True, blank=True,
+        null=True,
+        blank=True,
         help_text=(
-            "Ce fichier est généré automatiquement quand le questionnaire est enregistré."))
+            "Ce fichier est généré automatiquement quand le questionnaire est enregistré."
+        ),
+    )
     control = models.ForeignKey(
-        to='Control', verbose_name='contrôle', related_name='questionnaires',
-        null=True, blank=True, on_delete=models.CASCADE)
-    order_with_respect_to = 'control'
-    order = models.PositiveIntegerField('order', db_index=True)
+        to="Control",
+        verbose_name="contrôle",
+        related_name="questionnaires",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+    )
+    order_with_respect_to = "control"
+    order = models.PositiveIntegerField("order", db_index=True)
     is_draft = models.BooleanField(
-        verbose_name="brouillon", default=False,
-        help_text="Ce questionnaire est-il encore au stade de brouillon?")
+        verbose_name="brouillon",
+        default=False,
+        help_text="Ce questionnaire est-il encore au stade de brouillon?",
+    )
     is_replied = models.BooleanField(
-        verbose_name="répondu", default=False,
-        help_text="Ce questionnaire a-t-il obtenu toutes les réponses de l'organisme contrôlé ?")
+        verbose_name="répondu",
+        default=False,
+        help_text="Ce questionnaire a-t-il obtenu toutes les réponses de l'organisme contrôlé ?",
+    )
     is_finalized = models.BooleanField(
-        verbose_name="finalisé", default=False,
-        help_text="Ce questionnaire a-t-il été finalisé par le contrôleur ?")
-    modified = models.DateTimeField('modifié', auto_now=True, null=True)
+        verbose_name="finalisé",
+        default=False,
+        help_text="Ce questionnaire a-t-il été finalisé par le contrôleur ?",
+    )
+    modified = models.DateTimeField("modifié", auto_now=True, null=True)
 
     class Meta:
-        ordering = ('control', 'order')
+        ordering = ("control", "order")
         verbose_name = "Questionnaire"
         verbose_name_plural = "Questionnaires"
 
@@ -180,11 +216,11 @@ class Questionnaire(OrderedModel, WithNumberingMixin, DocxMixin):
 
     @property
     def url(self):
-        return reverse('questionnaire-detail', args=[self.id])
+        return reverse("questionnaire-detail", args=[self.id])
 
     @property
     def file_url(self):
-        return reverse('send-questionnaire-file', args=[self.id])
+        return reverse("send-questionnaire-file", args=[self.id])
 
     @property
     def basename(self):
@@ -222,23 +258,28 @@ class Questionnaire(OrderedModel, WithNumberingMixin, DocxMixin):
         return settings.QUESTIONNAIRE_SITE_URL
 
     def __str__(self):
-        display_text = f'[ID{self.id}]'
+        display_text = f"[ID{self.id}]"
         if self.control:
-            display_text += f' [C{self.control.id}]'
-        display_text += f' [Q{self.numbering}]'
-        display_text += f' - {self.title}'
+            display_text += f" [C{self.control.id}]"
+        display_text += f" [Q{self.numbering}]"
+        display_text += f" - {self.title}"
         return display_text
 
 
 class Theme(OrderedModel, WithNumberingMixin):
     title = models.CharField("titre", max_length=255)
     questionnaire = models.ForeignKey(
-        to='Questionnaire', verbose_name='questionnaire', related_name='themes',
-        null=True, blank=True, on_delete=models.CASCADE)
-    order_with_respect_to = 'questionnaire'
+        to="Questionnaire",
+        verbose_name="questionnaire",
+        related_name="themes",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+    )
+    order_with_respect_to = "questionnaire"
 
     class Meta:
-        ordering = ('questionnaire', 'order')
+        ordering = ("questionnaire", "order")
         verbose_name = "Thème"
         verbose_name_plural = "Thèmes"
 
@@ -249,25 +290,30 @@ class Theme(OrderedModel, WithNumberingMixin):
         return self.questionnaire.control
 
     def __str__(self):
-        display_text = f'[ID{self.id}]'
+        display_text = f"[ID{self.id}]"
         if self.control:
-            display_text += f' [C{self.control.id}]'
+            display_text += f" [C{self.control.id}]"
         if self.questionnaire:
-            display_text += f' [Q{self.questionnaire.numbering}]'
-        display_text += f' [T{self.numbering}]'
-        display_text += f' - {self.title}'
+            display_text += f" [Q{self.questionnaire.numbering}]"
+        display_text += f" [T{self.numbering}]"
+        display_text += f" - {self.title}"
         return display_text
 
 
 class Question(OrderedModel, WithNumberingMixin, DocxMixin):
     description = models.TextField("description")
     theme = models.ForeignKey(
-        'theme', verbose_name='thème', related_name='questions',
-        null=True, blank=True, on_delete=models.CASCADE)
-    order_with_respect_to = 'theme'
+        "theme",
+        verbose_name="thème",
+        related_name="questions",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+    )
+    order_with_respect_to = "theme"
 
     class Meta:
-        ordering = ('theme', 'order')
+        ordering = ("theme", "order")
         verbose_name = "Question"
         verbose_name_plural = "Questions"
 
@@ -288,32 +334,35 @@ class Question(OrderedModel, WithNumberingMixin, DocxMixin):
         return self.to_rich_text(self.description)
 
     def __str__(self):
-        display_text = f'[ID{self.id}] [Num{self.numbering}]'
+        display_text = f"[ID{self.id}] [Num{self.numbering}]"
         if self.control:
-            display_text += f' [C{self.control.id}]'
+            display_text += f" [C{self.control.id}]"
         if self.questionnaire:
-            display_text += f' [Q{self.theme.questionnaire.numbering}]'
+            display_text += f" [Q{self.theme.questionnaire.numbering}]"
         if self.theme:
-            display_text += f' [T{self.theme.numbering}]'
-        display_text += f' - {self.description}'
+            display_text += f" [T{self.theme.numbering}]"
+        display_text += f" - {self.description}"
         return display_text
 
 
 class QuestionFile(OrderedModel, FileInfoMixin):
     question = models.ForeignKey(
-        to='Question', verbose_name='question', related_name='question_files',
-        on_delete=models.CASCADE)
+        to="Question",
+        verbose_name="question",
+        related_name="question_files",
+        on_delete=models.CASCADE,
+    )
     file = models.FileField(verbose_name="fichier", upload_to=question_file_path)
-    order_with_respect_to = 'question'
+    order_with_respect_to = "question"
 
     class Meta:
-        ordering = ('question', 'order')
-        verbose_name = 'Question: Fichier Annexe'
-        verbose_name_plural = 'Question: Fichiers Annexes'
+        ordering = ("question", "order")
+        verbose_name = "Question: Fichier Annexe"
+        verbose_name_plural = "Question: Fichiers Annexes"
 
     @property
     def url(self):
-        return reverse('send-question-file', args=[self.id])
+        return reverse("send-question-file", args=[self.id])
 
     @property
     def basename(self):
@@ -326,22 +375,30 @@ class QuestionFile(OrderedModel, FileInfoMixin):
 @cleanup.ignore
 class ResponseFile(TimeStampedModel, FileInfoMixin):
     question = models.ForeignKey(
-        to='Question', verbose_name='question', related_name='response_files',
-        on_delete=models.CASCADE)
+        to="Question",
+        verbose_name="question",
+        related_name="response_files",
+        on_delete=models.CASCADE,
+    )
     file = models.FileField(verbose_name="fichier", upload_to=response_file_path)
     author = models.ForeignKey(
-        to=settings.AUTH_USER_MODEL, related_name='response_files', on_delete=models.PROTECT)
+        to=settings.AUTH_USER_MODEL,
+        related_name="response_files",
+        on_delete=models.PROTECT,
+    )
     is_deleted = models.BooleanField(
-        verbose_name="Supprimé", default=False,
-        help_text="Ce fichier est=il dans la corbeille?")
+        verbose_name="Supprimé",
+        default=False,
+        help_text="Ce fichier est=il dans la corbeille?",
+    )
 
     class Meta:
-        verbose_name = 'Réponse: Fichier Déposé'
-        verbose_name_plural = 'Réponse: Fichiers Déposés'
+        verbose_name = "Réponse: Fichier Déposé"
+        verbose_name_plural = "Réponse: Fichiers Déposés"
 
     @property
     def url(self):
-        return reverse('send-response-file', args=[self.id])
+        return reverse("send-response-file", args=[self.id])
 
     @property
     def basename(self):

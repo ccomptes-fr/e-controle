@@ -6,17 +6,21 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('control', '0014_add_timestamp_on_response_file'),
+        ("control", "0014_add_timestamp_on_response_file"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='responsefile',
-            name='author',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.PROTECT, related_name='response_files', to=settings.AUTH_USER_MODEL),
+            model_name="responsefile",
+            name="author",
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="response_files",
+                to=settings.AUTH_USER_MODEL,
+            ),
             preserve_default=False,
         ),
     ]

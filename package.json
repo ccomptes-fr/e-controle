@@ -17,7 +17,8 @@
     "watch-questionnaire-detail": "parcel watch static/src/questionnaire-detail.js --out-dir ./static/dist/ --out-file questionnaire-detail-bundle.js",
     "watch-session-management": "parcel watch static/src/session-management.js --out-dir ./static/dist/ --out-file session-management-bundle.js",
     "watch-sidebar": "parcel watch static/src/sidebar.js --out-dir ./static/dist/ --out-file sidebar-bundle.js",
-    "test": "jest"
+    "test": "jest",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@babel/polyfill": "^7.11.5",

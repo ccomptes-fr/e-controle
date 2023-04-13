@@ -4,15 +4,14 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('control', '0027_update_help_text'),
+        ("control", "0027_update_help_text"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='questionnaire',
-            old_name='file',
-            new_name='uploaded_file',
+            model_name="questionnaire",
+            old_name="file",
+            new_name="uploaded_file",
         ),
     ]

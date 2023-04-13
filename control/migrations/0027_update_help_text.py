@@ -5,20 +5,31 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('control', '0026_questionnaire_generated_file'),
+        ("control", "0026_questionnaire_generated_file"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='questionnaire',
-            name='file',
-            field=models.FileField(blank=True, help_text='Si ce fichier est renseigné, il sera proposé au téléchargement.Sinon, un fichier généré automatiquement sera disponible.', null=True, upload_to=control.upload_path.questionnaire_file_path, verbose_name='fichier'),
+            model_name="questionnaire",
+            name="file",
+            field=models.FileField(
+                blank=True,
+                help_text="Si ce fichier est renseigné, il sera proposé au téléchargement.Sinon, un fichier généré automatiquement sera disponible.",
+                null=True,
+                upload_to=control.upload_path.questionnaire_file_path,
+                verbose_name="fichier",
+            ),
         ),
         migrations.AlterField(
-            model_name='questionnaire',
-            name='generated_file',
-            field=models.FileField(blank=True, help_text='Ce fichier est généré automatiquement quand le questionnaire est enregistré.', null=True, upload_to=control.upload_path.questionnaire_file_path, verbose_name='fichier généré automatiquement'),
+            model_name="questionnaire",
+            name="generated_file",
+            field=models.FileField(
+                blank=True,
+                help_text="Ce fichier est généré automatiquement quand le questionnaire est enregistré.",
+                null=True,
+                upload_to=control.upload_path.questionnaire_file_path,
+                verbose_name="fichier généré automatiquement",
+            ),
         ),
     ]

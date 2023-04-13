@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('user_profiles', '0008_change_meta_on_profile_type'),
+        ("user_profiles", "0008_change_meta_on_profile_type"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='userprofile',
-            name='active_directory_name',
+            model_name="userprofile",
+            name="active_directory_name",
         ),
     ]

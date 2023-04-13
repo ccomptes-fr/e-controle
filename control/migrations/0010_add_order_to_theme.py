@@ -4,20 +4,25 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('control', '0009_questionnaire_description_max'),
+        ("control", "0009_questionnaire_description_max"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='theme',
-            options={'ordering': ('questionnaire', 'order'), 'verbose_name': 'Thème', 'verbose_name_plural': 'Thèmes'},
+            name="theme",
+            options={
+                "ordering": ("questionnaire", "order"),
+                "verbose_name": "Thème",
+                "verbose_name_plural": "Thèmes",
+            },
         ),
         migrations.AddField(
-            model_name='theme',
-            name='order',
-            field=models.PositiveIntegerField(db_index=True, default=0, editable=False, verbose_name='order'),
+            model_name="theme",
+            name="order",
+            field=models.PositiveIntegerField(
+                db_index=True, default=0, editable=False, verbose_name="order"
+            ),
             preserve_default=False,
         ),
     ]

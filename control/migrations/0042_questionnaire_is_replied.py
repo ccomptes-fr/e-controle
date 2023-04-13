@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('control', '0041_auto_20200424_1047'),
+        ("control", "0041_auto_20200424_1047"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='questionnaire',
-            name='is_replied',
-            field=models.BooleanField(default=False, help_text="Ce questionnaire a-t-il obtenu toutes les réponses de l'organisme contrôlé ?", verbose_name='répondu'),
+            model_name="questionnaire",
+            name="is_replied",
+            field=models.BooleanField(
+                default=False,
+                help_text="Ce questionnaire a-t-il obtenu toutes les réponses de l'organisme contrôlé ?",
+                verbose_name="répondu",
+            ),
         ),
     ]

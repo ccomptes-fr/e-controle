@@ -4,20 +4,28 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('control', '0029_change_questionnaire_file_labels'),
+        ("control", "0029_change_questionnaire_file_labels"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='control',
-            name='depositing_organization',
-            field=models.CharField(blank=True, help_text='Organisme qui va déposer les pièces dans cet espace de dépôt', max_length=255, verbose_name='Organisme interrogé'),
+            model_name="control",
+            name="depositing_organization",
+            field=models.CharField(
+                blank=True,
+                help_text="Organisme qui va déposer les pièces dans cet espace de dépôt",
+                max_length=255,
+                verbose_name="Organisme interrogé",
+            ),
         ),
         migrations.AlterField(
-            model_name='control',
-            name='title',
-            field=models.CharField(help_text='Procédure pour laquelle est ouvert cet espace de dépôt', max_length=255, verbose_name='procédure'),
+            model_name="control",
+            name="title",
+            field=models.CharField(
+                help_text="Procédure pour laquelle est ouvert cet espace de dépôt",
+                max_length=255,
+                verbose_name="procédure",
+            ),
         ),
     ]

@@ -27,21 +27,19 @@ class DemoView(View):
         is_admin = user.is_staff or user.is_superuser
         if not is_admin:
             django_login(request, user)
-            return HttpResponseRedirect(reverse('control-detail'))
+            return HttpResponseRedirect(reverse("control-detail"))
         else:
             return HttpResponseForbidden("Non autorisé")
-        return HttpResponseRedirect(reverse('login'))
+        return HttpResponseRedirect(reverse("login"))
 
 
 class DemoInspectorView(DemoView):
-
     @property
     def demo_username(self):
         return settings.DEMO_INSPECTOR_USERNAME
 
 
 class DemoAuditedView(DemoView):
-
     @property
     def demo_username(self):
         return settings.DEMO_AUDITED_USERNAME

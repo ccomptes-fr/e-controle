@@ -17,22 +17,26 @@ class SendResponseFileRunner:
         user.profile.agreed_to_tos = True
         user.profile.save()
         utils.login(client, user=response_file.author)
-        url = reverse('send-response-file', args=[response_file.id])
+        url = reverse("send-response-file", args=[response_file.id])
         self.response = client.get(url)
 
 
-def test_download_response_file_works_if_the_control_is_associated_with_the_user(client):
+def test_download_response_file_works_if_the_control_is_associated_with_the_user(
+    client,
+):
     runner = SendResponseFileRunner(client)
     assert runner.response.status_code == 200
 
 
 def test_download_response_file_has_right_filename(client):
     runner = SendResponseFileRunner(client)
-    assert runner.response.has_header('Content-Disposition')
-    assert runner.response['Content-Disposition'].find(runner.filename) > -1
+    assert runner.response.has_header("Content-Disposition")
+    assert runner.response["Content-Disposition"].find(runner.filename) > -1
 
 
-def test_download_response_file_fails_if_the_control_is_not_associated_with_the_user(client):
+def test_download_response_file_fails_if_the_control_is_not_associated_with_the_user(
+    client,
+):
     response_file = factories.ResponseFileFactory()
     user = response_file.author
     unauthorized_control = factories.ControlFactory()
@@ -40,6 +44,6 @@ def test_download_response_file_fails_if_the_control_is_not_associated_with_the_
     user.profile.controls.add(unauthorized_control)
     user.profile.save()
     utils.login(client, user=response_file.author)
-    url = reverse('send-response-file', args=[response_file.id])
+    url = reverse("send-response-file", args=[response_file.id])
     response = client.get(url)
     assert response.status_code != 200

@@ -5,7 +5,7 @@ from control.models import Questionnaire
 
 
 class OnlyInspectorCanAccess(permissions.BasePermission):
-    message_format = 'Accessing this resource is not allowed.'
+    message_format = "Accessing this resource is not allowed."
 
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
@@ -14,7 +14,7 @@ class OnlyInspectorCanAccess(permissions.BasePermission):
 
 
 class OnlyAuditedCanAccess(permissions.BasePermission):
-    message_format = 'Accessing this resource is not allowed.'
+    message_format = "Accessing this resource is not allowed."
 
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
@@ -23,7 +23,7 @@ class OnlyAuditedCanAccess(permissions.BasePermission):
 
 
 class OnlyInspectorCanChange(permissions.BasePermission):
-    message_format = 'Adding or changing this resource is not allowed.'
+    message_format = "Adding or changing this resource is not allowed."
 
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
@@ -34,7 +34,6 @@ class OnlyInspectorCanChange(permissions.BasePermission):
 
 
 class OnlyEditorCanChangeQuestionnaire(permissions.BasePermission):
-
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -47,16 +46,18 @@ class OnlyEditorCanChangeQuestionnaire(permissions.BasePermission):
 
 
 class ControlIsNotDeleted(permissions.BasePermission):
-    message_format = 'Accessing this resource is not allowed.'
+    message_format = "Accessing this resource is not allowed."
 
     def has_object_permission(self, request, view, obj):
-        if not hasattr(obj, 'control'):
-            raise ParseError(detail='Missing attribute "control" during permission check')
+        if not hasattr(obj, "control"):
+            raise ParseError(
+                detail='Missing attribute "control" during permission check'
+            )
         return not obj.control.is_deleted()
 
 
 class QuestionnaireIsDraft(permissions.BasePermission):
-    message_format = 'Accessing this resource is not allowed.'
+    message_format = "Accessing this resource is not allowed."
 
     def has_object_permission(self, request, view, obj):
         """
@@ -66,8 +67,10 @@ class QuestionnaireIsDraft(permissions.BasePermission):
         """
         if isinstance(obj, Questionnaire):
             questionnaire = obj
-        elif hasattr(obj, 'questionnaire'):
+        elif hasattr(obj, "questionnaire"):
             questionnaire = obj.questionnaire
         else:
-            raise ParseError(detail='Could not get "questionnaire" during permission check')
+            raise ParseError(
+                detail='Could not get "questionnaire" during permission check'
+            )
         return questionnaire.is_draft

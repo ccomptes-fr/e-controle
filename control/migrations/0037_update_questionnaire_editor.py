@@ -7,15 +7,16 @@ from actstream import registry
 
 def find_questionnaire_creator(questionnaire):
     creation_action = questionnaire.action_object_actions.filter(
-        verb='created questionnaire').first()
+        verb="created questionnaire"
+    ).first()
     if not creation_action:
         return None
     return creation_action.actor_object_id
 
 
 def set_editor_to_questionnaire_creator(apps, schema_editor):
-    Questionnaire = apps.get_model('control', 'Questionnaire')
-    registry.register(apps.get_model('control.Questionnaire'))
+    Questionnaire = apps.get_model("control", "Questionnaire")
+    registry.register(apps.get_model("control.Questionnaire"))
     for questionnaire in Questionnaire.objects.all():
         creator_id = find_questionnaire_creator(questionnaire)
         questionnaire.editor_id = creator_id
@@ -23,12 +24,13 @@ def set_editor_to_questionnaire_creator(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('control', '0036_questionnaire_editor'),
+        ("control", "0036_questionnaire_editor"),
     ]
 
     operations = [
         migrations.RunPython(
-            set_editor_to_questionnaire_creator, reverse_code=lambda apps, schema_editor: None)
+            set_editor_to_questionnaire_creator,
+            reverse_code=lambda apps, schema_editor: None,
+        )
     ]

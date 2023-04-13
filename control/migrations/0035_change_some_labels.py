@@ -4,18 +4,24 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('control', '0034_change_meta_data_on_reference_code'),
+        ("control", "0034_change_meta_data_on_reference_code"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='questionfile',
-            options={'ordering': ('question', 'order'), 'verbose_name': 'Question: Fichier Annexe', 'verbose_name_plural': 'Question: Fichiers Annexes'},
+            name="questionfile",
+            options={
+                "ordering": ("question", "order"),
+                "verbose_name": "Question: Fichier Annexe",
+                "verbose_name_plural": "Question: Fichiers Annexes",
+            },
         ),
         migrations.AlterModelOptions(
-            name='responsefile',
-            options={'verbose_name': 'Réponse: Fichier Déposé', 'verbose_name_plural': 'Réponse: Fichiers Déposés'},
+            name="responsefile",
+            options={
+                "verbose_name": "Réponse: Fichier Déposé",
+                "verbose_name_plural": "Réponse: Fichiers Déposés",
+            },
         ),
     ]

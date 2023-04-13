@@ -4,7 +4,6 @@ from rest_framework.response import Response
 
 
 class SessionTimeoutViewSet(viewsets.ViewSet):
-
-    @decorators.action(detail=False, methods=['get'], url_path='keep-alive')
+    @decorators.action(detail=False, methods=["get"], url_path="keep-alive")
     def keep_alive(self, request):
         return Response({})

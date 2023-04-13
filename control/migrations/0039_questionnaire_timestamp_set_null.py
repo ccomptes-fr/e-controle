@@ -4,17 +4,17 @@ from django.db import migrations
 
 
 def set_timestamp_null(apps, schema_editor):
-    Questionnaire = apps.get_model('control', 'Questionnaire')
+    Questionnaire = apps.get_model("control", "Questionnaire")
     Questionnaire.objects.update(modified=None)
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('control', '0038_add_timestamp_on_questionnaire'),
+        ("control", "0038_add_timestamp_on_questionnaire"),
     ]
 
     operations = [
         migrations.RunPython(
-            set_timestamp_null, reverse_code=lambda apps, schema_editor: None)
+            set_timestamp_null, reverse_code=lambda apps, schema_editor: None
+        )
     ]

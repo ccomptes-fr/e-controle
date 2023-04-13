@@ -5,15 +5,21 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('control', '0022_end_date_meta_options'),
+        ("control", "0022_end_date_meta_options"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='question',
-            name='theme',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='questions', to='control.Theme', verbose_name='thème'),
+            model_name="question",
+            name="theme",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="questions",
+                to="control.Theme",
+                verbose_name="thème",
+            ),
         ),
     ]

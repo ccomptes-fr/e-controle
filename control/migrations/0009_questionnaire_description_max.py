@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('control', '0008_remove_questionnaire_reference_code'),
+        ("control", "0008_remove_questionnaire_reference_code"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='question',
-            name='description',
-            field=models.TextField(verbose_name='description'),
+            model_name="question",
+            name="description",
+            field=models.TextField(verbose_name="description"),
         ),
     ]

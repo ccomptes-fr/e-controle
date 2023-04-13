@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('user_profiles', '0011_add_agreed_to_tos'),
+        ("user_profiles", "0011_add_agreed_to_tos"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='userprofile',
-            name='agreed_to_tos',
-            field=models.BooleanField(default=False, help_text="Les Conditions Générales d'Utilisation ont-elles été acceptées ?", verbose_name='accepté CGU'),
+            model_name="userprofile",
+            name="agreed_to_tos",
+            field=models.BooleanField(
+                default=False,
+                help_text="Les Conditions Générales d'Utilisation ont-elles été acceptées ?",
+                verbose_name="accepté CGU",
+            ),
         ),
     ]

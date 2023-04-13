@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('user_profiles', '0004_copy_existing_control'),
+        ("user_profiles", "0004_copy_existing_control"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userprofile',
-            name='active_directory_name',
-            field=models.CharField(blank=True, max_length=255, verbose_name="Login sur l'active directory de la cour"),
+            model_name="userprofile",
+            name="active_directory_name",
+            field=models.CharField(
+                blank=True,
+                max_length=255,
+                verbose_name="Login sur l'active directory de la cour",
+            ),
         ),
     ]

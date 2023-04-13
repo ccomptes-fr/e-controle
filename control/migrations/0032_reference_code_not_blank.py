@@ -4,15 +4,20 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('control', '0031_auto_20190716_0942'),
+        ("control", "0031_auto_20190716_0942"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='control',
-            name='reference_code',
-            field=models.CharField(error_messages={'unique': 'UNIQUE'}, help_text='Ce code est utilisé notamment pour le dossier de stockage des réponses', max_length=255, unique=True, verbose_name='code de référence'),
+            model_name="control",
+            name="reference_code",
+            field=models.CharField(
+                error_messages={"unique": "UNIQUE"},
+                help_text="Ce code est utilisé notamment pour le dossier de stockage des réponses",
+                max_length=255,
+                unique=True,
+                verbose_name="code de référence",
+            ),
         ),
     ]

@@ -4,19 +4,26 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('user_profiles', '0013_organization_set_null'),
+        ("user_profiles", "0013_organization_set_null"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='UserIpAddress',
+            name="UserIpAddress",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('ip', models.CharField(max_length=30)),
-                ('username', models.CharField(max_length=30)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("ip", models.CharField(max_length=30)),
+                ("username", models.CharField(max_length=30)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
         ),
     ]

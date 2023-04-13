@@ -15,10 +15,10 @@ import shutil
 from control.models import ResponseFile, Questionnaire
 from django.core.files import File
 
-CONTROL_TITLE = 'Contrôle des comptes et de la gestion de la commune de TODO'
-Q1_TITLE = 'Questionnaire n°1 - présentation générale - TODO'
-Q2_TITLE = 'Questionnaire n°2 - Fiabilité des comptes - TODO'
-Q3_TITLE = 'Questionnaire n°3 - Gestion des ressources humaines - TODO'
+CONTROL_TITLE = "Contrôle des comptes et de la gestion de la commune de TODO"
+Q1_TITLE = "Questionnaire n°1 - présentation générale - TODO"
+Q2_TITLE = "Questionnaire n°2 - Fiabilité des comptes - TODO"
+Q3_TITLE = "Questionnaire n°3 - Gestion des ressources humaines - TODO"
 
 
 def fix_ordering():
@@ -37,7 +37,8 @@ def fix_ordering():
 
 def fix_files():
     response_files = ResponseFile.objects.filter(
-        question__theme__questionnaire__control__title=CONTROL_TITLE)
+        question__theme__questionnaire__control__title=CONTROL_TITLE
+    )
     for rfile in response_files:
         old_file_filed = rfile.file
         old_file_object = old_file_filed.file
@@ -45,14 +46,15 @@ def fix_files():
         new_file_object = File(file=old_file_object, name=clean_basename)
         rfile.file = new_file_object
         rfile.save()
-        backup_file_name = '/tmp/backup-vj/' + os.path.basename(old_file_object.name)
+        backup_file_name = "/tmp/backup-vj/" + os.path.basename(old_file_object.name)
         if os.path.isfile(old_file_filed.path):
             shutil.move(old_file_object.name, backup_file_name)
 
 
 def check_files():
     response_files = ResponseFile.objects.filter(
-        question__theme__questionnaire__control__title=CONTROL_TITLE)
+        question__theme__questionnaire__control__title=CONTROL_TITLE
+    )
     for rfile in response_files:
         if os.path.isfile(rfile.file.path):
             print(rfile)

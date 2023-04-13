@@ -4,16 +4,15 @@ from django.db import migrations
 
 
 def copy_existing_control(apps, schema_editor):
-    UserProfile = apps.get_model('user_profiles', 'UserProfile')
+    UserProfile = apps.get_model("user_profiles", "UserProfile")
     for profile in UserProfile.objects.filter(control__isnull=False):
         profile.controls.add(profile.control)
         profile.save()
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('user_profiles', '0003_add_many_controls'),
+        ("user_profiles", "0003_add_many_controls"),
     ]
 
     operations = [

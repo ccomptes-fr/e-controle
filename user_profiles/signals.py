@@ -25,14 +25,14 @@ def lowercase_username(sender, instance, *args, **kwargs):
 
 def add_log_entry(verb, session_user, user_profile, control=None):
     action_details = {
-        'sender': session_user,
-        'action_object': user_profile,
-        'target': control,
+        "sender": session_user,
+        "action_object": user_profile,
+        "target": control,
     }
     if user_profile.is_inspector:
-        action_details['verb'] = f'{verb} inspector user'
+        action_details["verb"] = f"{verb} inspector user"
     if user_profile.is_audited:
-        action_details['verb'] = f'{verb} audited user'
+        action_details["verb"] = f"{verb} audited user"
     action.send(**action_details)
 
 
@@ -42,7 +42,11 @@ def add_log_entry_for_user_add(session_user, user_profile, control, **kwargs):
     Add a log entry after user is added to a control.
     """
     add_log_entry(
-        verb='added', session_user=session_user, user_profile=user_profile, control=control)
+        verb="added",
+        session_user=session_user,
+        user_profile=user_profile,
+        control=control,
+    )
 
 
 @receiver(user_api_post_update, sender=UserProfile)
@@ -50,7 +54,7 @@ def add_log_entry_for_user_update(session_user, user_profile, **kwargs):
     """
     Add a log entry after user is updated.
     """
-    add_log_entry(verb='updated', session_user=session_user, user_profile=user_profile)
+    add_log_entry(verb="updated", session_user=session_user, user_profile=user_profile)
 
 
 @receiver(user_api_post_remove, sender=UserProfile)
@@ -59,22 +63,29 @@ def add_log_entry_for_user_remove(session_user, user_profile, control, **kwargs)
     Add a log entry after user is removed from a control.
     """
     add_log_entry(
-        verb='removed', session_user=session_user, user_profile=user_profile, control=control)
+        verb="removed",
+        session_user=session_user,
+        user_profile=user_profile,
+        control=control,
+    )
 
 
 def bake_and_send_email(
-        session_user, user_profile, control, email_subject, html_template, text_template):
+    session_user, user_profile, control, email_subject, html_template, text_template
+):
     """
     A wrapper function for sending emails.
     """
-    recipients = [session_user.email, ]
+    recipients = [
+        session_user.email,
+    ]
     inspectors = control.user_profiles.filter(profile_type=UserProfile.INSPECTOR)
     inspectors = inspectors.exclude(user=session_user)
-    inspectors_emails = inspectors.values_list('user__email', flat=True)
+    inspectors_emails = inspectors.values_list("user__email", flat=True)
     context = {
-        'control': control,
-        'user': session_user,
-        'target_user': user_profile.user
+        "control": control,
+        "user": session_user,
+        "target_user": user_profile.user,
     }
     send_email(
         to=recipients,
@@ -94,9 +105,9 @@ def send_email_for_user_add(session_user, user_profile, control, **kwargs):
         session_user=session_user,
         user_profile=user_profile,
         control=control,
-        email_subject=f'e.contrôle - Nouvel utilisateur - {control}',
-        html_template='user_profiles/email_add_user.html',
-        text_template='user_profiles/email_add_user.txt',
+        email_subject=f"e.contrôle - Nouvel utilisateur - {control}",
+        html_template="user_profiles/email_add_user.html",
+        text_template="user_profiles/email_add_user.txt",
     )
 
 
@@ -108,9 +119,9 @@ def send_email_for_user_remove(session_user, user_profile, control, **kwargs):
         session_user=session_user,
         user_profile=user_profile,
         control=control,
-        email_subject=f'e.contrôle - Suppression utilisateur - {control}',
-        html_template='user_profiles/email_remove_user.html',
-        text_template='user_profiles/email_remove_user.txt',
+        email_subject=f"e.contrôle - Suppression utilisateur - {control}",
+        html_template="user_profiles/email_remove_user.html",
+        text_template="user_profiles/email_remove_user.txt",
     )
 
 

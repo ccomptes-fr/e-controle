@@ -22,7 +22,7 @@ if __name__ == "__main__":
                 "forget to activate a virtual environment?"
             )
         raise
-    BASE_DIR = Path('.').absolute()
-    env_path = BASE_DIR / '.env'
+    BASE_DIR = Path(".").absolute()
+    env_path = BASE_DIR / ".env"
     load_dotenv(dotenv_path=env_path, override=True)
     execute_from_command_line(sys.argv)

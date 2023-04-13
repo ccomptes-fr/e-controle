@@ -1,1 +1,1 @@
-default_app_config = 'faq.apps.FaqConfig'
+default_app_config = "faq.apps.FaqConfig"

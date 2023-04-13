@@ -11,23 +11,23 @@ client = APIClient()
 
 
 def get_questionnaire(user, id):
-    return utils.get_resource(client, user, 'questionnaire', id)
+    return utils.get_resource(client, user, "questionnaire", id)
 
 
 def list_questionnaires(user):
-    return utils.list_resource(client, user, 'questionnaire')
+    return utils.list_resource(client, user, "questionnaire")
 
 
 def create_questionnaire(user, payload):
-    return utils.create_resource(client, user, 'questionnaire', payload)
+    return utils.create_resource(client, user, "questionnaire", payload)
 
 
 def update_questionnaire(user, payload):
-    return utils.update_resource(client, user, 'questionnaire', payload)
+    return utils.update_resource(client, user, "questionnaire", payload)
 
 
 def delete_questionnaire(user, id):
-    return utils.delete_resource(client, user, 'questionnaire', id)
+    return utils.delete_resource(client, user, "questionnaire", id)
 
 
 def make_create_payload(control_id):
@@ -36,15 +36,8 @@ def make_create_payload(control_id):
         "control": str(control_id),
         "is_draft": True,
         "themes": [
-           {
-              "title": "theme theme theme",
-              "questions": [
-                {
-                  "description": "bliblibli"
-                }
-              ]
-           }
-        ]
+            {"title": "theme theme theme", "questions": [{"description": "bliblibli"}]}
+        ],
     }
 
 
@@ -84,7 +77,10 @@ def test_can_access_questionnaire_api_if_control_is_associated_with_the_user():
     payload = make_create_payload(questionnaire.control.id)
     assert create_questionnaire(inspector_user, payload).status_code == 201
 
-@pytest.mark.skip(reason="TODO : tests ne passent pas depuis ce commit https://github.com/betagouv/e-controle/commit/70a3e92266e170e86becfc466bc814121290ee4d#diff-5b5e28cbcc14ded1039edbd5750378fae9751f28da74ca306ee63d6709176bb5L151")
+
+@pytest.mark.skip(
+    reason="TODO : tests ne passent pas depuis ce commit https://github.com/betagouv/e-controle/commit/70a3e92266e170e86becfc466bc814121290ee4d#diff-5b5e28cbcc14ded1039edbd5750378fae9751f28da74ca306ee63d6709176bb5L151"
+)
 def test_cannot_get_questionnaire_even_if_control_is_associated_with_the_user():
     # Retrieve is disabled
     questionnaire = factories.QuestionnaireFactory()
@@ -112,31 +108,40 @@ def test_no_access_to_questionnaire_api_if_control_is_not_associated_with_the_us
     assert_no_data_is_saved()
 
 
-@pytest.mark.skip(reason="TODO : tests ne passent pas depuis ce commit https://github.com/betagouv/e-controle/commit/70a3e92266e170e86becfc466bc814121290ee4d#diff-5b5e28cbcc14ded1039edbd5750378fae9751f28da74ca306ee63d6709176bb5L151")
+@pytest.mark.skip(
+    reason="TODO : tests ne passent pas depuis ce commit https://github.com/betagouv/e-controle/commit/70a3e92266e170e86becfc466bc814121290ee4d#diff-5b5e28cbcc14ded1039edbd5750378fae9751f28da74ca306ee63d6709176bb5L151"
+)
 def test_no_access_to_questionnaire_api_for_anonymous():
     questionnaire = factories.QuestionnaireFactory()
 
     # retrieve is never allowed
-    response = utils.get_resource_without_login(client, 'questionnaire', questionnaire.id)
+    response = utils.get_resource_without_login(
+        client, "questionnaire", questionnaire.id
+    )
     assert response.status_code == 403
 
     # update
     payload = make_update_payload(questionnaire)
-    response = utils.update_resource_without_login(client, 'questionnaire', payload)
+    response = utils.update_resource_without_login(client, "questionnaire", payload)
     assert response.status_code == 403
 
     # delete is never allowed
-    response = utils.delete_resource_without_login(client, 'questionnaire', questionnaire.id)
+    response = utils.delete_resource_without_login(
+        client, "questionnaire", questionnaire.id
+    )
     assert response.status_code == 403
 
     # create
     clear_saved_data()
     payload = make_create_payload(questionnaire.control.id)
-    response = utils.create_resource_without_login(client, 'questionnaire', payload)
+    response = utils.create_resource_without_login(client, "questionnaire", payload)
     assert response.status_code == 403
     assert_no_data_is_saved()
 
-@pytest.mark.skip(reason="TODO : tests ne passent pas depuis ce commit https://github.com/betagouv/e-controle/commit/70a3e92266e170e86becfc466bc814121290ee4d#diff-5b5e28cbcc14ded1039edbd5750378fae9751f28da74ca306ee63d6709176bb5L151")
+
+@pytest.mark.skip(
+    reason="TODO : tests ne passent pas depuis ce commit https://github.com/betagouv/e-controle/commit/70a3e92266e170e86becfc466bc814121290ee4d#diff-5b5e28cbcc14ded1039edbd5750378fae9751f28da74ca306ee63d6709176bb5L151"
+)
 def test_no_modifying_questionnaire_if_not_inspector():
     questionnaire = factories.QuestionnaireFactory()
     audited_user = utils.make_audited_user(questionnaire.control)
@@ -154,14 +159,20 @@ def test_no_modifying_questionnaire_if_not_inspector():
     assert create_questionnaire(audited_user, payload).status_code == 403
     assert_no_data_is_saved()
 
-@pytest.mark.skip(reason="TODO : tests ne passent pas depuis ce commit https://github.com/betagouv/e-controle/commit/70a3e92266e170e86becfc466bc814121290ee4d#diff-5b5e28cbcc14ded1039edbd5750378fae9751f28da74ca306ee63d6709176bb5L151")
+
+@pytest.mark.skip(
+    reason="TODO : tests ne passent pas depuis ce commit https://github.com/betagouv/e-controle/commit/70a3e92266e170e86becfc466bc814121290ee4d#diff-5b5e28cbcc14ded1039edbd5750378fae9751f28da74ca306ee63d6709176bb5L151"
+)
 def test_no_access_to_draft_if_not_inspector():
     questionnaire = factories.QuestionnaireFactory(is_draft=True)
     audited_user = utils.make_audited_user(questionnaire.control)
     # retrieve is never allowed
     assert get_questionnaire(audited_user, questionnaire.id).status_code == 405
 
-@pytest.mark.skip(reason="TODO : tests ne passent pas depuis ce commit https://github.com/betagouv/e-controle/commit/70a3e92266e170e86becfc466bc814121290ee4d#diff-5b5e28cbcc14ded1039edbd5750378fae9751f28da74ca306ee63d6709176bb5L151")
+
+@pytest.mark.skip(
+    reason="TODO : tests ne passent pas depuis ce commit https://github.com/betagouv/e-controle/commit/70a3e92266e170e86becfc466bc814121290ee4d#diff-5b5e28cbcc14ded1039edbd5750378fae9751f28da74ca306ee63d6709176bb5L151"
+)
 def test_no_access_to_questionnaire_if_control_is_deleted():
     # retrieve is never allowed
     questionnaire = factories.QuestionnaireFactory()
@@ -206,50 +217,57 @@ def test_questionnaire_create__success():
 
     # Response.data is filled in
     questionnaire = response.data
-    assert questionnaire['id'] > -1
-    assert questionnaire['is_draft'] == True
+    assert questionnaire["id"] > -1
+    assert questionnaire["is_draft"] == True
 
-    theme = response.data['themes'][0]
-    assert theme['id'] > -1
-    assert theme['questionnaire'] == questionnaire['id']
+    theme = response.data["themes"][0]
+    assert theme["id"] > -1
+    assert theme["questionnaire"] == questionnaire["id"]
 
-    question = theme['questions'][0]
-    assert question['id'] > -1
-    assert question['theme'] == theme['id']
+    question = theme["questions"][0]
+    assert question["id"] > -1
+    assert question["theme"] == theme["id"]
 
     # Data is saved, foreign keys are set
     assert Questionnaire.objects.all().count() == 1
-    questionnaire = Questionnaire.objects.get(id=response.data['id'])  # should not throw
+    questionnaire = Questionnaire.objects.get(
+        id=response.data["id"]
+    )  # should not throw
     assert questionnaire.control == control
     assert questionnaire.is_draft == True
 
     assert Theme.objects.all().count() == 1
-    theme = Theme.objects.get(id=response.data['themes'][0]['id'])  # should not throw
+    theme = Theme.objects.get(id=response.data["themes"][0]["id"])  # should not throw
     assert theme.questionnaire == questionnaire
 
     assert Question.objects.all().count() == 1
-    question = Question.objects.get(id=response.data['themes'][0]['questions'][0]['id'])  # should not throw
+    question = Question.objects.get(
+        id=response.data["themes"][0]["questions"][0]["id"]
+    )  # should not throw
     assert question.theme == theme
 
-@pytest.mark.skip(reason="TODO : tests ne passent pas depuis ce commit https://github.com/betagouv/e-controle/commit/70a3e92266e170e86becfc466bc814121290ee4d#diff-5b5e28cbcc14ded1039edbd5750378fae9751f28da74ca306ee63d6709176bb5L151")
+
+@pytest.mark.skip(
+    reason="TODO : tests ne passent pas depuis ce commit https://github.com/betagouv/e-controle/commit/70a3e92266e170e86becfc466bc814121290ee4d#diff-5b5e28cbcc14ded1039edbd5750378fae9751f28da74ca306ee63d6709176bb5L151"
+)
 def test_questionnaire_create_fails_without_control_id():
     control = factories.ControlFactory()
     user = utils.make_inspector_user(control)
     payload = make_create_payload(control.id)
 
     # No control field : malformed request
-    payload.pop('control')
+    payload.pop("control")
     response = create_questionnaire(user, payload)
     assert response.status_code == 400
 
     # "control" : "null" : malformed request
-    payload['control'] = None
+    payload["control"] = None
     response = create_questionnaire(user, payload)
     assert response.status_code == 400
     assert_no_data_is_saved()
 
     # "control" : "" : malformed request
-    payload['control'] = ""
+    payload["control"] = ""
     response = create_questionnaire(user, payload)
     assert response.status_code == 400
     assert_no_data_is_saved()
@@ -260,7 +278,7 @@ def test_questionnaire_create_fails_with_malformed_theme():
     user = utils.make_inspector_user(control)
     payload = make_create_payload(control.id)
 
-    payload['themes'][0].pop('title')
+    payload["themes"][0].pop("title")
     response = create_questionnaire(user, payload)
     assert response.status_code == 400
     assert_no_data_is_saved()
@@ -271,7 +289,7 @@ def test_questionnaire_create_fails_with_malformed_question():
     user = utils.make_inspector_user(control)
     payload = make_create_payload(control.id)
 
-    payload['themes'][0]['questions'][0].pop('description')
+    payload["themes"][0]["questions"][0].pop("description")
     response = create_questionnaire(user, payload)
     assert response.status_code == 400
     assert_no_data_is_saved()
@@ -280,33 +298,44 @@ def test_questionnaire_create_fails_with_malformed_question():
 # Create questionnaire draft through api, to set the editor properly.
 def create_questionnaire_through_api(user, control):
     payload = make_create_payload(control.id)
-    payload['is_draft'] = True
+    payload["is_draft"] = True
     response = create_questionnaire(user, payload)
     assert 200 <= response.status_code < 300
     return response.data
 
-@pytest.mark.skip(reason="TODO : tests ne passent pas depuis ce commit https://github.com/betagouv/e-controle/commit/70a3e92266e170e86becfc466bc814121290ee4d#diff-5b5e28cbcc14ded1039edbd5750378fae9751f28da74ca306ee63d6709176bb5L151")
+
+@pytest.mark.skip(
+    reason="TODO : tests ne passent pas depuis ce commit https://github.com/betagouv/e-controle/commit/70a3e92266e170e86becfc466bc814121290ee4d#diff-5b5e28cbcc14ded1039edbd5750378fae9751f28da74ca306ee63d6709176bb5L151"
+)
 def test_inspector_cannot_update_published_questionnaire():
     increment_ids()
     control = factories.ControlFactory()
     user = utils.make_inspector_user(control)
-    questionnaire = factories.QuestionnaireFactory(is_draft=False, control=control, editor=user)
+    questionnaire = factories.QuestionnaireFactory(
+        is_draft=False, control=control, editor=user
+    )
     payload = make_update_payload(questionnaire)
     # Here we are trying to update a questionnaire that's already published
     response = update_questionnaire(user, payload)
     assert 400 <= response.status_code < 500
 
-@pytest.mark.skip(reason="TODO : tests ne passent pas depuis ce commit https://github.com/betagouv/e-controle/commit/70a3e92266e170e86becfc466bc814121290ee4d#diff-5b5e28cbcc14ded1039edbd5750378fae9751f28da74ca306ee63d6709176bb5L151")
+
+@pytest.mark.skip(
+    reason="TODO : tests ne passent pas depuis ce commit https://github.com/betagouv/e-controle/commit/70a3e92266e170e86becfc466bc814121290ee4d#diff-5b5e28cbcc14ded1039edbd5750378fae9751f28da74ca306ee63d6709176bb5L151"
+)
 def test_audited_cannot_update_published_questionnaire():
     # In fact, draft or not, audited should not be able to update at all
     increment_ids()
     control = factories.ControlFactory()
     user = utils.make_audited_user(control)
-    questionnaire = factories.QuestionnaireFactory(is_draft=False, control=control, editor=user)
+    questionnaire = factories.QuestionnaireFactory(
+        is_draft=False, control=control, editor=user
+    )
     payload = make_update_payload(questionnaire)
     # Here we are trying to update a questionnaire that's already published
     response = update_questionnaire(user, payload)
     assert 400 <= response.status_code < 500
+
 
 def test_questionnaire_draft_update__editor_can_update():
     increment_ids()
@@ -315,19 +344,22 @@ def test_questionnaire_draft_update__editor_can_update():
     questionnaire = create_questionnaire_through_api(user, control)
 
     payload = questionnaire
-    payload['description'] = 'this is a great questionnaire.'
+    payload["description"] = "this is a great questionnaire."
 
     response = update_questionnaire(user, payload)
     assert response.status_code == 200
 
-@pytest.mark.skip(reason="TODO : tests ne passent pas depuis ce commit https://github.com/betagouv/e-controle/commit/70a3e92266e170e86becfc466bc814121290ee4d#diff-5b5e28cbcc14ded1039edbd5750378fae9751f28da74ca306ee63d6709176bb5L151")
+
+@pytest.mark.skip(
+    reason="TODO : tests ne passent pas depuis ce commit https://github.com/betagouv/e-controle/commit/70a3e92266e170e86becfc466bc814121290ee4d#diff-5b5e28cbcc14ded1039edbd5750378fae9751f28da74ca306ee63d6709176bb5L151"
+)
 def test_questionnaire_draft_update__non_editor_cannot_update():
     increment_ids()
     questionnaire = factories.QuestionnaireFactory()
     control = questionnaire.control
     non_editor = utils.make_inspector_user(control, assign_questionnaire_editor=False)
     payload = make_update_payload(questionnaire)
-    payload['description'] = 'this is a great questionnaire.'
+    payload["description"] = "this is a great questionnaire."
     response = update_questionnaire(non_editor, payload)
     assert 400 <= response.status_code < 500
 
@@ -338,11 +370,11 @@ def test_questionnaire_update__questionnaire_update():
     questionnaire = factories.QuestionnaireFactory()
     user = utils.make_inspector_user(questionnaire.control)
     payload = make_update_payload(questionnaire)
-    payload['description'] = 'this is a great questionnaire.'
-    payload['is_draft'] = False
+    payload["description"] = "this is a great questionnaire."
+    payload["is_draft"] = False
 
     assert Questionnaire.objects.all().count() == 1
-    assert payload['description'] != questionnaire.description
+    assert payload["description"] != questionnaire.description
 
     response = update_questionnaire(user, payload)
     assert response.status_code == 200
@@ -351,7 +383,7 @@ def test_questionnaire_update__questionnaire_update():
     assert Questionnaire.objects.all().count() == 1
     saved_qr = Questionnaire.objects.get(id=questionnaire.id)
     assert saved_qr.description != questionnaire.description
-    assert saved_qr.description == payload['description']
+    assert saved_qr.description == payload["description"]
     assert saved_qr.is_draft == False
 
 
@@ -361,11 +393,11 @@ def test_questionnaire_update__theme_update():
     questionnaire = theme.questionnaire
     user = utils.make_inspector_user(questionnaire.control)
     payload = make_update_payload(questionnaire)
-    payload['themes'][0]['title'] = 'this is a great theme.'
+    payload["themes"][0]["title"] = "this is a great theme."
 
     assert Questionnaire.objects.all().count() == 1
     assert Theme.objects.all().count() == 1
-    assert payload['themes'][0]['title'] != theme.title
+    assert payload["themes"][0]["title"] != theme.title
 
     response = update_questionnaire(user, payload)
     assert response.status_code == 200
@@ -378,11 +410,11 @@ def test_questionnaire_update__theme_update():
     assert Theme.objects.all().count() == 1
     saved_theme = Theme.objects.get(id=theme.id)
     assert saved_theme.title != theme.title
-    assert saved_theme.title == payload['themes'][0]['title']
+    assert saved_theme.title == payload["themes"][0]["title"]
 
     # Response data is filled in
-    assert len(response.data['themes']) == 1
-    assert response.data['themes'][0]['title'] == payload['themes'][0]['title']
+    assert len(response.data["themes"]) == 1
+    assert response.data["themes"][0]["title"] == payload["themes"][0]["title"]
 
 
 def run_test_questionnaire_update__theme_create(added_theme):
@@ -391,7 +423,7 @@ def run_test_questionnaire_update__theme_create(added_theme):
     questionnaire = theme.questionnaire
     user = utils.make_inspector_user(questionnaire.control)
     payload = make_update_payload(questionnaire)
-    payload['themes'].append(added_theme)
+    payload["themes"].append(added_theme)
 
     assert Questionnaire.objects.all().count() == 1
     assert Theme.objects.all().count() == 1
@@ -406,29 +438,29 @@ def run_test_questionnaire_update__theme_create(added_theme):
 
     assert Theme.objects.all().count() == 2
     new_theme = Theme.objects.last()
-    assert new_theme.title == payload['themes'][1]['title']
+    assert new_theme.title == payload["themes"][1]["title"]
     assert new_theme.questionnaire == saved_qr
 
     # Response data is filled in
-    assert len(response.data['themes']) == 2
-    assert response.data['themes'][1]['title'] == payload['themes'][1]['title']
+    assert len(response.data["themes"]) == 2
+    assert response.data["themes"][1]["title"] == payload["themes"][1]["title"]
 
 
 def test_questionnaire_update__theme_create():
-    added_theme = {'title': 'this is a great theme.' }
+    added_theme = {"title": "this is a great theme."}
     run_test_questionnaire_update__theme_create(added_theme)
 
 
 def test_questionnaire_update__theme_create_if_bad_id():
     added_theme = {
-        'id': 123,  # id is bad. It should be ignored, so that this theme is considered new.
-        'title': 'this is a great theme.'
+        "id": 123,  # id is bad. It should be ignored, so that this theme is considered new.
+        "title": "this is a great theme.",
     }
     run_test_questionnaire_update__theme_create(added_theme)
 
     # Id in payload was ignored and new id was assigned to the new theme
     new_theme = Theme.objects.last()
-    assert new_theme.id != added_theme['id']
+    assert new_theme.id != added_theme["id"]
 
 
 def test_questionnaire_update__question_update():
@@ -439,7 +471,7 @@ def test_questionnaire_update__question_update():
     user = utils.make_inspector_user(questionnaire.control)
     payload = make_update_payload(questionnaire)
 
-    payload['themes'][0]['questions'][0]['description'] = 'this is a great question.'
+    payload["themes"][0]["questions"][0]["description"] = "this is a great question."
 
     assert Questionnaire.objects.all().count() == 1
     assert Theme.objects.all().count() == 1
@@ -455,13 +487,18 @@ def test_questionnaire_update__question_update():
 
     saved_question = Question.objects.get(id=question.id)
     assert saved_question.description != question.description
-    assert saved_question.description == payload['themes'][0]['questions'][0]['description']
+    assert (
+        saved_question.description
+        == payload["themes"][0]["questions"][0]["description"]
+    )
 
     # Response data is filled
-    assert len(response.data['themes']) == 1
-    assert len(response.data['themes'][0]['questions']) == 1
-    assert \
-        response.data['themes'][0]['questions'][0]['description'] == payload['themes'][0]['questions'][0]['description']
+    assert len(response.data["themes"]) == 1
+    assert len(response.data["themes"][0]["questions"]) == 1
+    assert (
+        response.data["themes"][0]["questions"][0]["description"]
+        == payload["themes"][0]["questions"][0]["description"]
+    )
 
 
 def run_test_questionnaire_update__question_create(added_question):
@@ -472,7 +509,7 @@ def run_test_questionnaire_update__question_create(added_question):
     user = utils.make_inspector_user(questionnaire.control)
     payload = make_update_payload(questionnaire)
 
-    payload['themes'][0]['questions'].append(added_question)
+    payload["themes"][0]["questions"].append(added_question)
 
     assert Questionnaire.objects.all().count() == 1
     assert Theme.objects.all().count() == 1
@@ -487,19 +524,26 @@ def run_test_questionnaire_update__question_create(added_question):
 
     assert Question.objects.all().count() == 2
     new_question = Question.objects.last()
-    assert new_question.description == payload['themes'][0]['questions'][1]['description']
+    assert (
+        new_question.description == payload["themes"][0]["questions"][1]["description"]
+    )
 
     # Response data is filled in
-    assert len(response.data['themes'][0]['questions']) == 2
-    assert \
-        response.data['themes'][0]['questions'][1]['description'] == payload['themes'][0]['questions'][1]['description']
+    assert len(response.data["themes"][0]["questions"]) == 2
+    assert (
+        response.data["themes"][0]["questions"][1]["description"]
+        == payload["themes"][0]["questions"][1]["description"]
+    )
 
 
 def test_questionnaire_update__question_create():
-    added_question = {'description': 'this is a great question.'}
+    added_question = {"description": "this is a great question."}
     run_test_questionnaire_update__question_create(added_question)
 
-@pytest.mark.skip(reason="TODO : tests ne passent pas depuis ce commit https://github.com/betagouv/e-controle/commit/70a3e92266e170e86becfc466bc814121290ee4d#diff-5b5e28cbcc14ded1039edbd5750378fae9751f28da74ca306ee63d6709176bb5L151")
+
+@pytest.mark.skip(
+    reason="TODO : tests ne passent pas depuis ce commit https://github.com/betagouv/e-controle/commit/70a3e92266e170e86becfc466bc814121290ee4d#diff-5b5e28cbcc14ded1039edbd5750378fae9751f28da74ca306ee63d6709176bb5L151"
+)
 def test_questionnaire_delete():
     # delete is never allowed.
     increment_ids()
@@ -529,7 +573,7 @@ def test_questionnaire_update__question_delete():
     user = utils.make_inspector_user(questionnaire.control)
     payload = make_update_payload(questionnaire)
 
-    payload['themes'][0]['questions'] = []
+    payload["themes"][0]["questions"] = []
 
     assert Questionnaire.objects.all().count() == 1
     assert Theme.objects.all().count() == 1
@@ -545,7 +589,7 @@ def test_questionnaire_update__question_delete():
     assert Question.objects.all().count() == 0
 
     # Response data is filled in
-    assert len(response.data['themes'][0].get('questions', [])) == 0
+    assert len(response.data["themes"][0].get("questions", [])) == 0
 
 
 def test_questionnaire_update__theme_delete():
@@ -556,7 +600,7 @@ def test_questionnaire_update__theme_delete():
     user = utils.make_inspector_user(questionnaire.control)
     payload = make_update_payload(questionnaire)
 
-    payload['themes'] = []
+    payload["themes"] = []
 
     assert Questionnaire.objects.all().count() == 1
     assert Theme.objects.all().count() == 1
@@ -571,7 +615,7 @@ def test_questionnaire_update__theme_delete():
     assert Question.objects.all().count() == 0
 
     # Response data is filled in
-    assert len(response.data.get('themes', [])) == 0
+    assert len(response.data.get("themes", [])) == 0
 
 
 def run_test_questionnaire_update__question_recreated(modify_payload_func):
@@ -582,7 +626,7 @@ def run_test_questionnaire_update__question_recreated(modify_payload_func):
     user = utils.make_inspector_user(questionnaire.control)
     payload = make_update_payload(questionnaire)
 
-    original_id = payload['themes'][0]['questions'][0]['id']
+    original_id = payload["themes"][0]["questions"][0]["id"]
     modify_payload_func(payload)
 
     assert Questionnaire.objects.all().count() == 1
@@ -601,12 +645,12 @@ def run_test_questionnaire_update__question_recreated(modify_payload_func):
     assert Question.objects.all().last().id != original_id
 
     # Response data is filled in
-    assert len(response.data['themes'][0].get('questions', [])) == 1
+    assert len(response.data["themes"][0].get("questions", [])) == 1
 
 
 def test_questionnaire_update__question_recreated_if_no_id():
     def modify_payload(payload):
-        payload['themes'][0]['questions'][0].pop('id')
+        payload["themes"][0]["questions"][0].pop("id")
 
     run_test_questionnaire_update__question_recreated(modify_payload)
 
@@ -619,7 +663,7 @@ def run_test_questionnaire_update__theme_recreated(modify_payload_func):
     user = utils.make_inspector_user(questionnaire.control)
     payload = make_update_payload(questionnaire)
 
-    original_id = payload['themes'][0]['id']
+    original_id = payload["themes"][0]["id"]
     modify_payload_func(payload)
 
     assert Questionnaire.objects.all().count() == 1
@@ -638,13 +682,13 @@ def run_test_questionnaire_update__theme_recreated(modify_payload_func):
     assert Theme.objects.all().last().id != original_id
 
     # Response data is filled in
-    assert len(response.data.get('themes', [])) == 1
-    assert len(response.data['themes'][0].get('questions', [])) == 1
+    assert len(response.data.get("themes", [])) == 1
+    assert len(response.data["themes"][0].get("questions", [])) == 1
 
 
 def test_questionnaire_update__theme_recreated_if_no_id():
     def modify_payload(payload):
-        payload['themes'][0].pop('id')
+        payload["themes"][0].pop("id")
 
     run_test_questionnaire_update__theme_recreated(modify_payload)
 
@@ -653,9 +697,9 @@ def test_questionnaire_update__theme_recreated_if_bad_id():
     bad_id = 123456
 
     def modify_payload(payload):
-        good_id = payload['themes'][0]['id']
+        good_id = payload["themes"][0]["id"]
         assert good_id != bad_id
-        payload['themes'][0]['id'] = bad_id
+        payload["themes"][0]["id"] = bad_id
 
     run_test_questionnaire_update__theme_recreated(modify_payload)
 

@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('control', '0039_questionnaire_timestamp_set_null'),
+        ("control", "0039_questionnaire_timestamp_set_null"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='control',
-            name='deleted_at',
+            model_name="control",
+            name="deleted_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
     ]

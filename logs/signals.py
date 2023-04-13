@@ -11,10 +11,10 @@ def log_admin_action(sender, instance, **kwargs):
     Add a log entry after for admin actions
     """
     if instance.is_change():
-        verb = 'admin updated'
+        verb = "admin updated"
     if instance.is_deletion():
-        verb = 'admin deleted'
+        verb = "admin deleted"
     if instance.is_addition():
-        verb = 'admin added'
+        verb = "admin added"
     edited_object = instance.get_edited_object()
     add_log_entry(verb, instance.user, edited_object, instance.change_message)

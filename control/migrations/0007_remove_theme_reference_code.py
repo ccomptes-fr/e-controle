@@ -4,14 +4,13 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('control', '0006_change_meta_options'),
+        ("control", "0006_change_meta_options"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='theme',
-            name='reference_code',
+            model_name="theme",
+            name="reference_code",
         ),
     ]
