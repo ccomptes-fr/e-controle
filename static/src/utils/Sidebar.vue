@@ -14,6 +14,7 @@
                     theme="white-theme"
                     :collapsed="collapsed"
                     widthCollapsed="0px"
+                    @item-click="onItemClick"
       >
         <template v-slot:header>
           <div id="sidebar-title"
@@ -174,6 +175,9 @@ export default Vue.extend({
     }
   },
   methods: {
+    onItemClick(event, item){
+      window.scrollTo(0,0)
+    },
     displayError(err) {
       this.hasError = true
       this.errorMessage = err.message ? err.message : err

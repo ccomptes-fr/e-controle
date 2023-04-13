@@ -48,4 +48,4 @@ services:
       - rabbitmq
     environment:
       - PORT=8080
-    command: "./startLocal.sh"
+    command: bash -c "./startLocal.sh"
