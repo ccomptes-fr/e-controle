@@ -364,7 +364,6 @@ export default Vue.extend({
                   const formData = new FormData()
                   formData.append('file', response.data, qf.basename)
                   formData.append('question', qId)
-                  console.log('fileresponse', response.data)
                   axios.post(backendUrls.annexe(), formData, {
                     headers: {
                       'Content-Type': 'multipart/form-data',
@@ -388,7 +387,6 @@ export default Vue.extend({
     checkAllQuestionnaires() {
       this.checkedQuestionnaires = []
       this.allChecked = !this.allChecked
-
       if (this.allChecked) {
         this.accessibleQuestionnaires.map(q => {
           this.checkedQuestionnaires.push(q.id)
@@ -420,6 +418,7 @@ export default Vue.extend({
                         themeId: t.order,
                         questionId: q.order,
                         basename: rf.basename,
+                        is_deleted: rf.is_deleted,
                         url: rf.url,
                       }
                     }
@@ -430,11 +429,11 @@ export default Vue.extend({
           }
         })
 
+      const Files = responseFiles.filter( resp => resp.is_deleted === false)
       const zipFilename = this.control.reference_code + '.zip'
       const zip = new JSZip()
       let cnt = 0
-
-      responseFiles.map(rf => {
+      Files.map(rf => {
         const url = window.location.origin + rf.url
 
         JSZipUtils.getBinaryContent(url, (err, data) => {
@@ -447,7 +446,7 @@ export default Vue.extend({
             .file(formatted.filename, data, { binary: true })
 
           cnt++
-          if (cnt === responseFiles.length) {
+          if (cnt === Files.length) {
             zip.generateAsync({ type: 'blob' }).then((content) => {
               saveAs(content, zipFilename)
             })
@@ -485,7 +484,6 @@ export default Vue.extend({
       }
       axios.put(backendUrls.control(this.control.id), payload)
         .then(response => {
-          console.debug(response)
           this.title = response.data.title
           this.organization = response.data.depositing_organization
 
@@ -495,7 +493,6 @@ export default Vue.extend({
           window.location.reload()
         })
         .catch((error) => {
-          console.error(error)
           this.errors = error.response.data
           this.hasErrors = true
         })

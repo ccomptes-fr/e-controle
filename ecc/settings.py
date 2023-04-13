@@ -1,5 +1,6 @@
 import os
 import environ
+import sys
 
 env = environ.Env(
     DEBUG=(bool, False),
@@ -373,4 +374,18 @@ if not DEBUG and FILENANE:
                 "propagate": True
             },
         },
+    }
+else:
+    LOGGING = {
+        'version': 1,
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+                'stream': sys.stdout,
+            }
+        },
+        'root': {
+            'handlers': ['console'],
+            'level': 'INFO'
+        }
     }
