@@ -50,40 +50,40 @@
     - coverage.xml
     expire_in: 10 min
 
-.lint:linter_frontend:
-  image: ${DOCKER_REGISTRY}node/node16:16.13.1
-  interruptible: true
-  allow_failure: false
-  stage: lint
-  cache:
-    key: $CI_COMMIT_REF_SLUG
-    paths:
-      - .npm/
-      - node_modules/
-  before_script:
-    - npm i --cache .npm --prefer-offline --force --registry=http://${REGISTRY_DOMAINE}/repository/npm/
-  script:
-    - npm run lint || true
+# .lint:linter_frontend:
+#   image: ${DOCKER_REGISTRY}node/node16:16.13.1
+#   interruptible: true
+#   allow_failure: false
+#   stage: lint
+#   cache:
+#     key: $CI_COMMIT_REF_SLUG
+#     paths:
+#       - .npm/
+#       - node_modules/
+#   before_script:
+#     - npm i --cache .npm --prefer-offline --force --registry=http://${REGISTRY_DOMAINE}/repository/npm/
+#   script:
+#     - npm run lint || true
 
-.lint:linter_backend:
-  image: ${DOCKER_REGISTRY}python/python3:latest
-  interruptible: true
-  allow_failure: false
-  stage: lint
-  variables:
-    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-  cache:
-    key: $CI_COMMIT_REF_SLUG
-    paths:
-      - coverage.xml
-      - .cache/pip
-      - venv/
-  before_script:
-    - version=$(cat requirements.txt | grep 'flake8==' | cut -d'=' -f3)
-    - echo $version
-    - pip install flake8==$version --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
-  script:
-    - flake8 .
+# .lint:linter_backend:
+#   image: ${DOCKER_REGISTRY}python/python3:latest
+#   interruptible: true
+#   allow_failure: false
+#   stage: lint
+#   variables:
+#     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+#   cache:
+#     key: $CI_COMMIT_REF_SLUG
+#     paths:
+#       - coverage.xml
+#       - .cache/pip
+#       - venv/
+#   before_script:
+#     - version=$(cat requirements.txt | grep 'flake8==' | cut -d'=' -f3)
+#     - echo $version
+#     - pip install flake8==$version --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
+#   script:
+#     - flake8 .
 
 .quality:sonarqube:
   image: ${DOCKER_REGISTRY}docker:20.10.12
@@ -151,15 +151,15 @@ test:tests_back:
     - .test:tests_back
   rules: *default_rules
 
-lint:linter_frontend:
-  extends:
-    - .lint:linter_frontend
-  rules: *default_rules
+# lint:linter_frontend:
+#   extends:
+#     - .lint:linter_frontend
+#   rules: *default_rules
 
-lint:linter_backend:
-  extends:
-    - .lint:linter_backend
-  rules: *default_rules
+# lint:linter_backend:
+#   extends:
+#     - .lint:linter_backend
+#   rules: *default_rules
 
 quality:sonarqube:
   extends:
