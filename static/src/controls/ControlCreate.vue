@@ -90,7 +90,7 @@
                 pattern="^[\.\s\wÀ-ÖØ-öø-ÿŒœ-]+$"
                 maxlength="25"
                 title="Ce champ ne doit pas contenir de caractères spéciaux
-                         ( ! , @ # $ / \ ' &quot; + etc)"
+                         (. ! , @ # $ / \ ' &quot; + etc)"
                 aria-describedby="reference-code-help"
                 aria-labelledby="reference-code-label"
               />
@@ -179,7 +179,7 @@ export default Vue.extend({
           return (
             'Le nom abrégé "' +
             requestedCode +
-            '" ne doit pas contenir de caractères spéciaux (! , @ # $ / \\ " \' + etc).' +
+            '" ne doit pas contenir de caractères spéciaux (. ! , @ # $ / \\ " \' + etc)' +
             " Veuillez en choisir un autre."
           );
         }
@@ -196,7 +196,7 @@ export default Vue.extend({
       }
 
       return "L'espace de dépôt n'a pas pu être créé.";
-    },
+    }
   },
 });
 </script>
