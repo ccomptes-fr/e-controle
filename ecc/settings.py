@@ -28,6 +28,14 @@ DEBUG_TOOLBAR_CONFIG = {
     "SHOW_COLLAPSED": True,
 }
 
+# https://docs.djangoproject.com/fr/3.2/topics/cache/#database-caching
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "webdav_cache",
+    }
+}
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -348,6 +356,8 @@ LDAP_DC = env("LDAP_DC", default=None)
 TITLE_TO_COME_IN = env("TITLE_TO_COME_IN", default="").split(",")
 MAGICAUTH_EMAIL_UNKNOWN_CALLBACK = "adauth.auth.active_directory_auth"
 WEBDAV_URL = env("WEBDAV_URL", default="https://e-controle-webdav.ccomptes.fr")
+# timeout in seconds, cache the can_user_access_realm corresponding to the samaccount
+WEBDAV_CACHE_TIMEOUT = env("WEBDAV_CACHE_TIMEOUT", default=30 * 60)
 
 DEMO_INSPECTOR_USERNAME = env("DEMO_INSPECTOR_USERNAME", default=None)
 DEMO_AUDITED_USERNAME = env("DEMO_AUDITED_USERNAME", default=None)
@@ -356,14 +366,14 @@ ALLOW_DEMO_LOGIN = env("ALLOW_DEMO_LOGIN", default=False)
 SESSION_EXPIRE_SECONDS = env("SESSION_EXPIRE_SECONDS", default=24 * 60 * 60)
 SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
 
-# Logging config for production, APP_NAME come from gunicorn config
+# Logging config for production
 # we must check filename not none to run 2 separates logs files
 # 1 file for econtrole and 1 file for econtrole-webdav
 # https://mattsegal.dev/django-gunicorn-nginx-logging.html
 # https://mattsegal.dev/file-logging-django.html
-FILENANE = env("APP_NAME", default=None)
-
-if not DEBUG and FILENANE:
+#  APP_NAME come from gunicorn config
+FILENAME = env("APP_NAME", default=None)
+if not DEBUG and FILENAME:
     LOGGING = {
         "version": 1,
         "disable_existing_loggers": False,
@@ -377,7 +387,7 @@ if not DEBUG and FILENANE:
             "file": {
                 "level": "ERROR",
                 "class": "logging.FileHandler",
-                "filename": f"/var/log/{FILENANE}.log",
+                "filename": f"/var/log/{FILENAME}.log",
                 "formatter": "verbose",
             },
         },
