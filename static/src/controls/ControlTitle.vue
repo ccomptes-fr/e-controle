@@ -19,7 +19,7 @@
             </span>
             <input type="text" class="form-control" v-model="reference_code" required aria-labelledby="reference-label"
               maxlength="25" title="Ce champ ne doit pas contenir de caractères spéciaux
-                           ( ! , @ # $ / \ ' &quot; + etc)" @focus="referenceChanged">
+                           (. ! , @ # $ / \ ' &quot; + etc)" @focus="referenceChanged">
           </div>
           <span class="text-danger" v-if="reference_code.length > 24">
             Ce champ ne peut contenir plus de 25 caractères.
