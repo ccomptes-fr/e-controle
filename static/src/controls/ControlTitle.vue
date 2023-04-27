@@ -1,12 +1,7 @@
 <template>
   <div class="card">
-    <confirm-modal
-      ref="modal"
-      cancel-button="Annuler"
-      confirm-button-prevent="Dupliquer l'espace de dépôt"
-      title="Dupliquer un espace de dépôt"
-      @confirm="cloneControl"
-    >
+    <confirm-modal ref="modal" cancel-button="Annuler" confirm-button-prevent="Dupliquer l'espace de dépôt"
+      title="Dupliquer un espace de dépôt" @confirm="cloneControl">
       <info-bar>
         Veuillez sélectionner les questionnaires que vous souhaitez dupliquer.
       </info-bar>
@@ -20,16 +15,11 @@
           </label>
           <div class="flex-row align-items-center">
             <span class="input-group-prepend" id="prepend">
-              <span class="input-group-text">{{new Date().getFullYear()}}_</span>
+              <span class="input-group-text">{{ new Date().getFullYear() }}_</span>
             </span>
-            <input type="text"
-                   class="form-control"
-                   v-model="reference_code"
-                   required aria-labelledby="reference-label"
-                   maxlength="25"
-                   title="Ce champ ne doit pas contenir de caractères spéciaux
-                         ( ! , @ # $ / \ ' &quot; + etc)"
-                   @focus="referenceChanged">
+            <input type="text" class="form-control" v-model="reference_code" required aria-labelledby="reference-label"
+              maxlength="25" title="Ce champ ne doit pas contenir de caractères spéciaux
+                           ( ! , @ # $ / \ ' &quot; + etc)" @focus="referenceChanged">
           </div>
           <span class="text-danger" v-if="reference_code.length > 24">
             Ce champ ne peut contenir plus de 25 caractères.
@@ -40,22 +30,15 @@
             <input type="checkbox" class="custom-control-input" @click="checkAllQuestionnaires" v-model="allChecked">
             <span class="custom-control-label font-weight-bold">Sélectionner Tout
           </label>
-          <label v-for="q in accessibleQuestionnaires"
-                :key="q.id"
-                class="custom-control custom-checkbox">
+          <label v-for="q in accessibleQuestionnaires" :key="q.id" class="custom-control custom-checkbox">
             <input type="checkbox" class="custom-control-input" :value="q.id" v-model="checkedQuestionnaires">
             <span class="custom-control-label">Questionnaire {{ q.numbering }} - {{ q.title }}</span>
           </label>
         </div>
       </form>
     </confirm-modal>
-    <confirm-modal
-      ref="modalexp"
-      cancel-button="Annuler"
-      confirm-button-prevent="Exporter l'espace de dépôt"
-      title="Exporter un espace de dépôt"
-      @confirm="exportControl"
-    >
+    <confirm-modal ref="modalexp" cancel-button="Annuler" confirm-button-prevent="Exporter l'espace de dépôt"
+      title="Exporter un espace de dépôt" @confirm="exportControl">
       <info-bar>
         Veuillez sélectionner les questionnaires dont vous souhaitez exporter les fichiers-réponses.
       </info-bar>
@@ -65,9 +48,7 @@
             <input type="checkbox" class="custom-control-input" @click="checkAllQuestionnaires" v-model="allChecked">
             <span class="custom-control-label font-weight-bold">Sélectionner Tout
           </label>
-          <label v-for="q in accessibleQuestionnaires"
-                :key="q.id"
-                class="custom-control custom-checkbox">
+          <label v-for="q in accessibleQuestionnaires" :key="q.id" class="custom-control custom-checkbox">
             <input type="checkbox" class="custom-control-input" :value="q.id" v-model="checkedQuestionnaires">
             <span class="custom-control-label">Questionnaire {{ q.numbering }} - {{ q.title }}</span>
           </label>
@@ -78,7 +59,7 @@
     <template v-if="editMode">
       <div class="card-body">
         <error-bar v-if="hasErrors" :noclose="true">
-            L'espace de dépôt n'a pas pu être modifié. Erreur : {{JSON.stringify(errors)}}
+          L'espace de dépôt n'a pas pu être modifié. Erreur : {{ JSON.stringify(errors) }}
         </error-bar>
 
         <form @submit.prevent="updateControl">
@@ -91,7 +72,8 @@
               </label>
               <div class="flex-row align-items-center">
                 <i class="fa fa-building mr-2 text-muted"></i>
-                <input type="text" class="form-control" v-model="organization" required aria-labelledby="organization-label" maxlength="255">
+                <input type="text" class="form-control" v-model="organization" required
+                  aria-labelledby="organization-label" maxlength="255">
               </div>
             </div>
             <div class="form-group">
@@ -101,19 +83,16 @@
               </label>
               <div class="flex-row align-items-center">
                 <i class="fa fa-award mr-2 text-muted"></i>
-                <input type="text" class="form-control" v-model="title" required aria-labelledby="title-label" maxlength="255">
+                <input type="text" class="form-control" v-model="title" required aria-labelledby="title-label"
+                  maxlength="255">
               </div>
             </div>
           </fieldset>
           <div class="text-right">
-            <button @click="cancel"
-                    type="button"
-                    class="btn btn-secondary">
+            <button @click="cancel" type="button" class="btn btn-secondary">
               Annuler
             </button>
-            <button id="control-title-submit-button"
-                    type="submit"
-                    class="btn btn-primary">
+            <button id="control-title-submit-button" type="submit" class="btn btn-primary">
               Modifier l'espace de dépôt
             </button>
           </div>
@@ -148,51 +127,34 @@
         <div v-if="sessionUser.is_inspector" class="col-4 flex-column ie-flex-column-fix align-items-end ml-6">
           <div class="mb-6 flex-column ie-flex-column-fix align-items-end">
             <div class="text-muted card-title mb-1 break-word text-right">
-              <strong>../{{control.reference_code}}</strong>
+              <strong>../{{ control.reference_code }}</strong>
             </div>
-            <a class="btn btn-secondary parent-fake-icon"
-               @click="showWebdavTip">
+            <a class="btn btn-secondary parent-fake-icon" @click="showWebdavTip">
               <i class="fe fe-folder mr-3"></i>
-              <img :src="'/static/img/file-explorer.png'"
-                   alt="Explorateur Windows"
-                   class="fake-icon" />
+              <img :src="'/static/img/file-explorer.png'" alt="Explorateur Windows" class="fake-icon" />
               Comment voir les réponses ?
             </a>
           </div>
 
           <div class="btn-group">
-            <button type="button"
-                    class="btn btn-secondary"
-                    @click="enterEditMode">
+            <button type="button" class="btn btn-secondary" @click="enterEditMode">
               <i class="fe fe-edit mr-2"></i>
               Modifier
             </button>
-            <button type="button"
-                    class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
-                    data-toggle="dropdown"
-                    aria-haspopup="true"
-                    aria-expanded="false">
+            <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"
+              aria-haspopup="true" aria-expanded="false">
               <span class="sr-only">Menu d'actions</span>
             </button>
             <div class="dropdown-menu dropdown-menu-right">
-              <button class="dropdown-item"
-                      type="button"
-                      @click="showCloneModal"
-              >
+              <button class="dropdown-item" type="button" @click="showCloneModal">
                 <i class="fas fa-file-export mr-2"></i>
                 Dupliquer
               </button>
-               <button class="dropdown-item"
-                      type="button"
-                      @click="showExportModal"
-              >
+              <button class="dropdown-item" type="button" @click="showExportModal">
                 <i class="fas fa-file-export mr-2"></i>
                 Exporter (.zip)
               </button>
-              <button class="dropdown-item text-danger"
-                      type="button"
-                      @click="startControlDeleteFlow"
-              >
+              <button class="dropdown-item text-danger" type="button" @click="startControlDeleteFlow">
                 <i class="fe fe-trash-2 mr-2"></i>
                 Supprimer cet espace...
               </button>
@@ -205,9 +167,7 @@
     </template>
 
     <control-delete-flow ref="controlDeleteFlow" :control="control"></control-delete-flow>
-    <webdav-tip :control-id="control.id"
-                :ref="'webdavTip' + control.id"
-                :reference-code="control.reference_code">
+    <webdav-tip :control-id="control.id" :ref="'webdavTip' + control.id" :reference-code="control.reference_code">
     </webdav-tip>
 
   </div>
@@ -237,7 +197,7 @@ export default Vue.extend({
   props: {
     control: Object,
   },
-  data: function() {
+  data: function () {
     return {
       editMode: false,
       title: '',
@@ -294,7 +254,7 @@ export default Vue.extend({
       const newRefCode = new Date().getFullYear() + '_' + this.reference_code
 
       const valid = this.reference_code &&
-                    !this.controls.find(ctrl => ctrl.reference_code === newRefCode)
+        !this.controls.find(ctrl => ctrl.reference_code === newRefCode)
 
       if (!valid) {
         this.referenceError = true
@@ -333,7 +293,7 @@ export default Vue.extend({
                 return { title: t.title, questions: qq }
               })
 
-              const newQ = { ...q, control: controlId, is_draft: true, id: null, themes: [] }
+              const newQ = { ...q, control: controlId, is_draft: true, is_finalized: false, is_replied: false, is_not_closed: false, id: null, themes: [] }
               return this.cloneQuestionnaire(newQ, themes, q.themes)
             })
 
@@ -476,7 +436,7 @@ export default Vue.extend({
       this.restoreForm()
       this.quitEditMode()
     },
-    updateControl: function() {
+    updateControl: function () {
       this.clearErrors()
       const payload = {
         title: this.title,
@@ -509,7 +469,7 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-  .break-word {
-    word-break: break-all;
-  }
+.break-word {
+  word-break: break-all;
+}
 </style>

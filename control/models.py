@@ -89,7 +89,7 @@ class Control(SoftDeleteModel):
         help_text="Ce code est utilisé notamment pour le dossier de stockage des réponses",
         validators=[
             RegexValidator(
-                regex="^[\.\s\w-]+$",
+                regex='^[\s\w-]+[^\.]$',
                 message=INVALID_ERROR_MESSAGE,
             ),
         ],
@@ -189,10 +189,14 @@ class Questionnaire(OrderedModel, WithNumberingMixin, DocxMixin):
         help_text="Ce questionnaire est-il encore au stade de brouillon?",
     )
     is_replied = models.BooleanField(
-        verbose_name="répondu",
-        default=False,
-        help_text="Ce questionnaire a-t-il obtenu toutes les réponses de l'organisme contrôlé ?",
-    )
+        verbose_name="répondu", default=False,
+        help_text="Ce questionnaire a-t-il obtenu toutes les réponses de l'organisme contrôlé ?")
+    is_closed = models.BooleanField(
+        verbose_name="terminé",default=False,
+        help_text="Ce questionnaire a-t-il été accepté par le contrôleur ?")
+    is_not_closed = models.BooleanField(
+        verbose_name="non terminé", default=False,
+        help_text="Ce questionnaire a-t-il été non accepté par le contrôleur ?")
     is_finalized = models.BooleanField(
         verbose_name="finalisé",
         default=False,

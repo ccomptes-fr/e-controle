@@ -1,25 +1,31 @@
 <template>
   <div class="card">
-    <confirm-modal
-      ref="modal"
-      cancel-button="Annuler"
-      confirm-button="Dupliquer le questionnaire"
-      title="Dupliquer un questionnaire"
-      @confirm="cloneQuestionnaire"
-    >
+    <confirm-modal ref="modal" cancel-button="Annuler" confirm-button="Dupliquer le questionnaire"
+      title="Dupliquer un questionnaire" @confirm="cloneQuestionnaire">
       <info-bar>
         Veuillez sélectionner les espaces de dépôt vers lesquels vous souhaitez dupliquer ce questionnaire.
       </info-bar>
       <form>
         <div class="form-group mb-6">
-          <label v-for="ctrl in accessibleControls"
-                :key="ctrl.id"
-                class="custom-control custom-checkbox">
+          <label v-for="ctrl in accessibleControls" :key="ctrl.id" class="custom-control custom-checkbox">
             <input type="checkbox" class="custom-control-input" :value="ctrl.id" v-model="checkedCtrls">
-            <span class="custom-control-label">{{ ctrl.depositing_organization }} - {{ ctrl.title }} ({{ ctrl.reference_code }})</span>
+            <span class="custom-control-label">{{ ctrl.depositing_organization }} - {{ ctrl.title }} ({{
+              ctrl.reference_code }})</span>
           </label>
         </div>
       </form>
+    </confirm-modal>
+    <confirm-modal ref="NotClosedModal" cancel-button="Annuler" confirm-button="Créer un mail pour l'informer"
+      title="Informer l'organisme contrôlé" @confirm="sendMail()">
+      <div class="modal-header border-bottom-0 flex-column align-items-center">
+        <p>
+          <i class="fa fa-exclamation-triangle text-warning big-icon"></i>
+        </p>
+        <div class="mt-5">
+          <p>Attention, les réponses ne sont pas complètes!</p>
+          <p>Pensez à informer l'organisme contrôlé.</p>
+        </div>
+      </div>
     </confirm-modal>
     <div class="card-status card-status-top bg-blue"></div>
     <div class="card-header">
@@ -30,23 +36,18 @@
     </div>
 
     <div>
-      <div
-        v-if="accessibleQuestionnaires.length === 0"
-        class="alert alert-icon alert-secondary m-2"
-      >
+      <div v-if="accessibleQuestionnaires.length === 0" class="alert alert-icon alert-secondary m-2">
         <i class="fe fe-info mr-2" aria-hidden="true"></i>
         Il n'y a pas encore de questionnaire pour cet espace de dépôt.
       </div>
       <table v-else class="table card-table table-vcenter">
         <thead>
           <tr>
-            <th v-if="user.is_inspector">
+            <th>
               Statut
-              <help-tooltip
-                text="Un questionnaire est d'abord en Brouillon : il est modifiable et
-                                  l'organisme interrogé ne le voit pas. Puis il est Publié : il
-                                  n'est plus modifiable et l'organisme interrogé le voit."
-              >
+              <help-tooltip text="Un questionnaire est d'abord en Brouillon : il est modifiable et
+                                      l'organisme interrogé ne le voit pas. Puis il est Publié : il
+                                      n'est plus modifiable et l'organisme interrogé le voit.">
               </help-tooltip>
             </th>
             <th>Titre</th>
@@ -56,19 +57,21 @@
           </tr>
         </thead>
         <tbody>
-          <tr
-            v-for="questionnaire in accessibleQuestionnaires"
-            :key="'questionnaire-' + questionnaire.id"
-          >
-            <td class="tag-column" v-if="user.is_inspector">
+          <tr v-for="questionnaire in accessibleQuestionnaires" :key="'questionnaire-' + questionnaire.id">
+            <td class="tag-column">
               <div v-if="questionnaire.is_draft">
                 <div class="tag tag-azure round-tag font-italic">Brouillon</div>
               </div>
               <div v-else-if="questionnaire_has_replies(questionnaire.id) && !questionnaire_is_replied(questionnaire.id)">
                 <div class="tag tag-yellow round-tag font-italic">En cours</div>
               </div>
-              <div v-else-if="questionnaire_is_replied(questionnaire.id) && !questionnaire_is_finalized(questionnaire.id)">
+              <div
+                v-else-if="questionnaire_is_replied(questionnaire.id) && !questionnaire_is_finalized(questionnaire.id) && !questionnaire_is_not_closed(questionnaire.id)">
                 <div class="tag tag-orange round-tag font-italic">Répondu</div>
+              </div>
+              <div
+                v-else-if="questionnaire_is_not_closed(questionnaire.id) && !questionnaire_is_finalized(questionnaire.id)">
+                <div class="tag tag-red round-tag font-italic">Non Terminé</div>
               </div>
               <div v-else-if="questionnaire_is_finalized(questionnaire.id)">
                 <div class="tag tag-purple round-tag font-italic">Finalisé</div>
@@ -90,14 +93,10 @@
             </td>
             <td v-if="user.is_inspector" class="editor-column">
               <div v-if="questionnaire.is_draft && questionnaire.editor">
-                <help-tooltip
-                  v-if="questionnaire.editor.id !== user.id"
-                  text="Cette personne dispose des droits pour modifier ce
-                                    questionnaire. Vous pourrez modifier ce questionnaire en
-                                    cliquant sur 'Consulter', puis 'Obtenir les droits de
-                                    rédaction'."
-                  icon-class="fe fe-lock"
-                >
+                <help-tooltip v-if="questionnaire.editor.id !== user.id" text="Cette personne dispose des droits pour modifier ce
+                                        questionnaire. Vous pourrez modifier ce questionnaire en
+                                        cliquant sur 'Consulter', puis 'Obtenir les droits de
+                                        rédaction'." icon-class="fe fe-lock">
                 </help-tooltip>
                 <small>
                   {{ questionnaire.editor.first_name }}
@@ -112,28 +111,19 @@
             <td class="w-1 action-column">
               <template v-if="!user.is_inspector">
                 <div v-if="questionnaire_has_replies(questionnaire.id)" class="text-right">
-                   <div class="btn-group">
-                      <a class="btn btn-secondary"
-                        :href="questionnaireDetailUrl(questionnaire.id)"
-                        title="Déposer et consulter vos réponses">
-                        <i class="fe fe-eye"></i>
-                        Répondre
-                      </a>
-                       <button
-                      type="button"
-                      class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
-                      data-toggle="dropdown"
-                      aria-haspopup="true"
-                      aria-expanded="false"
-                    >
+                  <div class="btn-group">
+                    <a class="btn btn-secondary" :href="questionnaireDetailUrl(questionnaire.id)"
+                      title="Déposer et consulter vos réponses">
+                      <i class="fe fe-eye"></i>
+                      Répondre
+                    </a>
+                    <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
+                      data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                       <span class="sr-only">Menu d'actions</span>
                     </button>
                     <div class="dropdown-menu dropdown-menu-right">
-                      <button
-                        class="dropdown-item text-success"
-                        type="button"
-                        @click="markQuestionnaireAsReplied(questionnaire.id)"
-                      >
+                      <button class="dropdown-item text-success" type="button"
+                        @click="markQuestionnaireAsReplied(questionnaire.id)">
                         <i class="fe fe-check"></i>
                         Marquer comme répondu
                       </button>
@@ -141,61 +131,44 @@
                   </div>
                 </div>
                 <div v-else class="text-right">
-                  <a
-                    :href="questionnaireDetailUrl(questionnaire.id)"
-                    class="btn btn-primary ml-2"
-                    title="Déposer et consulter vos réponses"
-                  >
+                  <a :href="questionnaireDetailUrl(questionnaire.id)" class="btn btn-primary ml-2"
+                    title="Déposer et consulter vos réponses">
                     <i class="fe fe-eye"></i>
                     Répondre
                   </a>
                 </div>
               </template>
               <template v-else>
-                <template
-                  v-if="
-                    questionnaire.is_draft &&
-                    !!questionnaire.editor &&
-                    questionnaire.editor.id === user.id
-                  "
-                >
+                <template v-if="
+                  questionnaire.is_draft &&
+                  !!questionnaire.editor &&
+                  questionnaire.editor.id === user.id
+                ">
                   <div class="text-right">
                     <div class="btn-group">
-                      <a class="btn btn-secondary"
-                        :href="questionnaireEditUrl(questionnaire.id)"
+                      <a class="btn btn-secondary" :href="questionnaireEditUrl(questionnaire.id)"
                         title="Modifier le brouillon de questionnaire">
                         <i class="fe fe-edit"></i>
                         Modifier
                       </a>
-                       <button
-                      type="button"
-                      class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
-                      data-toggle="dropdown"
-                      aria-haspopup="true"
-                      aria-expanded="false"
-                    >
-                      <span class="sr-only">Menu d'actions</span>
-                    </button>
-                    <div class="dropdown-menu dropdown-menu-right">
-                      <button
-                        class="dropdown-item text-danger"
-                        type="button"
-                        @click="startQuestionnaireDeleteFlow(questionnaire.id)"
-                      >
-                        <i class="fe fe-trash-2"></i>
-                        Supprimer
+                      <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="sr-only">Menu d'actions</span>
                       </button>
+                      <div class="dropdown-menu dropdown-menu-right">
+                        <button class="dropdown-item text-danger" type="button"
+                          @click="startQuestionnaireDeleteFlow(questionnaire.id)">
+                          <i class="fe fe-trash-2"></i>
+                          Supprimer
+                        </button>
+                      </div>
                     </div>
-                  </div>
                 </template>
                 <template v-else-if="questionnaire.is_draft &&
-                                    questionnaire.editor.id !== user.id"
-                >
+                  questionnaire.editor.id !== user.id">
                   <div class="text-right">
-                    <a :href="questionnaireDetailUrl(questionnaire.id)"
-                      class="btn btn-primary ml-2"
-                      title="Voir le brouillon de questionnaire"
-                    >
+                    <a :href="questionnaireDetailUrl(questionnaire.id)" class="btn btn-primary ml-2"
+                      title="Voir le brouillon de questionnaire">
                       <i class="fe fe-eye"></i>
                       Consulter
                     </a>
@@ -204,43 +177,33 @@
                 <template v-else>
                   <div class="text-right">
                     <div class="btn-group">
-                    <a
-                      :href="questionnaireDetailUrl(questionnaire.id)"
-                      title="Voir le questionnaire publié"
-                      class="btn btn-secondary"
-                    >
-                      <i class="fe fe-eye"></i>
-                      Consulter
-                    </a>
-                    <button
-                      type="button"
-                      class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
-                      data-toggle="dropdown"
-                      aria-haspopup="true"
-                      aria-expanded="false"
-                    >
-                      <span class="sr-only">Menu d'actions</span>
-                    </button>
-                    <div class="dropdown-menu dropdown-menu-right">
-                      <button
-                        class="dropdown-item"
-                        type="button"
-                        @click="showModal(questionnaire.id)"
-                      >
-                        <i class="fe fe-copy"></i>
-                        Dupliquer
+                      <a :href="questionnaireDetailUrl(questionnaire.id)" title="Voir le questionnaire publié"
+                        class="btn btn-secondary">
+                        <i class="fe fe-eye"></i>
+                        Consulter
+                      </a>
+                      <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="sr-only">Menu d'actions</span>
                       </button>
-                      <button
-                        v-if="questionnaire_is_replied(questionnaire.id)"
-                        class="dropdown-item text-success"
-                        type="button"
-                        @click="markQuestionnaireAsFinalized(questionnaire.id)"
-                      >
-                        <i class="fe fe-check"></i>
-                        Marquer comme finalisé
-                      </button>
+                      <div class="dropdown-menu dropdown-menu-right">
+                        <button class="dropdown-item" type="button" @click="showModal(questionnaire.id)">
+                          <i class="fe fe-copy"></i>
+                          Dupliquer
+                        </button>
+                        <button v-if="questionnaire_is_replied(questionnaire.id)" class="dropdown-item text-success"
+                          type="button" @click="markQuestionnaireAsFinalized(questionnaire.id)">
+                          <i class="fe fe-check"></i>
+                          Marquer comme finalisé
+                        </button>
+                        <button v-if="questionnaire_is_replied(questionnaire.id)" class="dropdown-item text-danger"
+                          type="button"
+                          @click="markQuestionnaireAsNotClosed(questionnaire.id), showNotClosedModal(questionnaire)">
+                          <i class="fe fe-check"></i>
+                          Marquer comme non terminé
+                        </button>
+                      </div>
                     </div>
-                  </div>
                 </template>
               </template>
             </td>
@@ -249,10 +212,7 @@
       </table>
     </div>
 
-    <div
-      v-if="user.is_inspector"
-      class="card-footer flex-row justify-content-end"
-    >
+    <div v-if="user.is_inspector" class="card-footer flex-row justify-content-end">
       <a :href="questionnaireCreateUrl" class="btn btn-primary">
         <i class="fe fe-plus"></i>
         Ajouter un questionnaire
@@ -281,12 +241,13 @@ export default Vue.extend({
   components: {
     HelpTooltip,
     InfoBar,
-    ConfirmModal,
+    ConfirmModal
   },
-  data: function() {
+  data: function () {
     return {
       questionnaireId: null,
       checkedCtrls: [],
+      users: []
     }
   },
   computed: {
@@ -309,6 +270,25 @@ export default Vue.extend({
     },
   },
   methods: {
+    getUsers() {
+      axios.get(backendUrls.getUsersInControl(this.control.id))
+        .then((response) => {
+          this.users = response.data
+        })
+    },
+    auditedUsers() {
+      return this.users.filter(item => {
+        return item.profile_type === 'audited'
+      })
+    },
+    getAuditedEmails() {
+      const auditees = this.auditedUsers()
+      const emails = []
+      auditees.map(item => {
+        emails.push(item.email)
+      })
+      return emails
+    },
     questionnaireDetailUrl(questionnaireId) {
       return backendUrls['questionnaire-detail'](questionnaireId)
     },
@@ -335,6 +315,10 @@ export default Vue.extend({
       const q = this.control.questionnaires.find(q => q.id === qId)
       return q.is_replied
     },
+    questionnaire_is_not_closed(qId) {
+      const q = this.control.questionnaires.find(q => q.id === qId)
+      return q.is_not_closed
+    },
     questionnaire_is_finalized(qId) {
       const q = this.control.questionnaires.find(q => q.id === qId)
       return q.is_finalized
@@ -343,10 +327,10 @@ export default Vue.extend({
       const q = this.control.questionnaires.find(q => q.id === qId)
       let found_replies = false
 
-      if(q.themes) {
+      if (q.themes) {
         q.themes.map(theme => {
           theme.questions.map(question => {
-            if(question.response_files.length) {
+            if (question.response_files.length) {
               found_replies = true
             }
           })
@@ -358,7 +342,7 @@ export default Vue.extend({
     markQuestionnaireAsReplied(qId) {
       const getUpdateMethod = (qId) => axios.put.bind(this, backendUrls.questionnaire(qId))
       const curQ = this.control.questionnaires.find(q => q.id === qId)
-      const newQ = { ...curQ, is_replied: true }
+      const newQ = { ...curQ, is_replied: true, is_not_closed: false }
 
       getUpdateMethod(qId)(newQ)
     },
@@ -367,6 +351,12 @@ export default Vue.extend({
       const curQ = this.control.questionnaires.find(q => q.id === qId)
       const newQ = { ...curQ, is_finalized: true }
 
+      getUpdateMethod(qId)(newQ)
+    },
+    markQuestionnaireAsNotClosed(qId) {
+      const getUpdateMethod = (qId) => axios.put.bind(this, backendUrls.questionnaire(qId))
+      const curQ = this.control.questionnaires.find(q => q.id === qId)
+      const newQ = { ...curQ, is_not_closed: true }
       getUpdateMethod(qId)(newQ)
     },
     cloneQuestionnaire() {
@@ -386,7 +376,7 @@ export default Vue.extend({
           })
 
           // new questionnaire not finalized and not replied
-          let newQ = { ...curQ, control: ctrl.id, is_draft: true, is_finalized: false, is_replied: false, id: null, themes: [] }
+          let newQ = { ...curQ, control: ctrl.id, is_draft: true, is_finalized: false, is_replied: false, is_not_closed: false, id: null, themes: [] }
           getCreateMethod()(newQ).then(response => {
             const qId = response.data.id
             newQ = { ...newQ, themes: themes }
@@ -419,7 +409,25 @@ export default Vue.extend({
         })
       }
     },
+    showNotClosedModal(q) {
+      let element = this.$refs.NotClosedModal.$el
+      $(element).modal('show')
+    },
+    sendMail() {
+      const newline = '%0d%0a'
+      const body = 'Bonjour' + ',' +
+        newline + newline + 'Vous avez indiqué avoir terminé de déposer vos réponses. Cependant, nous estimons que vos réponses ne sont pas complètes.' +
+        newline + newline +
+        'Cordialement'
+      const link = 'mailto:' + this.getAuditedEmails()
+        + "&subject=Les réponses ne sont pas complètes!"
+        + "&body=" + body
+      window.location.href = link;
+    }
   },
+  mounted() {
+    this.getUsers()
+  }
 })
 </script>
 
