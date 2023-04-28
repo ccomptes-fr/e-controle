@@ -14,7 +14,7 @@ WORKDIR /code
 RUN mkdir /code/webdav-files /code/e-controle-media
 COPY requirements.txt ./
 RUN pip install -r requirements.txt --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE} \
-    && pip install WsgiDAV==4.0.1 --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
+    && pip install WsgiDAV==4.2.0 --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
 COPY . .
 RUN chmod a+x ./startWebdav.sh
 
