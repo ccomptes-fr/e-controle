@@ -71,6 +71,39 @@ def add_log_entry(control, verb, to, subject):
     action.send(**action_details)
 
 
+def get_admin_emails():
+    # admin user has not a email
+    return list(User.objects.filter(is_staff=True, is_active=True).exclude(email="").values_list("email", flat=True))
+
+
+def sent_emails(recipient_list, subject, html_template, text_template, context, control, action_sent, action_not_sent):
+    number_of_sent_email = send_email(
+      to=recipient_list,
+      subject=subject,
+      html_template=html_template,
+      text_template=text_template,
+      extra_context=context,
+    )
+    logger.info(f"Sent {number_of_sent_email} emails")
+    number_of_recipients = len(recipient_list)
+    if number_of_sent_email != number_of_recipients:
+        logger.warning(
+          f"There was {number_of_recipients} recipient(s), "
+          f"but {number_of_sent_email} email(s) sent."
+        )
+    if number_of_sent_email > 0:
+        logger.info(f"Email sent for control {control.id}")
+        verb = action_sent
+    else:
+        logger.info(f"No email was sent for control {control.id}")
+        verb = action_not_sent
+
+    add_log_entry(control, verb, recipient_list, subject)
+
+    logger.info(
+      f"Waiting {EMAIL_SPACING_TIME_SECONDS}s after emailing for control {control.id}"
+    )
+
 @task
 def send_files_report():
     html_template = "reporting/email/files_report.html"
@@ -84,12 +117,12 @@ def send_files_report():
         subject += " - de nouveaux documents déposés !"
         files = get_files(control)
         if not files:
-            logger.info(f"No new documents, aborting.")
+            logger.info("No new documents, aborting.")
             continue
         recipients = control.user_profiles.filter(send_files_report=True)
         recipient_list = recipients.values_list("user__email", flat=True)
         if not recipient_list:
-            logger.info(f"No recipients, aborting.")
+            logger.info("No recipients, aborting.")
             continue
         logger.debug(f"Recipients: {len(recipient_list)}")
         date_cutoff = get_date_cutoff(control)
@@ -98,32 +131,8 @@ def send_files_report():
             "date_cutoff": date_cutoff.strftime("%A %d %B %Y"),
             "files": files,
         }
-        number_of_sent_email = send_email(
-            to=recipient_list,
-            subject=subject,
-            html_template=html_template,
-            text_template=text_template,
-            extra_context=context,
-        )
-        logger.info(f"Sent {number_of_sent_email} emails")
-        number_of_recipients = len(recipient_list)
-        if number_of_sent_email != number_of_recipients:
-            logger.warning(
-                f"There was {number_of_recipients} recipient(s), "
-                f"but {number_of_sent_email} email(s) sent."
-            )
-        if number_of_sent_email > 0:
-            logger.info(f"Email sent for control {control.id}")
-            verb = ACTION_LOG_VERB_SENT
-        else:
-            logger.info(f"No email was sent for control {control.id}")
-            verb = ACTION_LOG_VERB_NOT_SENT
-
-        add_log_entry(control, verb, recipient_list, subject)
-
-        logger.info(
-            f"Waiting {EMAIL_SPACING_TIME_SECONDS}s after emailing for control {control.id}"
-        )
+        sent_emails(recipient_list, subject, html_template, text_template, context, control, ACTION_LOG_VERB_SENT,
+                    ACTION_LOG_VERB_NOT_SENT)
         time.sleep(EMAIL_SPACING_TIME_SECONDS)
 
 
@@ -132,10 +141,7 @@ def send_clean_controls_report():
     html_template = "reporting/email/clean_controls_report.html"
     text_template = "reporting/email/clean_controls_report.txt"
 
-    # get admin user(s)
-    admin_list = list(
-        User.objects.filter(is_staff=True).values_list("email", flat=True)
-    )
+    admin_list = get_admin_emails()
 
     # files uploaded 2 years from now
     date_cutoff = datetime.now() - timedelta(weeks=2 * 52, days=3, seconds=34)
@@ -165,32 +171,9 @@ def send_clean_controls_report():
                 "has_file": last_file[0] > 0,
             }
 
-            number_of_sent_email = send_email(
-                to=recipient_list,
-                subject=subject,
-                html_template=html_template,
-                text_template=text_template,
-                extra_context=context,
-            )
-            logger.info(f"Sent {number_of_sent_email} emails")
-            number_of_recipients = len(recipient_list)
-            if number_of_sent_email != number_of_recipients:
-                logger.warning(
-                    f"There was {number_of_recipients} recipient(s), "
-                    f"but {number_of_sent_email} email(s) sent."
-                )
-            if number_of_sent_email > 0:
-                logger.info(f"Email sent for clean control {control.id}")
-                verb = ACTION_LOG_VERB_SENT_CLEAN
-            else:
-                logger.info(f"No email was sent for clean control {control.id}")
-                verb = ACTION_LOG_VERB_NOT_SENT_CLEAN
+            sent_emails(recipient_list, subject, html_template, text_template, context, control,
+                        ACTION_LOG_VERB_SENT_CLEAN, ACTION_LOG_VERB_NOT_SENT_CLEAN)
 
-            add_log_entry(control, verb, recipient_list, subject)
-
-            logger.info(
-                f"Waiting {EMAIL_SPACING_TIME_SECONDS}s after emailing for clean control {control.id}"
-            )
             time.sleep(EMAIL_SPACING_TIME_SECONDS)
         else:
             logger.info(f"Active control not too old: {control.id}")
@@ -201,12 +184,9 @@ def send_orphans_controls_report():
     html_template = "reporting/email/orphans_controls_report.html"
     text_template = "reporting/email/orphans_controls_report.txt"
 
-    logger.info(f"Processing orphans controls")
+    logger.info("Processing orphans controls")
 
-    # get admin users
-    recipient_list = list(
-        User.objects.filter(is_staff=True).values_list("email", flat=True)
-    )
+    recipient_list = get_admin_emails()
 
     # get "orphans" controls (equipe de controle and organisme interroge empty)
     orphan_controls = []
@@ -218,31 +198,10 @@ def send_orphans_controls_report():
         subject = "Liste des contrôles orphelins"
 
         context = {"controls": orphan_controls}
+        sent_emails(recipient_list, subject, html_template, text_template, context, orphan_controls[0],
+                    ACTION_LOG_VERB_SENT_ORPHANS, ACTION_LOG_VERB_NOT_SENT_ORPHANS)
 
-        number_of_sent_email = send_email(
-            to=recipient_list,
-            subject=subject,
-            html_template=html_template,
-            text_template=text_template,
-            extra_context=context,
-        )
-        logger.info(f"Sent {number_of_sent_email} emails")
-        number_of_recipients = len(recipient_list)
-        if number_of_sent_email != number_of_recipients:
-            logger.warning(
-                f"There was {number_of_recipients} recipient(s), "
-                f"but {number_of_sent_email} email(s) sent."
-            )
-        if number_of_sent_email > 0:
-            logger.info(f"Email sent for orphans controls")
-            verb = ACTION_LOG_VERB_SENT_ORPHANS
-        else:
-            logger.info(f"No email was sent for orphans controls")
-            verb = ACTION_LOG_VERB_NOT_SENT_ORPHANS
-
-        add_log_entry(orphan_controls[0], verb, recipient_list, subject)
-
-        logger.info(
-            f"Waiting {EMAIL_SPACING_TIME_SECONDS}s after emailing for orphans controls"
-        )
         time.sleep(EMAIL_SPACING_TIME_SECONDS)
+    else:
+        logger.info("No orphans controls")
+
