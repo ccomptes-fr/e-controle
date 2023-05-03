@@ -28,3 +28,5 @@ print_mime_types.py
 backup
 coverage.xml
 venv
+.trivycache
+trivy
