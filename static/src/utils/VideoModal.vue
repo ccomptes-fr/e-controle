@@ -6,7 +6,8 @@
             <button type="button"
                     class="close"
                     data-dismiss="modal"
-                    aria-label="Close">
+                    aria-label="Fermer">
+                    <span class="sr-only">Fermer</span>
             </button>
           </div>
           <div class="modal-body">

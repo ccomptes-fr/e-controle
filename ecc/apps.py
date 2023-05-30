@@ -21,6 +21,7 @@ class EccConfig(AppConfig):
         registry.register(apps.get_model("control.Question"))
         registry.register(apps.get_model("control.Questionnaire"))
         registry.register(apps.get_model("control.Theme"))
+        #registry.register(apps.get_model("auth.Group"))
         registry.register(apps.get_model("user_profiles.UserProfile"))
         registry.register(apps.get_model("faq.FAQItem"))
         registry.register(apps.get_model("admin.LogEntry"))
@@ -31,6 +32,11 @@ class EccConfig(AppConfig):
         registry.register(apps.get_model("django_celery_beat.CrontabSchedule"))
         registry.register(apps.get_model("django_celery_beat.PeriodicTasks"))
         registry.register(apps.get_model("django_celery_beat.PeriodicTask"))
+        registry.register(apps.get_model("tos.CGUItem"))
+        registry.register(apps.get_model("parametres.Parametre"))
+        registry.register(apps.get_model("alerte.Alert"))
+        registry.register(apps.get_model("control.QuestionnaireFile"))
+        registry.register(apps.get_model("user_profiles.Access"))
         registry.register(get_user_model())
 
         # Signals

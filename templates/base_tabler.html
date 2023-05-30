@@ -1,11 +1,11 @@
 {% load static %}
-<!doctype html>
-<html lang="en" dir="ltr">
+{% load startswith %}
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <meta http-equiv="Content-Language" content="en" />
         <meta name="msapplication-TileColor" content="#2d89ef">
         <meta name="theme-color" content="#4188c9">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -18,10 +18,10 @@
         <title>{{ request.site.name }}</title>
         {% endblock site_title %}
 
-        <link rel="icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon"/>
-        <link rel="shortcut icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}" />
+        <link rel="icon" href="{% static 'img/favicon.png' %}" type="image/x-icon"/>
+        <link rel="shortcut icon" type="image/x-icon" href="{% static 'img/favicon.png' %}" />
 
-        <link href="{% static 'tabler/dashboard.min.css' %}" rel="stylesheet" />
+        <link href="{% static 'tabler/dashboard.css' %}" rel="stylesheet" />
         {% if settings.DEBUG %}
           <link rel="stylesheet" type="text/css" href="{% static 'fonts/fontawesome/v5.8.1/css/all.css' %}">
         {% else %}
@@ -33,6 +33,9 @@
 
     </head>
     <body class="">
+        {%if settings.ENV_NAME != "" and not settings.ENV_NAME|startswith:"production" %}
+        <div class="bandeau">Attention : Vous êtes actuellement sur un environnement de test ({{settings.ENV_NAME}}).</div>
+        {%endif%}
         {% block content %}
         {% endblock content %}
         {% block js_in_script_tags %}

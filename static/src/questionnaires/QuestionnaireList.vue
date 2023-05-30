@@ -1,16 +1,23 @@
 <template>
   <div class="card">
-    <confirm-modal ref="modal" cancel-button="Annuler" confirm-button="Dupliquer le questionnaire"
-      title="Dupliquer un questionnaire" @confirm="cloneQuestionnaire">
+    <confirm-modal
+      ref="modal"
+      cancel-button="Annuler"
+      confirm-button="Dupliquer le questionnaire"
+      title="Dupliquer un questionnaire"
+      @confirm="cloneQuestionnaire"
+    >
       <info-bar>
-        Veuillez sélectionner les espaces de dépôt vers lesquels vous souhaitez dupliquer ce questionnaire.
+        <p>Veuillez sélectionner les espaces de dépôt vers lesquels vous souhaitez dupliquer ce questionnaire.</p>
       </info-bar>
       <form>
         <div class="form-group mb-6">
-          <label v-for="ctrl in accessibleControls" :key="ctrl.id" class="custom-control custom-checkbox">
-            <input type="checkbox" class="custom-control-input" :value="ctrl.id" v-model="checkedCtrls">
-            <span class="custom-control-label">{{ ctrl.depositing_organization }} - {{ ctrl.title }} ({{
-              ctrl.reference_code }})</span>
+          <label v-for="ctrl in controlsInspected"
+                :for="questionnaireId + '_' + ctrl.id"
+                :key="ctrl.id"
+                class="custom-control custom-checkbox">
+            <input :id="questionnaireId + '_' + ctrl.id" type="checkbox" class="custom-control-input" :value="ctrl.id" v-model="checkedCtrls">
+            <span class="custom-control-label">{{ ctrl.depositing_organization }} - {{ ctrl.title }} ({{ ctrl.reference_code }})</span>
           </label>
         </div>
       </form>
@@ -28,37 +35,51 @@
       </div>
     </confirm-modal>
     <div class="card-status card-status-top bg-blue"></div>
-    <div class="card-header">
-      <div class="card-title">
-        <i class="fe fe-list mr-2"></i>
-        <span>Questionnaires</span>
+    <div class="card-header" style="display: block; padding: 1rem">
+      <div class="float-right" v-if="hasAnyAnswer">
+        <button @click="toggleView()" style="font-size:smaller" class="card-title btn btn-primary ml-4" :title="isList ? 'Voir les documents' : 'Voir les questionnaires'">{{isList ? 'Voir les documents' : 'Voir les questionnaires'}}</button>
       </div>
+      <h2 class="card-title">
+        <span class="fe fe-folder mr-2" :class="{'fe-list':isList}" aria-hidden="true"></span>
+        <span>{{isList ? 'Questionnaires' : 'Documents'}}</span>
+      </h2>
     </div>
 
-    <div>
-      <div v-if="accessibleQuestionnaires.length === 0" class="alert alert-icon alert-secondary m-2">
-        <i class="fe fe-info mr-2" aria-hidden="true"></i>
+    <div v-if="currentView === 'questions'">
+      <div
+        v-if="accessibleQuestionnaires.length === 0"
+        class="alert alert-icon alert-secondary m-2"
+        role="status"
+      >
+        <span class="fe fe-info mr-2" aria-hidden="true"></span>
         Il n'y a pas encore de questionnaire pour cet espace de dépôt.
       </div>
       <table v-else class="table card-table table-vcenter">
+        <caption class="sr-only">Questionnaires</caption>
         <thead>
           <tr>
-            <th>
+            <th v-if="accessType === 'demandeur'" scope="col">
               Statut
-              <help-tooltip text="Un questionnaire est d'abord en Brouillon : il est modifiable et
-                                      l'organisme interrogé ne le voit pas. Puis il est Publié : il
-                                      n'est plus modifiable et l'organisme interrogé le voit.">
+              <help-tooltip
+                text="Brouillon : modifiable, l'organisme interrogé ne le voit pas<br />
+Publié : non modifiable, l'organisme interrogé le voit<br />
+En cours : l'organisme interrogé a commencé à déposer les réponses<br />
+Répondu : l'organisme interrogé a fini de répondre au questionnaire<br />
+Finalisé : l'instruction des pièces déposées est achevée">
               </help-tooltip>
             </th>
-            <th>Titre</th>
-            <th>Date de réponse</th>
-            <th v-if="user.is_inspector">Rédacteur</th>
+            <th scope="col">Titre</th>
+            <th scope="col">Date de réponse</th>
+            <th v-if="accessType === 'demandeur'" scope="col">Rédacteur</th>
             <td class="border-bottom"></td>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="questionnaire in accessibleQuestionnaires" :key="'questionnaire-' + questionnaire.id">
-            <td class="tag-column">
+          <tr
+            v-for="questionnaire in accessibleQuestionnaires"
+            :key="'questionnaire-' + questionnaire.id"
+          >
+            <td class="tag-column" v-if="accessType === 'demandeur'">
               <div v-if="questionnaire.is_draft">
                 <div class="tag tag-azure round-tag font-italic">Brouillon</div>
               </div>
@@ -91,25 +112,29 @@
                 </small>
               </div>
             </td>
-            <td v-if="user.is_inspector" class="editor-column">
+            <td v-if="accessType === 'demandeur'" class="editor-column">
               <div v-if="questionnaire.is_draft && questionnaire.editor">
-                <help-tooltip v-if="questionnaire.editor.id !== user.id" text="Cette personne dispose des droits pour modifier ce
-                                        questionnaire. Vous pourrez modifier ce questionnaire en
-                                        cliquant sur 'Consulter', puis 'Obtenir les droits de
-                                        rédaction'." icon-class="fe fe-lock">
+                <help-tooltip
+                  v-if="questionnaire.editor.id !== user.id"
+                  text="Cette personne dispose des droits pour modifier ce
+                                    questionnaire. Vous pourrez modifier ce questionnaire en
+                                    cliquant sur 'Consulter', puis 'Obtenir les droits de
+                                    rédaction'."
+                  icon-class="fe fe-lock"
+                >
                 </help-tooltip>
                 <small>
                   {{ questionnaire.editor.first_name }}
                   {{ questionnaire.editor.last_name }}
-                  <div v-if="questionnaire.modified_date" class="text-muted">
-                    {{ questionnaire.modified_date }} à
+                  <span v-if="questionnaire.modified_date" class="text-muted editor-date">
+                    {{ questionnaire.modified_date | DateFormat }} à
                     {{ questionnaire.modified_time }}
-                  </div>
+                  </span>
                 </small>
               </div>
             </td>
             <td class="w-1 action-column">
-              <template v-if="!user.is_inspector">
+              <template v-if="accessType !== 'demandeur'">
                 <div v-if="questionnaire_has_replies(questionnaire.id)" class="text-right">
                   <div class="btn-group">
                     <a class="btn btn-secondary" :href="questionnaireDetailUrl(questionnaire.id)"
@@ -151,18 +176,26 @@
                         <i class="fe fe-edit"></i>
                         Modifier
                       </a>
-                      <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
-                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <span class="sr-only">Menu d'actions</span>
+                       <button
+                      type="button"
+                      class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
+                      data-toggle="dropdown"
+                      aria-haspopup="true"
+                      aria-expanded="false"
+                    >
+                      <span class="sr-only">Menu d'actions</span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right">
+                      <button
+                        class="dropdown-item text-danger"
+                        type="button"
+                        @click="startQuestionnaireDeleteFlow(questionnaire.id)"
+                      >
+                        <span class="fe fe-trash-2" aria-hidden="true"></span>
+                        Supprimer
                       </button>
-                      <div class="dropdown-menu dropdown-menu-right">
-                        <button class="dropdown-item text-danger" type="button"
-                          @click="startQuestionnaireDeleteFlow(questionnaire.id)">
-                          <i class="fe fe-trash-2"></i>
-                          Supprimer
-                        </button>
-                      </div>
                     </div>
+                  </div>
                 </template>
                 <template v-else-if="questionnaire.is_draft &&
                   questionnaire.editor.id !== user.id">
@@ -177,14 +210,48 @@
                 <template v-else>
                   <div class="text-right">
                     <div class="btn-group">
-                      <a :href="questionnaireDetailUrl(questionnaire.id)" title="Voir le questionnaire publié"
-                        class="btn btn-secondary">
-                        <i class="fe fe-eye"></i>
-                        Consulter
-                      </a>
-                      <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
-                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <span class="sr-only">Menu d'actions</span>
+                    <a
+                      :href="questionnaireDetailUrl(questionnaire.id)"
+                      title="Voir le questionnaire publié"
+                      class="btn btn-secondary"
+                    >
+                      <span class="fe fe-eye" aria-hidden="true"></span>
+                      Consulter
+                    </a>
+                    <button
+                      type="button"
+                      class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
+                      data-toggle="dropdown"
+                      aria-haspopup="true"
+                      aria-expanded="false"
+                    >
+                      <span class="sr-only">Menu d'actions</span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right">
+                      <button
+                        class="dropdown-item"
+                        type="button"
+                        @click="showModal(questionnaire.id)"
+                        v-if="controlsInspected.length"
+                      >
+                        <span class="fe fe-copy" aria-hidden="true"></span>
+                        Dupliquer
+                      </button>
+                      <button class="dropdown-item"
+                              type="button"
+                              @click="exportControl(questionnaire.id)"
+                      >
+                        <span class="fas fa-file-export mr-2" aria-hidden="true"></span>
+                        Exporter (.zip)
+                      </button>
+                      <button
+                        v-if="questionnaire.is_replied && !questionnaire.is_finalized"
+                        class="dropdown-item text-success"
+                        type="button"
+                        @click="markQuestionnaireAsFinalized(questionnaire.id)"
+                      >
+                        <span class="fe fe-check" aria-hidden="true"></span>
+                        Marquer comme finalisé
                       </button>
                       <div class="dropdown-menu dropdown-menu-right">
                         <button class="dropdown-item" type="button" @click="showModal(questionnaire.id)">
@@ -212,9 +279,16 @@
       </table>
     </div>
 
-    <div v-if="user.is_inspector" class="card-footer flex-row justify-content-end">
+    <div v-if="currentView === 'tree'">
+      <questionnaire-tree-view :control="control"></questionnaire-tree-view>
+    </div>
+
+    <div
+      v-if="accessType === 'demandeur'"
+      class="card-footer flex-row justify-content-end"
+    >
       <a :href="questionnaireCreateUrl" class="btn btn-primary">
-        <i class="fe fe-plus"></i>
+        <span class="fe fe-plus" aria-hidden="true"></span>
         Ajouter un questionnaire
       </a>
     </div>
@@ -230,24 +304,32 @@ import InfoBar from '../utils/InfoBar'
 import ConfirmModal from '../utils/ConfirmModal'
 import Vue from 'vue'
 import Vuex, { mapState } from 'vuex'
+import QuestionnaireTreeView from '../questionnaires/QuestionnaireTreeView'
+
+import JSZip from 'jszip'
+import JSZipUtils from 'jszip-utils'
+import { saveAs } from 'file-saver'
 
 Vue.use(Vuex)
 
 export default Vue.extend({
-  props: ['control', 'user'],
+  props: ['control', 'user', 'accessType'],
   filters: {
     DateFormat,
   },
   components: {
     HelpTooltip,
     InfoBar,
-    ConfirmModal
+    ConfirmModal,
+    QuestionnaireTreeView,
   },
-  data: function () {
+  data: function() {
     return {
       questionnaireId: null,
       checkedCtrls: [],
-      users: []
+      currentView: 'questions',
+      isList: true,
+      controlsInspected:[],
     }
   },
   computed: {
@@ -258,7 +340,7 @@ export default Vue.extend({
       return this.controls
     },
     accessibleQuestionnaires() {
-      if (this.user.is_inspector) {
+      if (this.accessType === 'demandeur') {
         return this.control.questionnaires
       }
       return this.control.questionnaires.filter(
@@ -300,8 +382,8 @@ export default Vue.extend({
       const curQ = this.control.questionnaires.find(q => q.id === questionnaireId)
       const newQ = { ...curQ, control: null }
 
-      getUpdateMethod(questionnaireId)(newQ).then(response => {
-        console.log(response.data)
+      getUpdateMethod(questionnaireId)(newQ).then(() => {
+        self.$root.$emit('questionnaire-created')
       })
     },
     exportUrl(questionnaire) {
@@ -344,20 +426,30 @@ export default Vue.extend({
       const curQ = this.control.questionnaires.find(q => q.id === qId)
       const newQ = { ...curQ, is_replied: true, is_not_closed: false }
 
-      getUpdateMethod(qId)(newQ)
-    },
+      getUpdateMethod(qId)(newQ).then(() => {
+        window.location.reload();
+      })    },
     markQuestionnaireAsFinalized(qId) {
       const getUpdateMethod = (qId) => axios.put.bind(this, backendUrls.questionnaire(qId))
       const curQ = this.control.questionnaires.find(q => q.id === qId)
       const newQ = { ...curQ, is_finalized: true }
-
-      getUpdateMethod(qId)(newQ)
+      getUpdateMethod(qId)(newQ).then(() => {
+        window.location.reload();
+      })
     },
-    markQuestionnaireAsNotClosed(qId) {
-      const getUpdateMethod = (qId) => axios.put.bind(this, backendUrls.questionnaire(qId))
-      const curQ = this.control.questionnaires.find(q => q.id === qId)
-      const newQ = { ...curQ, is_not_closed: true }
-      getUpdateMethod(qId)(newQ)
+    getControlsInspectedFromUser() {
+      axios.get(backendUrls.getControlsInspectedFromUser(this.user.id))
+        .then((response) => {
+          this.controlsInspected = response.data.filter(obj => obj.id !== this.control.id)
+        })
+    },
+    toggleView() {
+      if (this.isList) {
+        this.currentView = 'tree';
+      } else {
+        this.currentView = 'questions';
+      }
+      this.isList = !this.isList;
     },
     cloneQuestionnaire() {
       const getCreateMethod = () => axios.post.bind(this, backendUrls.questionnaire())
@@ -384,8 +476,10 @@ export default Vue.extend({
             getUpdateMethod(qId)(newQ).then(response => {
               const updatedQ = response.data
 
-              curQ.themes.map(t => {
-                t.questions.map(q => {
+              // Update questionnaires list render when duplicated
+              self.$root.$emit('questionnaire-created')
+              curQ.themes.forEach(t => {
+                t.questions.forEach(q => {
                   const qId = updatedQ.themes.find(updatedT => updatedT.order === t.order)
                     .questions.find(updatedQ => updatedQ.order === q.order).id
 
@@ -406,8 +500,112 @@ export default Vue.extend({
               })
             })
           })
-        })
+        });
       }
+    },
+    exportControl(questionnaireId) {
+      this.$parent.$children[0].loaderActive = true;
+
+      const formatFilename = (file) => {
+        const questionnaireNb = String(file.questionnaireNb).padStart(2, '0')
+        const questionnaireId = `Q${questionnaireNb}`;
+        let themeId = '';
+        let filename = ''
+        if (file.category == 'question_file') {
+          themeId = 'ANNEXES-AUX-QUESTIONS';
+          filename = `Q${questionnaireNb}-${file.basename}`;
+        } else if (file.is_deleted) {
+          themeId = 'CORBEILLE';
+          filename = `Q${questionnaireNb}-${file.basename}`;
+        } else {
+          themeId = 'T'+String(file.themeId + 1).padStart(2, '0');
+          const questionId = String(file.questionId + 1).padStart(2, '0');
+          filename = `Q${questionnaireNb}-${themeId}-${questionId}-${file.basename}`;
+        }
+        return { questionnaireId, themeId, filename };
+      }
+
+      let files = this.accessibleQuestionnaires
+        .filter(aq => questionnaireId === aq.id)
+        .flatMap(fq => {
+          if (fq.themes) {
+            return fq.themes.flatMap(t => {
+              if (t.questions) {
+                return t.questions.flatMap(q => {
+                  return q.response_files.flatMap(rf => {
+                    if (rf) {
+                      return {
+                        questionnaireNb: fq.numbering,
+                        themeId: t.order,
+                        questionId: q.order,
+                        category: 'response_file',
+                        basename: rf.basename,
+                        url: rf.url,
+                        is_deleted: rf.is_deleted,
+                      }
+                    }
+                  })
+                })
+              }
+            })
+          }
+        })
+      files.push.apply(
+        files,
+        this.accessibleQuestionnaires
+        .filter(aq => questionnaireId == aq.id)
+        .flatMap(fq => {
+          if (fq.themes) {
+            return fq.themes.flatMap(t => {
+              if (t.questions) {
+                return t.questions.flatMap(q => {
+                  return q.question_files.flatMap(qf => {
+                    if (qf) {
+                      return {
+                        questionnaireNb: fq.numbering,
+                        themeId: t.order,
+                        questionId: q.order,
+                        category: 'question_file',
+                        basename: qf.basename,
+                        url: qf.url,
+                        is_deleted: qf.is_deleted,
+                      }
+                    }
+                  })
+                })
+              }
+            })
+          }
+        })
+      );
+
+      const zipFilename = this.control.reference_code + '.zip'
+      const zip = new JSZip()
+      let cnt = 0
+
+      if (files.length==0) {
+          this.$parent.$children[0].loaderActive = false;
+      }
+
+      files.map(file => {
+        const url = window.location.origin + file.url;
+        JSZipUtils.getBinaryContent(url, (err, data) => {
+          if (err) throw err;
+          const formatted = formatFilename(file);
+          zip.folder(formatted.questionnaireId)
+            .folder(formatted.themeId)
+            .file(formatted.filename, data, { binary: true });
+
+          cnt++;
+          if (cnt === files.length) {
+            zip.generateAsync({ type: 'blob' }).then((content) => {
+              this.$parent.$children[0].loaderActive = false;
+              saveAs(content, zipFilename)
+            })
+          }
+        })
+      })
+
     },
     showNotClosedModal(q) {
       let element = this.$refs.NotClosedModal.$el
@@ -438,6 +636,10 @@ export default Vue.extend({
 
 .editor-column {
   min-width: 9em;
+}
+
+.editor-date {
+  display: block;
 }
 
 .end-date-column {

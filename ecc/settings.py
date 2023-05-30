@@ -11,7 +11,7 @@ env = environ.Env(
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
+# See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("SECRET_KEY")
@@ -62,9 +62,9 @@ INSTALLED_APPS = [
     "ckeditor",
     "django_filters",
     "django_admin",
-    "django_http_referrer_policy",
     "email_obfuscator",
     "softdelete",
+    "django_softdelete",
     # Project's apps
     "backoffice",
     "config",
@@ -81,6 +81,8 @@ INSTALLED_APPS = [
     "soft_deletion",
     "tos",
     "logs",
+    "parametres",
+    "alerte",
     # Central app - loaded last
     "ecc",
 ]
@@ -88,9 +90,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "django_http_referrer_policy.middleware.ReferrerPolicyMiddleware",
-    "django_feature_policy.FeaturePolicyMiddleware",
-    "csp.middleware.CSPMiddleware",
+    "django_permissions_policy.PermissionsPolicyMiddleware",
+    #"csp.middleware.CSPMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django_session_timeout.middleware.SessionTimeoutMiddleware",
@@ -129,14 +130,14 @@ WSGI_APPLICATION = "ecc.wsgi.application"
 
 
 # Database
-# https://docs.djangoproject.com/en/1.11/ref/settings/#databases
+# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {"default": env.db()}
 
 SITE_ID = 1
 
 # Password validation
-# https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
+# https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -155,7 +156,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # HTTP Security
 SECURE_CONTENT_TYPE_NOSNIFF = True
-REFERRER_POLICY = "same-origin"
+SECURE_REFERRER_POLICY = "same-origin"
 FEATURE_POLICY = {
     "geolocation": "none",
     "autoplay": [
@@ -196,8 +197,7 @@ CSP_SCRIPT_SRC = env(
         "'self'",
         "'unsafe-eval'",
         "'unsafe-inline'",
-        "https://webanalytics.ccomptes.fr",
-    ),
+        "https://webanalytics.ccomptes.fr",    ),
 )
 
 if DEBUG:
@@ -245,7 +245,7 @@ MAGICAUTH_TOKEN_DURATION_SECONDS = env("MAGICAUTH_TOKEN_DURATION_SECONDS", defau
 LOGIN_URL = "login"
 
 # Internationalization
-# https://docs.djangoproject.com/en/1.11/topics/i18n/
+# https://docs.djangoproject.com/en/3.2/topics/i18n/
 
 LANGUAGE_CODE = "fr-fr"
 TIME_ZONE = "Europe/Paris"
@@ -262,7 +262,7 @@ except locale.Error as e:
     pass  # setlocale can crash, for instance when running on Heroku.
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.11/howto/static-files/
+# https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 ADMIN_URL = env("ADMIN_URL", default="admin/")
 # URL of e-controle in questionnaire
@@ -278,6 +278,8 @@ UPLOAD_FILE_EXTENSION_BLACKLIST = env(
 )
 
 UPLOAD_FILE_MAX_SIZE_MB = env("UPLOAD_FILE_MAX_SIZE_MB", default=256)
+
+MAX_FILENAME_LENGTH = env("MAX_FILENAME_LENGTH", default=150)
 
 STATIC_URL = "/static/"
 
@@ -313,6 +315,8 @@ SETTINGS_EXPORT = [
     "SUPPORT_TEAM_EMAIL",
     "WEBDAV_URL",
     "DEBUG",
+    "SAVE_IP_ADDRESS",
+    "ENV_NAME",
 ]
 
 REST_FRAMEWORK = {
@@ -332,6 +336,7 @@ if DEBUG:
     )
 
 CELERY_BROKER_URL = env("CELERY_BROKER_URL")
+CELERY_QUEUE = env("CELERY_QUEUE", default="default")
 HTTP_AUTHORIZATION = env("HTTP_AUTHORIZATION", default=None)
 
 CKEDITOR_CONFIGS = {
@@ -363,8 +368,15 @@ DEMO_INSPECTOR_USERNAME = env("DEMO_INSPECTOR_USERNAME", default=None)
 DEMO_AUDITED_USERNAME = env("DEMO_AUDITED_USERNAME", default=None)
 ALLOW_DEMO_LOGIN = env("ALLOW_DEMO_LOGIN", default=False)
 
+# Session management
 SESSION_EXPIRE_SECONDS = env("SESSION_EXPIRE_SECONDS", default=24 * 60 * 60)
 SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
+
+# Ip adress
+SAVE_IP_ADDRESS = env("SAVE_IP_ADDRESS", default=False)
+
+# Environnement name
+ENV_NAME = env("ENV_NAME", default="")
 
 # Logging config for production
 # we must check filename not none to run 2 separates logs files

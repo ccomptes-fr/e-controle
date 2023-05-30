@@ -21,12 +21,16 @@ from session import api_views as session_api_views
 from soft_deletion import api_views as deletion_api_views
 from tos import views as tos_views
 from user_profiles import api_views as user_profiles_api_views
+from declaration_conformite import views as declarationConformite_views
 
 
 admin.site.site_header = "e-contrôle Administration"
 
 router = routers.DefaultRouter()
 router.register(r"annexe", control_api_views.QuestionFileViewSet, basename="annexe")
+router.register(
+    r"piecejointe", control_api_views.QuestionnaireFileViewSet, basename="piecejointe"
+)
 router.register(r"config", config_api_views.ConfigViewSet, basename="config")
 router.register(r"control", control_api_views.ControlViewSet, basename="control")
 router.register(r"question", control_api_views.QuestionViewSet, basename="question")
@@ -77,6 +81,11 @@ urlpatterns = [
         name="send-question-file",
     ),
     path(
+        "fichier-pj-questionnaire/<int:pk>/",
+        control_views.SendQuestionnairePjFile.as_view(),
+        name="send-questionnaire-pj-file",
+    ),
+    path(
         "fichier-reponse/<int:pk>/",
         control_views.SendResponseFile.as_view(),
         name="send-response-file",
@@ -101,6 +110,12 @@ urlpatterns = [
         admin_views.Megacontrol.as_view(),
         name="megacontrol-done",
     ),
+    path(
+        "declaration-conformite/",
+        declarationConformite_views.DeclarationConformite.as_view(),
+        name="declarationConformite",
+    ),
+    path("stats/", include("stats.urls")),
     # Custom-made api endoints
     path(
         "api/fichier-reponse/corbeille/<int:pk>/",

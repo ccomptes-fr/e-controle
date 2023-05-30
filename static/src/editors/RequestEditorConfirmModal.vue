@@ -4,10 +4,10 @@
       <form @submit.prevent="confirm">
 
         <div class="modal-header border-bottom-0">
-          <h4 class="modal-title">
+          <div id="modal_title" class="modal-title">
             Vous êtes sur le point de forcer le transfert des droits
             de ce questionnaire, en conséquence :
-          </h4>
+          </div>
         </div>
 
         <div class="modal-body">
@@ -46,7 +46,7 @@
                   class="btn btn-primary"
                   title="Forcer le transfert"
           >
-            <i class="fa fa-exchange-alt mr-1"></i>
+            <span class="fa fa-exchange-alt mr-1" aria-hidden="true"></span>
             Forcer le transfert
           </button>
         </div>

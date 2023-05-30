@@ -15,7 +15,7 @@ def create_questionnaire_path(instance, **kwargs):
     """
     questionnaire = instance
     relative_path = questionnaire_path(questionnaire)
-    if relative_path:
-        absolute_path = os.path.join(settings.MEDIA_ROOT, relative_path)
-        if not os.path.exists(absolute_path):
-            os.makedirs(absolute_path)
+    absolute_path = os.path.join(settings.MEDIA_ROOT, relative_path)
+    if not os.path.exists(absolute_path):
+        os.makedirs(absolute_path)
+

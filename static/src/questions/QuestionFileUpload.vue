@@ -1,18 +1,18 @@
 <template>
 <div>
   <error-bar v-if="errorMessage" @dismissed="clearError">
-    {{ errorMessage }}
+    <p>{{ errorMessage }}</p>
   </error-bar>
   <div v-if="question.id">
     <label class="btn btn-primary">
-      <i class="fe fe-upload mr-2"></i>
+      <span class="fe fe-upload mr-2"></span>
       Ajouter un fichier annexe
       <input type="file" ref="fileInput" v-on:change="handleFileUpload()" hidden/>
     </label>
   </div>
   <div v-else>
     <label class="btn btn-primary disabled" >
-      <i class="fe fe-upload mr-2" ></i>
+      <span class="fe fe-upload mr-2" ></span>
       Ajouter un fichier annexe
     </label>
     <div class="small">

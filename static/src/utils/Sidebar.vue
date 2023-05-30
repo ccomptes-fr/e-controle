@@ -1,27 +1,31 @@
 <template>
-  <div class="sidebar" :class="{ collapsed: collapsed }">
+  <nav class="sidebar" :class="{ collapsed: collapsed }">
     <div v-if="showSidebar">
-      <button id="sidebar-toggle-button" class="btn btn-secondary" @click="toggleCollapse">
-        <i v-show="!collapsed" class="fa fa-chevron-left"></i>
-        <i v-show="collapsed" class="fa fa-chevron-down"></i>
+      <button id="sidebar-toggle-button" class="btn btn-secondary" @click="toggleCollapse" title="Replier le panneau latéral">
+        <span v-show="!collapsed" class="fa fa-chevron-left"></span>
+        <span v-show="collapsed" class="fa fa-chevron-down"></span>
         <span v-show="collapsed">Ouvrir le menu</span>
+        <span v-show="!collapsed" class="hidden">Replier le panneau latéral</span>
       </button>
       <sidebar-menu class="sidebar-body"
+                    id="sidebar"
                     :menu="menu"
                     :relative="true"
                     :hideToggle="true"
                     :show-one-child="true"
                     theme="white-theme"
                     :collapsed="collapsed"
+                    v-if="!collapsed"
+                    role="navigation"
                     widthCollapsed="0px"
                     @item-click="onItemClick"
       >
         <template v-slot:header>
           <div id="sidebar-title"
                class="card-header flex-row justify-content-center">
-            <div class="card-title text-nowrap text-center">
+            <h1 class="card-title text-nowrap text-center">
               Mes espaces de dépôt
-            </div>
+            </h1>
           </div>
 
           <div v-if="isLoaded && controls.length === 0">
@@ -53,13 +57,13 @@
 
           <error-bar id="sidebar-error-bar" v-if="hasError" noclose=true>
             <div>
-              Nous n'avons pas pu obtenir vos espaces de dépôt.
+              <p>Nous n'avons pas pu obtenir vos espaces de dépôt.</p>
             </div>
             <div class="mt-2">
-              Erreur : {{ errorMessage }}
+              <p>Erreur : {{ errorMessage }}</p>
             </div>
             <div class="mt-2">
-              Vous pouvez essayer de recharger la page
+              <p>Vous pouvez essayer de recharger la page
               <template v-if="!errorEmailLink">
                 .
               </template>
@@ -70,14 +74,14 @@
                   rel="noopener noreferrer"
                 >
                   cliquez ici pour nous contacter
-                </a>.
+                </a>.</p>
               </template>
             </div>
           </error-bar>
         </template>
       </sidebar-menu>
     </div>
-  </div>
+  </nav>
 </template>
 
 <script>
@@ -89,6 +93,8 @@ import { loadStatuses } from '../store'
 import { SidebarMenu } from 'vue-sidebar-menu'
 import Vue from 'vue'
 import 'vue-sidebar-menu/dist/vue-sidebar-menu.css'
+
+import axios from 'axios'
 
 const ERROR_EMAIL_BODY = 'Bonjour,%0D%0A%0D%0A' +
     'Je voudrais vous signaler une erreur lors du chargement des espaces de dépôt dans le menu.' +
@@ -213,50 +219,58 @@ export default Vue.extend({
       // If we are on a trash page, find the control for which the trash folder is.
       const questionnaireForTrash = backend.getIdFromViewUrl(this.window.location.pathname, 'trash')
 
-      const menu = this.controls.sort((a, b) => { return b.id - a.id })
-        .map(control => {
-          const controlMenu = {
-            icon: 'fa fa-archive',
-            href: backend['control-detail'](control.id),
-            title: makeControlTitle(control),
-          }
+      const menu = []
+      this.controls.forEach(async control => {
+        const controlMenu = {
+          icon: 'fa fa-archive',
+          href: backend['control-detail'](control.id),
+          title: makeControlTitle(control),
+          ctrl_id: control.id,
+        }
 
-          const children = control.questionnaires.map(questionnaire => {
-            if (this.user.is_inspector || !questionnaire.is_draft) {
-              const questionnaireItem = {
-                href: makeQuestionnaireLink(questionnaire),
-                title: 'Questionnaire ' + questionnaire.numbering + ' - ' + questionnaire.title,
-              }
-              if (questionnaireForTrash === questionnaire.id) {
-                questionnaireItem.child = [{
-                  href: backend.trash(questionnaire.id),
-                  title: 'Corbeille',
-                }]
-              }
-              return questionnaireItem
+        const resp = await axios.get(backend.getAccessToControl(control.id))
+        const accessType = resp.data[0].access_type
+        const children = control.questionnaires.map(questionnaire => {
+          if (accessType === 'demandeur' || !questionnaire.is_draft) {
+            const questionnaireItem = {
+              href: makeQuestionnaireLink(questionnaire),
+              title: 'Questionnaire ' + questionnaire.numbering + ' - ' + questionnaire.title,
             }
-          }).filter(item => !!item)
-          if (children.length > 0) {
-            controlMenu.child = children
+            if (questionnaireForTrash === questionnaire.id) {
+              questionnaireItem.child = [{
+                href: backend.trash(questionnaire.id),
+                title: 'Corbeille',
+              }]
+            }
+            return questionnaireItem
           }
+        }).filter(item => !!item)
+        if (children.length > 0) {
+          controlMenu.child = children
+        }
 
-          // Add menu item for the questionnaire being created, if there is one.
-          if (controlCreatingQuestionnaire === (control.id)) {
-            if (!controlMenu.child) {
-              controlMenu.child = []
-            }
-            controlMenu.child.push({
-              href: backend['questionnaire-create'](control.id),
-              title: 'Q' + (controlMenu.child.length + 1),
-            })
+        // Add menu item for the questionnaire being created, if there is one.
+        if (controlCreatingQuestionnaire === (control.id)) {
+          if (!controlMenu.child) {
+            controlMenu.child = []
           }
-          return controlMenu
-        })
+          controlMenu.child.push({
+            href: backend['questionnaire-create'](control.id),
+            title: 'Q' + (controlMenu.child.length + 1),
+          })
+        }
+        menu.push(controlMenu)
+        menu.sort((a, b) => { return b.ctrl_id - a.ctrl_id })
+      })
       this.isMenuBuilt = true
       this.menu = menu
     },
     toggleCollapse() {
-      this.collapsed = !this.collapsed
+      this.collapsed = !this.collapsed;
+      window.setTimeout(function() {
+        $("#sidebar").toggleClass("hidden");
+      },
+      300);
     },
   },
 })
@@ -346,4 +360,11 @@ export default Vue.extend({
     height: 80px;
   }
 
+  .v-sidebar-menu.vsm_white-theme.vsm_expanded .vsm--item_open .vsm--link_level-1 {
+    background-color: #3473cb;
+    color: #fff;
+  }
+  .v-sidebar-menu.vsm_white-theme.vsm_expanded .vsm--item_open .vsm--link_level-1 .vsm--icon {
+    background-color: #3473cb;
+  }
 </style>
