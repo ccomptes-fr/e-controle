@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='control',
             name='reference_code',
-            field=models.CharField(error_messages={'unique': 'UNIQUE'}, help_text='Ce code est utilisé notamment pour le dossier de stockage des réponses', max_length=70, unique=True, validators=[django.core.validators.RegexValidator(message='INVALID', regex='^[\\s\\w-]+[^\\.]$')], verbose_name='code de référence'),
+            field=models.CharField(error_messages={'unique': 'UNIQUE'}, help_text='Ce code est utilisé notamment pour le dossier de stockage des réponses', max_length=225, unique=True, validators=[django.core.validators.RegexValidator(message='INVALID', regex='^[\\s\\w-]+[^\\.]$')], verbose_name='code de référence'),
         ),
         migrations.AlterField(
             model_name='questionnaire',
