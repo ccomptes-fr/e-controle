@@ -84,7 +84,6 @@ requests==2.28.2
 rsa==4.9
 screen==1.0.1
 six==1.16.0
-soft-delete==0.2.2
 sqlparse==0.4.3
 TimeConvert==3.0.13
 typing_extensions==4.5.0
