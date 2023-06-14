@@ -1,3 +1,4 @@
+from django.conf import settings
 from django import template
 
 from parametres.models import Parametre
@@ -39,6 +40,6 @@ def get_support_email_item():
     return Parametre.objects.filter(code="SUPPORT_EMAIL").filter(
         deleted_at__isnull=True
     ).first() or {
-        "url": "support@collecte-pro.gouv.fr",
+        "url": settings.SUPPORT_TEAM_EMAIL,
         "title": "Mail de support",
     }
