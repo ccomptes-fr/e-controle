@@ -134,8 +134,8 @@ export default Vue.extend({
   },
   watch: {
     displayedControl: {
-      handler(newVal) {
-        this.getAccessType(newVal?.id)
+      handler: function (newVal) {
+        this.getAccessType(newVal.id)
       },
       deep: true,
       immediate: true,
