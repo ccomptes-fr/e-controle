@@ -7,7 +7,6 @@
   allow_failure: false
   interruptible: true
   needs:
-    - test:tests_back
     - quality:sonarqube
   variables: &build_variables
     DOCKER_TLS_CERTDIR: "/certs"
