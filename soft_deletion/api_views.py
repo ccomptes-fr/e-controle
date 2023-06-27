@@ -1,3 +1,4 @@
+from actstream import action
 from django.dispatch import Signal
 from django.shortcuts import get_object_or_404
 

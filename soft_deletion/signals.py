@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.dispatch import receiver
 from utils.email import send_email
+from utils.file import delete_control_folder
 
 from control.models import Control
 from .api_views import soft_delete_signal

@@ -1,3 +1,5 @@
+import pytest
+
 from pytest import mark
 
 from django.contrib.auth import get_user_model

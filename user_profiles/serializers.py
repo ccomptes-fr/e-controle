@@ -94,18 +94,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
             profile.user.save()
             profile.save()
         else:
-            if settings.KEYCLOAK_ACTIVE:
-                # Create keycloak user if doesn't exist
-                new_user = keycloak_admin.create_user(
-                    {
-                        "email": user_data["username"],
-                        "username": user_data["username"],
-                        "enabled": True,
-                        "firstName": user_data["first_name"],
-                        "lastName": user_data["last_name"],
-                    },
-                    exist_ok=True,
-                )
             user = User.objects.create(**user_data)
             profile_data["user"] = user
             profile_data["send_files_report"] = True
