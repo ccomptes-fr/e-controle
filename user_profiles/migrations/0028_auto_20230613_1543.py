@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
             "DROP TABLE IF EXISTS public.filer_file CASCADE"
         ),
         migrations.RunSQL(
-            "DROP TABLE IF EXISTSpublic.filer_folder CASCADE"
+            "DROP TABLE IF EXISTS public.filer_folder CASCADE"
         ),
         migrations.RunSQL(
             "DROP TABLE IF EXISTS public.filer_folderpermission CASCADE"
