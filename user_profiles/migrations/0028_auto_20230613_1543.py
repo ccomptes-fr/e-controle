@@ -11,33 +11,33 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunSQL(
-            "DROP TABLE public.filer_clipboard CASCADE"
+            "DROP TABLE IF EXISTS public.filer_clipboard CASCADE"
         ),
         migrations.RunSQL(
-            "DROP TABLE public.filer_clipboarditem CASCADE"
+            "DROP TABLE IF EXISTS public.filer_clipboarditem CASCADE"
         ),
         migrations.RunSQL(
-            "DROP TABLE public.filer_file CASCADE"
+            "DROP TABLE IF EXISTS public.filer_file CASCADE"
         ),
         migrations.RunSQL(
-            "DROP TABLE public.filer_folder CASCADE"
+            "DROP TABLE IF EXISTSpublic.filer_folder CASCADE"
         ),
         migrations.RunSQL(
-            "DROP TABLE public.filer_folderpermission CASCADE"
+            "DROP TABLE IF EXISTS public.filer_folderpermission CASCADE"
         ),
         migrations.RunSQL(
-            "DROP TABLE public.filer_image CASCADE"
+            "DROP TABLE IF EXISTS public.filer_image CASCADE"
         ),
         migrations.RunSQL(
-            "DROP TABLE public.filer_thumbnailoption CASCADE"
+            "DROP TABLE IF EXISTS public.filer_thumbnailoption CASCADE"
         ),
         migrations.RunSQL(
-            "DROP TABLE public.easy_thumbnails_source CASCADE"
+            "DROP TABLE IF EXISTS public.easy_thumbnails_source CASCADE"
         ),
         migrations.RunSQL(
-            "DROP TABLE public.easy_thumbnails_thumbnail CASCADE"
+            "DROP TABLE IF EXISTS public.easy_thumbnails_thumbnail CASCADE"
         ),
         migrations.RunSQL(
-            "DROP TABLE public.easy_thumbnails_thumbnaildimensions CASCADE"
+            "DROP TABLE IF EXISTS public.easy_thumbnails_thumbnaildimensions CASCADE"
         ),
     ]
