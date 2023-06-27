@@ -38,8 +38,9 @@
       - .cache/pip
   before_script:
     - pip install -r requirements.txt --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
+    - pip install -r requirements-dev.txt --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
     # conflict version with soft-delete
-    - pip install coverage==5.5 --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
+    # - pip install coverage==5.5 --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
     - python manage.py migrate
     - python manage.py makemigrations
   script:
