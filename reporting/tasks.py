@@ -3,7 +3,7 @@ import time
 from datetime import timedelta, datetime
 
 from actstream import action
-from celery import task
+from celery import shared_task
 from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -75,7 +75,7 @@ def get_admin_emails():
     # admin user has not a email
     return list(User.objects.filter(is_staff=True, is_active=True).exclude(email="").values_list("email", flat=True))
 
-@task(queue=settings.CELERY_QUEUE)
+@shared_task(queue=settings.CELERY_QUEUE)
 def sent_emails(recipient_list, subject, html_template, text_template, context, control, action_sent, action_not_sent):
     number_of_sent_email = send_email(
       to=recipient_list,
@@ -104,7 +104,7 @@ def sent_emails(recipient_list, subject, html_template, text_template, context, 
       f"Waiting {EMAIL_SPACING_TIME_SECONDS}s after emailing for control {control.id}"
     )
 
-@task(queue=settings.CELERY_QUEUE)
+@shared_task(queue=settings.CELERY_QUEUE)
 def send_files_report():
     html_template = "reporting/email/files_report.html"
     text_template = "reporting/email/files_report.txt"
@@ -136,7 +136,7 @@ def send_files_report():
         time.sleep(EMAIL_SPACING_TIME_SECONDS)
 
 
-@task(queue=settings.CELERY_QUEUE)
+@shared_task(queue=settings.CELERY_QUEUE)
 def send_clean_controls_report():
     html_template = "reporting/email/clean_controls_report.html"
     text_template = "reporting/email/clean_controls_report.txt"
@@ -179,7 +179,7 @@ def send_clean_controls_report():
             logger.info(f"Active control not too old: {control.id}")
 
 
-@task(queue=settings.CELERY_QUEUE)
+@shared_task(queue=settings.CELERY_QUEUE)
 def send_orphans_controls_report():
     html_template = "reporting/email/orphans_controls_report.html"
     text_template = "reporting/email/orphans_controls_report.txt"
