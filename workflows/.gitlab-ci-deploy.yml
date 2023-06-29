@@ -117,3 +117,18 @@ deploy:commit:rabbitmq:
     IMAGE_TAG: 3.8.2-management
   environment:
     name: Dev2
+
+# Deploy to RepriseCollectePro env
+deploy:commit:reprise_collecte_pro_e-controle:
+  extends:
+    - .deploy
+  when: manual
+  variables:
+    <<: *deploy_variables
+    IMAGE_TAG: $CI_COMMIT_SHA
+    IMAGE_NAME: e-controle
+    SERVER_PORT: 8082
+  needs:
+    - build:commit
+  environment:
+    name: RepriseCollectePro
