@@ -58,7 +58,7 @@
         <caption class="sr-only">Questionnaires</caption>
         <thead>
           <tr>
-            <th v-if="accessType === 'demandeur'" scope="col">
+            <th scope="col">
               Statut
               <help-tooltip
                 text="Brouillon : modifiable, l'organisme interrogé ne le voit pas<br />
@@ -79,7 +79,7 @@ Finalisé : l'instruction des pièces déposées est achevée">
             v-for="questionnaire in accessibleQuestionnaires"
             :key="'questionnaire-' + questionnaire.id"
           >
-            <td class="tag-column" v-if="accessType === 'demandeur'">
+            <td class="tag-column">
               <div v-if="questionnaire.is_draft">
                 <div class="tag tag-azure round-tag font-italic">Brouillon</div>
               </div>
