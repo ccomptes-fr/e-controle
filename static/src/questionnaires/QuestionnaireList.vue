@@ -350,6 +350,13 @@ export default Vue.extend({
     questionnaireCreateUrl() {
       return backendUrls['questionnaire-create'](this.control.id)
     },
+    hasAnyAnswer() {
+      let questionnaires = this.accessibleQuestionnaires.filter(aq => aq.has_replies)
+      return (questionnaires.length > 0)
+    },
+  },
+  mounted() {
+    this.getControlsInspectedFromUser()
   },
   methods: {
     getUsers() {
