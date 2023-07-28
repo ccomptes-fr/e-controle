@@ -3,6 +3,8 @@ ARG DOCKER_REGISTRY
 # Build the front
 FROM ${DOCKER_REGISTRY}node/node16:16.14.2-build AS front
 ARG REGISTRY_DOMAINE
+ARG NEXUS_URL
+ARG NEXUS_HOST
 WORKDIR /code
 COPY package*.json /code/
 COPY . .
@@ -21,7 +23,7 @@ ENV LC_ALL fr_FR.UTF-8
 ENV TZ Europe/Paris
 WORKDIR /code
 COPY requirements.txt ./
-RUN pip install -r requirements.txt --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
+RUN pip install -r requirements.txt --index-url ${NEXUS_URL} --trusted-host ${NEXUS_HOST}
 COPY . .
 COPY --from=front /code/static/ /code/static
 COPY --from=front /code/node_modules/bootstrap/dist/ /code/node_modules/bootstrap/dist
