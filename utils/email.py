@@ -48,12 +48,12 @@ def send_email(
     try:
         number_of_sent_email = email.send(fail_silently=False)
         add_log_entry(
-            site=current_site, verb="email envoy�", to=to, cc=cc, subject=subject
+            site=current_site, verb="email envoyé", to=to, cc=cc, subject=subject
         )
     except Exception as e:
         add_log_entry(
             site=current_site,
-            verb="email non envoy�",
+            verb="email non envoyé",
             to=to,
             cc=cc,
             subject=subject,
