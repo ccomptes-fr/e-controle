@@ -6,6 +6,7 @@ ARG PROXY_CC_URL
 ARG REGISTRY_DOMAINE
 ARG NEXUS_URL
 ARG NEXUS_HOST
+
 RUN export http_proxy=${PROXY_CC_URL} && apt-get clean && apt-get update && apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
     && sed -i -e 's/# fr_FR.UTF-8 UTF-8/fr_FR.UTF-8 UTF-8/' /etc/locale.gen && locale-gen
 ENV LANG fr_FR.UTF-8
