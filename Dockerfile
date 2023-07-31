@@ -17,8 +17,13 @@ ARG REGISTRY_DOMAINE
 ARG NEXUS_URL
 ARG NEXUS_HOST
 
-RUN export http_proxy=${PROXY_CC_URL} && apt-get clean && apt-get update && apt-get install -y locales && rm -rf /var/lib/apt/lists/* \
-    && sed -i -e 's/# fr_FR.UTF-8 UTF-8/fr_FR.UTF-8 UTF-8/' /etc/locale.gen && locale-gen
+# Update packages
+RUN export http_proxy=${PROXY_CC_URL} && apt-get update && apt-get upgrade -y && apt-get install -y locales \
+    && sed -i -e 's/# fr_FR.UTF-8 UTF-8/fr_FR.UTF-8 UTF-8/' /etc/locale.gen && locale-gen \
+# Clean up
+RUN apt-get autoremove -y \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/* \
 ENV LANG fr_FR.UTF-8
 ENV LANGUAGE fr_FR:fr
 ENV LC_ALL fr_FR.UTF-8
