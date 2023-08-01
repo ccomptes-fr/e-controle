@@ -6,7 +6,7 @@
       when: manual
 
 .test:tests_back:
-  image: ${DOCKER_REGISTRY}python:3.9.13
+  image: ${DOCKER_REGISTRY}tools/python:3.9.17
   stage: test
   interruptible: true
   allow_failure: false
@@ -100,7 +100,7 @@
     - docker run --rm -v $(pwd):/usr/src -e SONAR_HOST_URL=${SONAR_HOST_URL} ${DOCKER_REGISTRY}sonarqube
 
 .security:bandit:
-  image: ${DOCKER_REGISTRY}python:3.9.13
+  image: ${DOCKER_REGISTRY}tools/python:3.9.17
   interruptible: true
   allow_failure: true
   stage: security
@@ -116,7 +116,7 @@
     - bandit -r .
 
 .security:safety:
-  image: ${DOCKER_REGISTRY}python:3.9.13
+  image: ${DOCKER_REGISTRY}tools/python:3.9.17
   interruptible: true
   allow_failure: true
   stage: security

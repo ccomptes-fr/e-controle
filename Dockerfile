@@ -11,11 +11,12 @@ COPY . .
 RUN npm ci --registry=http://${REGISTRY_DOMAINE}/repository/npm/ && npm run build-all
 
 # Build the back
-FROM ${DOCKER_REGISTRY}python:3.9.13
+FROM ${DOCKER_REGISTRY}tools/python:3.9.17
 ENV PYTHONUNBUFFERED 1
 ARG REGISTRY_DOMAINE
 ARG NEXUS_URL
 ARG NEXUS_HOST
+ARG PROXY_CC_URL
 
 # Update packages
 RUN export http_proxy=${PROXY_CC_URL} && apt-get update && apt-get upgrade -y && apt-get install -y locales \
