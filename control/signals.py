@@ -17,5 +17,7 @@ def create_questionnaire_path(instance, **kwargs):
     relative_path = questionnaire_path(questionnaire)
     absolute_path = os.path.join(settings.MEDIA_ROOT, relative_path)
     if not os.path.exists(absolute_path):
-        os.makedirs(absolute_path)
+        os.makedirs(absolute_path, mode = settings.CHOWN_MASK)
+        # set right to the parent (espace de depot dir)
+        os.chmod(os.path.dirname(absolute_path), settings.CHOWN_MASK)
 
