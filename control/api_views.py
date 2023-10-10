@@ -413,6 +413,20 @@ class QuestionnaireViewSet(
                             code=status.HTTP_403_FORBIDDEN,
                         )
                         raise e
+                # Only Audited can change a Questionnaire from not closed to Replied
+                elif (
+                    pre_existing_qr.is_replied is True
+                    and pre_existing_qr.is_not_closed is True
+                    and request.data.get("is_not_closed") is False
+                ):
+                    if not request.user.profile.access.filter(
+                        Q(control=control) & Q(access_type="repondant")
+                    ).exists():
+                        e = PermissionDenied(
+                            detail=("Only Audited can change a Questionnaire from not closed to Replied."),
+                            code=status.HTTP_403_FORBIDDEN,
+                        )
+                        raise e
                 # Only Inspectors can change a published Questionnaire response date
                 elif (
                     pre_existing_qr.is_draft is False
