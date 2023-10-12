@@ -253,23 +253,12 @@ Finalisé : l'instruction des pièces déposées est achevée">
                         <span class="fe fe-check" aria-hidden="true"></span>
                         Marquer comme finalisé
                       </button>
-                      <div class="dropdown-menu dropdown-menu-right">
-                        <button class="dropdown-item" type="button" @click="showModal(questionnaire.id)">
-                          <i class="fe fe-copy"></i>
-                          Dupliquer
-                        </button>
-                        <button v-if="questionnaire_is_replied(questionnaire.id)" class="dropdown-item text-success"
-                          type="button" @click="markQuestionnaireAsFinalized(questionnaire.id)">
-                          <i class="fe fe-check"></i>
-                          Marquer comme finalisé
-                        </button>
-                        <button v-if="questionnaire_is_replied(questionnaire.id)" class="dropdown-item text-danger"
+                      <button v-if="questionnaire_is_replied(questionnaire.id)" class="dropdown-item text-danger"
                           type="button"
                           @click="markQuestionnaireAsNotClosed(questionnaire.id), showNotClosedModal(questionnaire)">
                           <i class="fe fe-check"></i>
                           Marquer comme non terminé
                         </button>
-                      </div>
                     </div>
                 </template>
               </template>
@@ -443,6 +432,12 @@ export default Vue.extend({
       getUpdateMethod(qId)(newQ).then(() => {
         window.location.reload();
       })
+    },
+    markQuestionnaireAsNotClosed(qId) {
+      const getUpdateMethod = (qId) => axios.put.bind(this, backendUrls.questionnaire(qId))
+      const curQ = this.control.questionnaires.find(q => q.id === qId)
+      const newQ = { ...curQ, is_not_closed: true }
+      getUpdateMethod(qId)(newQ)
     },
     getControlsInspectedFromUser() {
       axios.get(backendUrls.getControlsInspectedFromUser(this.user.id))
