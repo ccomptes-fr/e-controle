@@ -18,9 +18,9 @@
                 class="tag tag-azure big-tag round-tag font-italic mr-2">
             Brouillon
           </span>
-          <span v-else-if="questionnaire.has_replies && !questionnaire.is_replied" class="tag tag-yellow round-tag font-italic mr-2">En cours</span>
-          <span v-else-if="questionnaire_is_replied && !questionnaire_is_finalized && !questionnaire_is_not_closed" class="tag tag-orange round-tag font-italic mr-2">Répondu</span>
-          <span v-else-if="questionnaire_is_not_closed && !questionnaire_is_finalized" class="tag tag-red round-tag font-italic mr-2">Non Terminé</span>
+          <span v-else-if="questionnaire_has_replies() && !questionnaire.is_replied" class="tag tag-yellow round-tag font-italic mr-2">En cours</span>
+          <span v-else-if="questionnaire.is_replied && !questionnaire.is_finalized && !questionnaire.is_not_closed" class="tag tag-orange round-tag font-italic mr-2">Répondu</span>
+          <span v-else-if="questionnaire.is_not_closed && !questionnaire.is_finalized" class="tag tag-red round-tag font-italic mr-2">Non Terminé</span>
           <span v-else-if="questionnaire.is_finalized" class="tag tag-purple round-tag font-italic mr-2">Finalisé</span>
           <span v-else class="tag tag-green big-tag round-tag font-italic mr-2">Publié</span>
         </template>
@@ -131,6 +131,23 @@ export default Vue.extend({
         console.error("Erreur sur l'access type : ", error)
       }
     },
+    questionnaire_has_replies() {
+      const q = this.questionnaire
+      let found_replies = false
+
+      if(q.themes) {
+        q.themes.map(theme => {
+          theme.questions.map(question => {
+            if(question.response_files.length) {
+              found_replies = true
+            }
+          })
+        })
+      }
+
+      return found_replies
+    },
+
   },
   components: {
     Breadcrumbs,
