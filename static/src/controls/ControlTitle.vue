@@ -398,7 +398,7 @@ export default Vue.extend({
                     },
                   })
                 })
-              }) 
+              })
 
         await getUpdateMethod(qId)(newQ).then(response => {
           const updatedQ = response.data
@@ -525,8 +525,6 @@ export default Vue.extend({
           }
         })
       );
-
-      const Files = responseFiles.filter( resp => resp.is_deleted === false)
       const zipFilename = this.control.reference_code + '.zip'
       const zip = new JSZip()
       let cnt = 0
