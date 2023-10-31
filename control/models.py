@@ -96,7 +96,7 @@ class Control(SoftDeleteModel):
     )
     reference_code = models.CharField(
         verbose_name="code de référence",
-        max_length=225,
+        max_length=30,
         help_text="Ce code est utilisé notamment pour le dossier de stockage des réponses",
         validators=[
             RegexValidator(
@@ -111,8 +111,8 @@ class Control(SoftDeleteModel):
     objects = DeletableQuerySet.as_manager()
 
     class Meta:
-        verbose_name = "Procédure"
-        verbose_name_plural = "Procédures"
+        verbose_name = "Contrôle"
+        verbose_name_plural = "Contrôles"
 
     def data(self):
         return {
