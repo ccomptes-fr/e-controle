@@ -26,7 +26,6 @@ from .models import (
     QuestionnaireFile,
 )
 from .questionnaire_duplicate import QuestionnaireDuplicateMixin
-from user_profiles.models import UserProfile
 
 
 class ParentLinksMixin(object):
@@ -198,6 +197,80 @@ class QuestionAdmin(OrderedInlineModelAdminMixin, OrderedModelAdmin, ParentLinks
         QuestionFileInline,
         ResponseFileInline,
     )
+
+
+@admin.register(ResponseFile)
+class ResponseFileAdmin(ReadOnlyModelAdmin, admin.ModelAdmin, ParentLinksMixin):
+    def is_active(self, obj):
+        return not obj.is_deleted
+
+    is_active.boolean = True
+    is_active.short_description = "Actif ou corbeille?"
+
+    list_display = (
+        "id",
+        "file_name",
+        "link_to_question",
+        "link_to_theme",
+        "link_to_questionnaire",
+        "link_to_control",
+        "created",
+        "author",
+        "is_active",
+    )
+    list_display_links = ("id",)
+    date_hierarchy = "created"
+    list_filter = ("question__theme__questionnaire__control",)
+    fields = (
+        "id",
+        "author",
+        "file_name",
+        "link_to_question",
+        "link_to_questionnaire",
+        "link_to_control",
+        "created",
+        "modified",
+        "is_active",
+    )
+    readonly_fields = (
+        "file_name",
+        "is_active",
+        "link_to_question",
+        "link_to_questionnaire",
+        "link_to_control",
+    )
+    search_fields = (
+        "file",
+        "question__description",
+        "author__first_name",
+        "author__last_name",
+        "author__username",
+    )
+
+
+@admin.register(QuestionFile)
+class QuestionFileAdmin(admin.ModelAdmin, ParentLinksMixin):
+    list_display = (
+        "id",
+        "file",
+        "link_to_question",
+        "link_to_theme",
+        "link_to_questionnaire",
+        "link_to_control",
+    )
+    list_display_links = ("id",)
+    list_filter = ("question__theme__questionnaire__control",)
+    fields = (
+        "id",
+        "file",
+        "question",
+        "order",
+        "link_to_questionnaire",
+        "link_to_control",
+    )
+    readonly_fields = ("id", "order", "link_to_questionnaire", "link_to_control")
+    search_fields = ("file", "question__description")
+    raw_id_fields = ("question",)
 
 
 @method_decorator(staff_member_required, name="dispatch")
