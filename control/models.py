@@ -96,7 +96,7 @@ class Control(SoftDeleteModel):
     )
     reference_code = models.CharField(
         verbose_name="code de référence",
-        max_length=30,
+        max_length=255,
         help_text="Ce code est utilisé notamment pour le dossier de stockage des réponses",
         validators=[
             RegexValidator(
