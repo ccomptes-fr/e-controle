@@ -264,22 +264,13 @@ Finalisé : l'instruction des pièces déposées est achevée">
                         <span class="fe fe-check" aria-hidden="true"></span>
                         Marquer comme finalisé
                       </button>
-<<<<<<< HEAD
-<<<<<<< HEAD
-                      <button v-if="questionnaire.is_replied && !questionnaire.is_finalized" class="dropdown-item text-danger"
-=======
                       <button v-if="questionnaire_is_replied(questionnaire.id)" class="dropdown-item text-danger"
->>>>>>> fixbug/format-date-fr
-=======
-                      <button v-if="questionnaire_is_replied(questionnaire.id)" class="dropdown-item text-danger"
->>>>>>> 9436bcf5977582cbf35714efb6aaf2e8c4b48cda
                           type="button"
                           @click="markQuestionnaireAsNotClosed(questionnaire.id), showNotClosedModal(questionnaire)">
                           <i class="fe fe-check"></i>
                           Marquer comme non terminé
                         </button>
                     </div>
-                  </div>
                 </template>
               </template>
             </td>
@@ -459,21 +450,12 @@ export default Vue.extend({
       const curQ = this.control.questionnaires.find(q => q.id === qId)
       const newQ = { ...curQ, is_not_closed: true }
       getUpdateMethod(qId)(newQ)
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> 9436bcf5977582cbf35714efb6aaf2e8c4b48cda
     },
     getControlsInspectedFromUser() {
       axios.get(backendUrls.getControlsInspectedFromUser(this.user.id))
         .then((response) => {
           this.controlsInspected = response.data.filter(obj => obj.id !== this.control.id)
         })
-<<<<<<< HEAD
->>>>>>> fixbug/format-date-fr
-=======
->>>>>>> 9436bcf5977582cbf35714efb6aaf2e8c4b48cda
     },
     toggleView() {
       if (this.isList) {
