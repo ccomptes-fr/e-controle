@@ -1,9 +1,11 @@
 import os
 
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.core.validators import RegexValidator
 from django.db import models
 from django.urls import reverse
+from django.apps import apps
 
 from django_cleanup import cleanup
 from model_utils.models import TimeStampedModel
@@ -17,6 +19,7 @@ from .upload_path import (
     questionnaire_file_path,
     question_file_path,
     response_file_path,
+    questionnaire_pj_file_path,
     Prefixer,
 )
 
@@ -135,7 +138,7 @@ class Control(SoftDeleteModel):
 class Questionnaire(OrderedModel, WithNumberingMixin, DocxMixin):
     title = models.CharField("titre", max_length=255)
     sent_date = models.DateField(
-        verbose_name="date d'envoie",
+        verbose_name="date d'envoi",
         blank=True,
         null=True,
         help_text="Date de transmission du questionnaire",
@@ -227,11 +230,22 @@ class Questionnaire(OrderedModel, WithNumberingMixin, DocxMixin):
         return reverse("send-questionnaire-file", args=[self.id])
 
     @property
+    def site_url(self):
+        return "https://" + Site.objects.all()[0].domain + "/"
+
+    @property
     def basename(self):
         """
         Name of file, without path.
         """
         return os.path.basename(self.file.name)
+
+    @property
+    def downloadname(self):
+        """
+        Name of file, without path.
+        """
+        return self.basename
 
     @property
     def title_display(self):
@@ -258,8 +272,12 @@ class Questionnaire(OrderedModel, WithNumberingMixin, DocxMixin):
         return not self.is_draft
 
     @property
-    def site_url(self):
-        return settings.QUESTIONNAIRE_SITE_URL
+    def has_replies(self):
+        for theme in self.themes.all():
+            for question in theme.questions.all():
+                if len(question.response_files.all()) > 0:
+                    return True
+        return False
 
     def __str__(self):
         display_text = f"[ID{self.id}]"
@@ -268,6 +286,42 @@ class Questionnaire(OrderedModel, WithNumberingMixin, DocxMixin):
         display_text += f" [Q{self.numbering}]"
         display_text += f" - {self.title}"
         return display_text
+
+
+class QuestionnaireFile(OrderedModel, FileInfoMixin):
+    questionnaire = models.ForeignKey(
+        to="Questionnaire",
+        verbose_name="questionnaire",
+        related_name="questionnaire_files",
+        on_delete=models.CASCADE,
+    )
+    file = models.FileField(
+        verbose_name="fichier", upload_to=questionnaire_pj_file_path
+    )
+    order_with_respect_to = "questionnaire"
+
+    class Meta:
+        ordering = ("questionnaire", "order")
+        verbose_name = "Questionnaire: Fichier Annexe"
+        verbose_name_plural = "Questionnaire: Fichiers Annexes"
+
+    @property
+    def url(self):
+        return reverse("send-questionnaire-pj-file", args=[self.id])
+
+    @property
+    def basename(self):
+        """
+        Name of file, without path.
+        """
+        return os.path.basename(self.file.name)
+
+    @property
+    def downloadname(self):
+        """
+        Name of file, without path.
+        """
+        return self.basename
 
 
 class Theme(OrderedModel, WithNumberingMixin):
@@ -375,6 +429,13 @@ class QuestionFile(OrderedModel, FileInfoMixin):
         """
         return os.path.basename(self.file.name)
 
+    @property
+    def downloadname(self):
+        """
+        Name of file, without path.
+        """
+        return self.basename
+
 
 @cleanup.ignore
 class ResponseFile(TimeStampedModel, FileInfoMixin):
@@ -393,7 +454,7 @@ class ResponseFile(TimeStampedModel, FileInfoMixin):
     is_deleted = models.BooleanField(
         verbose_name="Supprimé",
         default=False,
-        help_text="Ce fichier est=il dans la corbeille?",
+        help_text="Ce fichier est-il dans la corbeille ?",
     )
 
     class Meta:
@@ -413,3 +474,15 @@ class ResponseFile(TimeStampedModel, FileInfoMixin):
         if self.is_deleted:
             return prefixer.strip_deleted_file_prefix()
         return prefixer.strip_file_prefix()
+
+    @property
+    def downloadname(self):
+        """
+        Name of file for download, prefixed.
+        """
+        prefixer = Prefixer(self)
+        if self.is_deleted:
+            filename = prefixer.strip_deleted_file_prefix()
+            return f"{prefixer.make_deleted_file_prefix()}-{filename}"
+        filename = prefixer.strip_file_prefix()
+        return f"{prefixer.make_file_prefix()}-{filename}"
