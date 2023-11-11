@@ -5,15 +5,15 @@ from ordered_model.models import OrderedModel
 from django_softdelete.models import SoftDeleteModel
 
 
-class FAQItem(OrderedModel, SoftDeleteModel):
+class CGUItem(OrderedModel, SoftDeleteModel):
     title = models.CharField("title", max_length=255)
     slug = models.SlugField("slug", max_length=255)
     description = RichTextField("description", blank=True)
 
     class Meta:
         ordering = ("order",)
-        verbose_name = "Item de F.A.Q"
-        verbose_name_plural = "Items de F.A.Q"
+        verbose_name = "Item de C.G.U."
+        verbose_name_plural = "Items de C.G.U."
 
     def __str__(self):
         return self.title

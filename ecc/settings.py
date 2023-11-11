@@ -64,7 +64,7 @@ INSTALLED_APPS = [
     "django_admin",
     "django_http_referrer_policy",
     "email_obfuscator",
-    "softdelete",
+    "django_softdelete",
     # Project's apps
     "backoffice",
     "config",
@@ -81,6 +81,7 @@ INSTALLED_APPS = [
     "soft_deletion",
     "tos",
     "logs",
+    "parametres",
     # Central app - loaded last
     "ecc",
 ]

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% load email_obfuscator %}
+{% load parametres_tags %}
 {% block content %}
 <div id="page" class="page white">
   <div id="non-footer" class="container">
@@ -10,9 +11,9 @@
         <img src="{% static 'img/photo_cour_des_comptes.jpg' %}" alt="Photo de la Cour des comptes" />
       </div>
       <div class="col-md d-flex flex-column justify-content-between align-items-center">
-        <div class="mt-8 mt-md-2 mt-lg-8 mb-2 d-flex flex-column justify-content-center align-items-center">
-          <div class="mb-5">
-            <img src="{% static 'img/logo_white_back.png' %}" alt="logo e.contrôle" />
+        <div class="mt-2 mt-md-2 mt-lg-2 d-flex flex-column justify-content-center align-items-center">
+          <div class="mb-5 text-center" style="font-family: Trebuchet MS; font-size: 5em;">
+          	<img src="{% static 'img/logo_white_back.png' %}" alt="logo e.contrôle" />
           </div>
           <h3 class="mb-lg-5 text-center">
             La plateforme d'échange de <br/> documents durant les contrôles
@@ -57,14 +58,15 @@
               {% endif %}
             </form>
             <div class="text-center text-muted small mt-2 mt-lg-5">
-              Vous rencontrez des difficultés pour vous connecter?
+              <p class="my-0">Vous rencontrez des difficultés pour vous connecter ?</p>
             </div>
             <div class="text-center text-muted small">
-              {{ settings.SUPPORT_TEAM_EMAIL|obfuscate_mailto:"Demandez de l'aide" }}
+              <p class="my-0">
+              {% get_support_email_item as support_email %}
+              {{ support_email.url|obfuscate_mailto:"Demandez de l'aide" }}
               ou
-              <a href="{% url 'faq' %}">
-                consultez la Foire aux Questions
-              </a>
+              <a href="{% url 'faq' %}">consultez la Foire aux Questions</a>.
+              </p>
             </div>
           </div>
         </div>
