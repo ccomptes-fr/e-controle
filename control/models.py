@@ -111,8 +111,8 @@ class Control(SoftDeleteModel):
     objects = DeletableQuerySet.as_manager()
 
     class Meta:
-        verbose_name = "Procédure"
-        verbose_name_plural = "Procédures"
+        verbose_name = "Contrôle"
+        verbose_name_plural = "Contrôles"
 
     def data(self):
         return {
