@@ -124,7 +124,9 @@ export default Vue.extend({
 
       // Ajout des attributs accessibilité pour l'icône de succès
       svgElement.setAttribute('role', 'img');
-      svgElement.setAttribute('aria-label', 'Dépôt validé'); // Texte descriptif pour l'icône de succès
+      svgElement.setAttribute('aria-label', 'Valider'); // Texte descriptif pour l'icône de succès
+
+      svgElement.querySelector('title').textContent = 'Valider'; // Texte descriptif pour les technologies d'assistance
 
       // Suppression de l'élément de suppression du fichier de l'interface utilisateur de Dropzone
       file.previewElement.getElementsByClassName('dz-remove')[0].remove();
@@ -138,7 +140,9 @@ export default Vue.extend({
 
       // Ajout des attributs accessibilité pour l'icône d'erreur
       svgElement.setAttribute('role', 'img');
-      svgElement.setAttribute('aria-label', 'Échec lors du dépôt du fichier'); // Texte descriptif pour l'icône d'erreur
+      svgElement.setAttribute('aria-label', 'Échouer'); // Texte descriptif pour l'icône d'erreur
+
+      svgElement.querySelector('title').textContent = 'Échouer'; // Texte descriptif pour les technologies d'assistance
 
       // Suppression de l'élément de suppression du fichier de l'interface utilisateur de Dropzone
       file.previewElement.getElementsByClassName('dz-remove')[0].remove();
