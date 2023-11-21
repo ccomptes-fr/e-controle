@@ -13,7 +13,7 @@
         Fichier{{ answer_count===1 ? '': 's' }} déposé{{ answer_count===1 ? '': 's' }}:
       </div>
       <table class="response-file-list table table-hover table-outline table-vcenter text-nowrap
-                    card-table">
+                    card-table" title="Fichiers déposés">
         <thead>
           <tr>
             <th style="width: 16%;">Date de dépôt</th>
