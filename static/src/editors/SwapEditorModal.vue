@@ -1,5 +1,5 @@
 <template>
-    <div class="modal" tabindex="-1" role="dialog">
+    <div class="modal" tabindex="-1" role="dialog" aria-labelledby="labelForSwapEditoModal">
       <div class="modal-dialog large-modal" role="document">
         <div class="modal-content">
           <div class="modal-header border-bottom-0">
