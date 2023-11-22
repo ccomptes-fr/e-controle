@@ -10141,14 +10141,6 @@ img {
   min-height: 100%;
 }
 
-.page a {
-  color: #0066cc; /* Couleur de base des liens */
-}
-
-.page a:hover {
-  color: #004080; /* Couleur des liens au survol */
-}
-
 body.fixed-header .page {
   padding-top: 4.5rem;
 }
