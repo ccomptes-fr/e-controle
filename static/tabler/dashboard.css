@@ -1829,6 +1829,10 @@ pre code {
   border: 0;
 }
 
+.table-responsive a {
+  color: #0066cc;
+}
+
 .form-control {
   display: block;
   width: 100%;
@@ -10139,7 +10143,6 @@ img {
 
 .page a {
   color: #0066cc; /* Couleur de base des liens */
-  text-decoration: underline; /* Ajouter un soulignement aux liens */
 }
 
 .page a:hover {
