@@ -101,7 +101,7 @@
         <p>
           <span class="fe fe-check-circle fg-success big-icon" aria-hidden="true"></span>
         </p>
-        <div id="modal_title" class="text-center">
+        <div id="success_publish_modal_title" class="text-center">
           Bravo, votre questionnaire est publié!
         </div>
         <div class="mt-5">

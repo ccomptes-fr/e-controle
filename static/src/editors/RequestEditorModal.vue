@@ -4,7 +4,7 @@
       <div class="modal-content">
         <div class="modal-header border-bottom-0" aria-labelledby="modal_title">
           <span class="fa fa-exchange-alt mr-2 mt-3" aria-hidden="true"></span>
-          <div id="modal_title" class="modal-title">
+          <div id="edit_modal_title" class="modal-title">
             <div class="modal-title">Obtenir les droits de rédaction du questionnaire</div>
           </div>
           <button type="button"
