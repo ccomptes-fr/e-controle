@@ -170,7 +170,7 @@
               <strong>../{{ control.reference_code }}</strong>
             </div>
             <a class="btn btn-secondary parent-fake-icon" @click="showWebdavTip">
-              <i class="fe fe-folder mr-3"></i>
+              <span class="fe fe-folder mr-3"></span>
               <img :src="'/static/img/file-explorer.png'" alt="Explorateur Windows" class="fake-icon" />
               Comment voir les réponses ?
             </a>

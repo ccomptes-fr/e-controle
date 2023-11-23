@@ -26,7 +26,7 @@
       title="Informer l'organisme contrôlé" @confirm="sendMail()">
       <div class="modal-header border-bottom-0 flex-column align-items-center">
         <p>
-          <i class="fa fa-exclamation-triangle text-warning big-icon"></i>
+          <span class="fa fa-exclamation-triangle text-warning big-icon"></span>
         </p>
         <div class="mt-5">
           <p>Attention, les réponses ne sont pas complètes!</p>
@@ -139,7 +139,7 @@ Finalisé : l'instruction des pièces déposées est achevée">
                   <div class="btn-group">
                     <a class="btn btn-secondary" :href="questionnaireDetailUrl(questionnaire.id)"
                       title="Déposer et consulter vos réponses">
-                      <i class="fe fe-eye"></i>
+                      <span class="fe fe-eye"></span>
                       Répondre
                     </a>
                     <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
@@ -267,7 +267,7 @@ Finalisé : l'instruction des pièces déposées est achevée">
                       <button v-if="questionnaire_is_replied(questionnaire.id)" class="dropdown-item text-danger"
                           type="button"
                           @click="markQuestionnaireAsNotClosed(questionnaire.id), showNotClosedModal(questionnaire)">
-                          <i class="fe fe-check"></i>
+                          <span class="fe fe-check"></span>
                           Marquer comme non terminé
                         </button>
                     </div>

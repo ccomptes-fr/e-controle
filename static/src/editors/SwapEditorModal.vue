@@ -1,10 +1,10 @@
 <template>
-    <div class="modal" tabindex="-1" role="dialog">
+    <div class="modal" tabindex="-1" role="dialog" aria-labelledby="labelForSwapEditoModal">
       <div class="modal-dialog large-modal" role="document">
         <div class="modal-content">
           <div class="modal-header border-bottom-0">
             <span class="fa fa-exchange-alt mr-2 mt-3" aria-hidden="true"></span>
-            <div id="modal_title" class="modal-title">
+            <div id="swap_edit_modal_title" class="modal-title">
                 Transférer les droits de rédaction du questionnaire
             </div>
             <button type="button"
