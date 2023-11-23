@@ -116,18 +116,36 @@ export default Vue.extend({
       this.hasErrors = false
     },
     styleSuccess(file) {
-      file.previewElement.getElementsByClassName('dz-success-mark')[0]
-        .getElementsByTagName('g')[0]
-        .getElementsByTagName('path')[0]
-        .setAttribute('fill', '#5EBB00') // success color in tabler
-      file.previewElement.getElementsByClassName('dz-remove')[0].remove()
+      const successMark = file.previewElement.getElementsByClassName('dz-success-mark')[0];
+      const svgElement = successMark.querySelector('svg');
+
+      // Modification de la couleur de l'icône de succès
+      svgElement.querySelector('path').setAttribute('fill', '#5EBB00'); // success color in tabler
+
+      // Ajout des attributs accessibilité pour l'icône de succès
+      svgElement.setAttribute('role', 'img');
+      svgElement.setAttribute('aria-label', 'Valider'); // Texte descriptif pour l'icône de succès
+
+      svgElement.querySelector('title').textContent = 'Valider'; // Texte descriptif pour les technologies d'assistance
+
+      // Suppression de l'élément de suppression du fichier de l'interface utilisateur de Dropzone
+      file.previewElement.getElementsByClassName('dz-remove')[0].remove();
     },
     styleError(file) {
-      file.previewElement.getElementsByClassName('dz-error-mark')[0]
-        .getElementsByTagName('g')[0]
-        .getElementsByTagName('g')[0]
-        .setAttribute('fill', '#cd201f') // danger color in tabler
-      file.previewElement.getElementsByClassName('dz-remove')[0].remove()
+      const errorMark = file.previewElement.getElementsByClassName('dz-error-mark')[0];
+      const svgElement = errorMark.querySelector('svg');
+
+      // Modification de la couleur de l'icône d'erreur
+      svgElement.querySelector('path').setAttribute('fill', '#cd201f'); // danger color in tabler
+
+      // Ajout des attributs accessibilité pour l'icône d'erreur
+      svgElement.setAttribute('role', 'img');
+      svgElement.setAttribute('aria-label', 'Échouer'); // Texte descriptif pour l'icône d'erreur
+
+      svgElement.querySelector('title').textContent = 'Échouer'; // Texte descriptif pour les technologies d'assistance
+
+      // Suppression de l'élément de suppression du fichier de l'interface utilisateur de Dropzone
+      file.previewElement.getElementsByClassName('dz-remove')[0].remove();
     },
     styleTimeout(file, errorMessage) {
       // Dropzone leaves the file in "processing" state, which looks weird. We style it to look like
