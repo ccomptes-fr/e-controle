@@ -26,7 +26,7 @@ from .models import (
     QuestionnaireFile,
 )
 from .questionnaire_duplicate import QuestionnaireDuplicateMixin
-
+from user_profiles.models import Access
 
 class ParentLinksMixin(object):
     def link_to_question(self, obj):
@@ -85,6 +85,12 @@ class QuestionnaireInline(OrderedTabularInline):
     extra = 1
 
 
+class AccesInline(admin.TabularInline):
+    model = Access
+    verbose_name_plural = "Profiles Utilisateurs"
+    extra = 1
+
+
 @admin.register(Control)
 class ControlAdmin(SoftDeletedAdmin, OrderedInlineModelAdminMixin, OrderedModelAdmin):
     list_display = ("id", "title", "depositing_organization", "reference_code")
@@ -94,7 +100,10 @@ class ControlAdmin(SoftDeletedAdmin, OrderedInlineModelAdminMixin, OrderedModelA
         "questionnaires__title",
         "questionnaires__description",
     )
-    inlines = (QuestionnaireInline,)
+    inlines = (
+        QuestionnaireInline,
+        AccesInline,
+    )
     list_filter = (IsActiveFilter,)
 
 
