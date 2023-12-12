@@ -155,7 +155,7 @@ deploy:commit:rabbitmq_reprise_collecte_pro:
   when: manual
   variables:
     <<: *deploy_rabbitmq_variables
-    IMAGE_TAG: 3.8.2-management
+    IMAGE_TAG: 3.12.4
     IMAGE_NAME: rabbitmq
     CONTAINER_NAME: rabbitmq-collecte-pro
     RABBITMQ_UI_PORT: 15673
