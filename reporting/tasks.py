@@ -109,7 +109,7 @@ def send_files_report():
     html_template = "reporting/email/files_report.html"
     text_template = "reporting/email/files_report.txt"
     for control in Control.objects.all():
-        logger.info(f"Processing control: {control.id}")
+        logger.info(f"Contrôle : {control.id}")
         if control.depositing_organization:
             subject = control.depositing_organization
         else:
@@ -117,14 +117,17 @@ def send_files_report():
         subject += " - de nouveaux documents déposés !"
         files = get_files(control)
         if not files:
-            logger.info("No new documents, aborting.")
+            logger.info(f"Pas de nouveau document, arrêt.")
             continue
-        recipients = control.user_profiles.filter(send_files_report=True)
-        recipient_list = recipients.values_list("user__email", flat=True)
+        recipient_list = [
+            access.userprofile.user.email
+            for access in control.access.all()
+            if access.userprofile.send_files_report == True
+        ]
         if not recipient_list:
-            logger.info("No recipients, aborting.")
+            logger.info(f"Pas de destinataire, arrêt.")
             continue
-        logger.debug(f"Recipients: {len(recipient_list)}")
+        logger.debug(f"Destinataires : {len(recipient_list)}")
         date_cutoff = get_date_cutoff(control)
         context = {
             "control": control,
