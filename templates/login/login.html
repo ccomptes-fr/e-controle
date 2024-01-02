@@ -78,6 +78,16 @@
             </div>
           </div>
         </div>
+        {%if alerte%}
+        <div id="alerte">
+          <div class="justify-content-center align-items-center row">
+            <div class="alert alert-danger alert-icon" role="alert">
+              <i class="fe fe-alert-triangle" aria-hidden="true"></i>
+              <p>{{alerte.text}}</p>
+            </div>
+          </div>
+        </div>
+        {%endif%}
         <a href="#a-quoi-sert-e-controle" class="mb-4 btn btn-secondary btn-pill">
           En savoir plus sur e.contrôle
         </a>
