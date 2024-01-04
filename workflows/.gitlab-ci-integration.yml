@@ -152,10 +152,10 @@ test:tests_back:
     - .test:tests_back
   rules: *default_rules
 
-# lint:linter_frontend:
-#   extends:
-#     - .lint:linter_frontend
-#   rules: *default_rules
+lint:linter_frontend:
+  extends:
+    - .lint:linter_frontend
+  rules: *default_rules
 
 # lint:linter_backend:
 #   extends:
