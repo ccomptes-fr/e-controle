@@ -51,20 +51,20 @@
     - coverage.xml
     expire_in: 10 min
 
-# .lint:linter_frontend:
-#   image: ${DOCKER_REGISTRY}node/node16:16.13.1
-#   interruptible: true
-#   allow_failure: false
-#   stage: lint
-#   cache:
-#     key: $CI_COMMIT_REF_SLUG
-#     paths:
-#       - .npm/
-#       - node_modules/
-#   before_script:
-#     - npm i --cache .npm --prefer-offline --force --registry=http://${REGISTRY_DOMAINE}/repository/npm/
-#   script:
-#     - npm run lint || true
+.lint:linter_frontend:
+  image: ${DOCKER_REGISTRY}node/node16:16.13.1
+  interruptible: true
+  allow_failure: false
+  stage: lint
+  cache:
+    key: $CI_COMMIT_REF_SLUG
+    paths:
+      - .npm/
+      - node_modules/
+  before_script:
+    - npm i --cache .npm --prefer-offline --force --registry=http://${REGISTRY_DOMAINE}/repository/npm/
+  script:
+    - npm run lint || true
 
 # .lint:linter_backend:
 #   image: ${DOCKER_REGISTRY}python/python3:latest
