@@ -15,7 +15,7 @@ click-repl==0.2.0
 coreapi==2.3.3
 coreschema==0.0.4
 Deprecated==1.2.13
-Django==3.2.17
+Django==3.2.20
 django-activity-stream==1.4.2
 django-admin==2.0.2
 django-admin-confirm==1.0.0

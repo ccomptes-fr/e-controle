@@ -12,11 +12,11 @@
       </info-bar>
       <form>
         <div class="form-group mb-6">
-          <label v-for="ctrl in controlsInspected"
-                :for="questionnaireId + '_' + ctrl.id"
+          <label v-for="ctrl in controls"
+                :for="ctrl.id"
                 :key="ctrl.id"
                 class="custom-control custom-checkbox">
-            <input :id="questionnaireId + '_' + ctrl.id" type="checkbox" class="custom-control-input" :value="ctrl.id" v-model="checkedCtrls">
+            <input :id="ctrl.id" type="checkbox" class="custom-control-input" :value="ctrl.id" v-model="checkedCtrls">
             <span class="custom-control-label">{{ ctrl.depositing_organization }} - {{ ctrl.title }} ({{ ctrl.reference_code }})</span>
           </label>
         </div>
@@ -26,7 +26,7 @@
       title="Informer l'organisme contrôlé" @confirm="sendMail()">
       <div class="modal-header border-bottom-0 flex-column align-items-center">
         <p>
-          <i class="fa fa-exclamation-triangle text-warning big-icon"></i>
+          <span class="fa fa-exclamation-triangle text-warning big-icon"></span>
         </p>
         <div class="mt-5">
           <p>Attention, les réponses ne sont pas complètes!</p>
@@ -135,11 +135,11 @@ Finalisé : l'instruction des pièces déposées est achevée">
             </td>
             <td class="w-1 action-column">
               <template v-if="accessType !== 'demandeur'">
-                <div v-if="questionnaire_has_replies(questionnaire.id)" class="text-right">
+                <div v-if="questionnaire_has_replies(questionnaire.id) && (!questionnaire.is_replied || questionnaire.is_not_closed) " class="text-right">
                   <div class="btn-group">
                     <a class="btn btn-secondary" :href="questionnaireDetailUrl(questionnaire.id)"
                       title="Déposer et consulter vos réponses">
-                      <i class="fe fe-eye"></i>
+                      <span class="fe fe-eye"></span>
                       Répondre
                     </a>
                     <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
@@ -147,33 +147,42 @@ Finalisé : l'instruction des pièces déposées est achevée">
                       <span class="sr-only">Menu d'actions</span>
                     </button>
                     <div class="dropdown-menu dropdown-menu-right">
-                      <button class="dropdown-item text-success" type="button"
-                        @click="markQuestionnaireAsReplied(questionnaire.id)">
-                        <i class="fe fe-check"></i>
+                      <button
+                        class="dropdown-item text-success"
+                        type="button"
+                        @click="markQuestionnaireAsReplied(questionnaire.id)"
+                      >
+                        <span class="fe fe-check" aria-hidden="true"></span>
                         Marquer comme répondu
                       </button>
                     </div>
                   </div>
                 </div>
                 <div v-else class="text-right">
-                  <a :href="questionnaireDetailUrl(questionnaire.id)" class="btn btn-primary ml-2"
-                    title="Déposer et consulter vos réponses">
-                    <i class="fe fe-eye"></i>
+                  <a
+                    :href="questionnaireDetailUrl(questionnaire.id)"
+                    class="btn btn-primary ml-2"
+                    title="Déposer et consulter vos réponses"
+                  >
+                    <span class="fe fe-eye" aria-hidden="true"></span>
                     Répondre
                   </a>
                 </div>
               </template>
               <template v-else>
-                <template v-if="
-                  questionnaire.is_draft &&
-                  !!questionnaire.editor &&
-                  questionnaire.editor.id === user.id
-                ">
+                <template
+                  v-if="
+                    questionnaire.is_draft &&
+                    !!questionnaire.editor &&
+                    questionnaire.editor.id === user.id
+                  "
+                >
                   <div class="text-right">
                     <div class="btn-group">
-                      <a class="btn btn-secondary" :href="questionnaireEditUrl(questionnaire.id)"
+                      <a class="btn btn-secondary"
+                        :href="questionnaireEditUrl(questionnaire.id)"
                         title="Modifier le brouillon de questionnaire">
-                        <i class="fe fe-edit"></i>
+                        <span class="fe fe-edit" aria-hidden="true"></span>
                         Modifier
                       </a>
                        <button
@@ -198,11 +207,14 @@ Finalisé : l'instruction des pièces déposées est achevée">
                   </div>
                 </template>
                 <template v-else-if="questionnaire.is_draft &&
-                  questionnaire.editor.id !== user.id">
+                                    questionnaire.editor.id !== user.id"
+                >
                   <div class="text-right">
-                    <a :href="questionnaireDetailUrl(questionnaire.id)" class="btn btn-primary ml-2"
-                      title="Voir le brouillon de questionnaire">
-                      <i class="fe fe-eye"></i>
+                    <a :href="questionnaireDetailUrl(questionnaire.id)"
+                      class="btn btn-primary ml-2"
+                      title="Voir le brouillon de questionnaire"
+                    >
+                      <span class="fe fe-eye" aria-hidden="true"></span>
                       Consulter
                     </a>
                   </div>
@@ -232,7 +244,6 @@ Finalisé : l'instruction des pièces déposées est achevée">
                         class="dropdown-item"
                         type="button"
                         @click="showModal(questionnaire.id)"
-                        v-if="controlsInspected.length"
                       >
                         <span class="fe fe-copy" aria-hidden="true"></span>
                         Dupliquer
@@ -253,23 +264,12 @@ Finalisé : l'instruction des pièces déposées est achevée">
                         <span class="fe fe-check" aria-hidden="true"></span>
                         Marquer comme finalisé
                       </button>
-                      <div class="dropdown-menu dropdown-menu-right">
-                        <button class="dropdown-item" type="button" @click="showModal(questionnaire.id)">
-                          <i class="fe fe-copy"></i>
-                          Dupliquer
-                        </button>
-                        <button v-if="questionnaire_is_replied(questionnaire.id)" class="dropdown-item text-success"
-                          type="button" @click="markQuestionnaireAsFinalized(questionnaire.id)">
-                          <i class="fe fe-check"></i>
-                          Marquer comme finalisé
-                        </button>
-                        <button v-if="questionnaire_is_replied(questionnaire.id)" class="dropdown-item text-danger"
+                      <button v-if="questionnaire_is_replied(questionnaire.id)" class="dropdown-item text-danger"
                           type="button"
                           @click="markQuestionnaireAsNotClosed(questionnaire.id), showNotClosedModal(questionnaire)">
-                          <i class="fe fe-check"></i>
+                          <span class="fe fe-check"></span>
                           Marquer comme non terminé
                         </button>
-                      </div>
                     </div>
                 </template>
               </template>
@@ -329,7 +329,7 @@ export default Vue.extend({
       checkedCtrls: [],
       currentView: 'questions',
       isList: true,
-      controlsInspected:[],
+      currentQuestionnaireThemes: [],
     }
   },
   computed: {
@@ -351,12 +351,11 @@ export default Vue.extend({
       return backendUrls['questionnaire-create'](this.control.id)
     },
     hasAnyAnswer() {
-      let questionnaires = this.accessibleQuestionnaires.filter(aq => aq.has_replies)
+      let questionnaires = this.accessibleQuestionnaires.filter(aq => this.questionnaire_has_replies(aq.id))
       return (questionnaires.length > 0)
     },
   },
   mounted() {
-    this.getControlsInspectedFromUser()
   },
   methods: {
     getUsers() {
@@ -385,6 +384,7 @@ export default Vue.extend({
       return backendUrls['questionnaire-edit'](questionnaireId)
     },
     startQuestionnaireDeleteFlow(questionnaireId) {
+      let self = this;
       const getUpdateMethod = (qId) => axios.put.bind(this, backendUrls.questionnaire(qId))
       const curQ = this.control.questionnaires.find(q => q.id === questionnaireId)
       const newQ = { ...curQ, control: null }
@@ -435,7 +435,8 @@ export default Vue.extend({
 
       getUpdateMethod(qId)(newQ).then(() => {
         window.location.reload();
-      })    },
+      })
+    },
     markQuestionnaireAsFinalized(qId) {
       const getUpdateMethod = (qId) => axios.put.bind(this, backendUrls.questionnaire(qId))
       const curQ = this.control.questionnaires.find(q => q.id === qId)
@@ -443,6 +444,12 @@ export default Vue.extend({
       getUpdateMethod(qId)(newQ).then(() => {
         window.location.reload();
       })
+    },
+    markQuestionnaireAsNotClosed(qId) {
+      const getUpdateMethod = (qId) => axios.put.bind(this, backendUrls.questionnaire(qId))
+      const curQ = this.control.questionnaires.find(q => q.id === qId)
+      const newQ = { ...curQ, is_not_closed: true }
+      getUpdateMethod(qId)(newQ)
     },
     getControlsInspectedFromUser() {
       axios.get(backendUrls.getControlsInspectedFromUser(this.user.id))
@@ -458,11 +465,15 @@ export default Vue.extend({
       }
       this.isList = !this.isList;
     },
-    cloneQuestionnaire() {
+    async cloneQuestionnaire() {
+      let self = this
       const getCreateMethod = () => axios.post.bind(this, backendUrls.questionnaire())
       const getUpdateMethod = (qId) => axios.put.bind(this, backendUrls.questionnaire(qId))
 
       if (this.checkedCtrls.length) {
+
+        const resp = await axios.get(backendUrls.getQuestionnaireAndThemes(this.user.id))
+        this.control = resp.data.filter(obj => obj.id === this.control.id)[0]
         const curQ = this.control.questionnaires.find(q => q.id === this.questionnaireId)
         const destCtrls = this.controls.filter(ctrl => this.checkedCtrls.includes(ctrl.id))
 
@@ -482,8 +493,6 @@ export default Vue.extend({
 
             getUpdateMethod(qId)(newQ).then(response => {
               const updatedQ = response.data
-
-              // Update questionnaires list render when duplicated
               self.$root.$emit('questionnaire-created')
               curQ.themes.forEach(t => {
                 t.questions.forEach(q => {

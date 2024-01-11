@@ -4,7 +4,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <div id="modal_title" class="modal-title">{{ editingControl.title }}</div>
+        <div id="add_user_modal_title" class="modal-title">{{ editingControl.title }}</div>
       </div>
       <div class="modal-body">
         <div v-if="hasErrors" class="alert alert-danger" role="alert">

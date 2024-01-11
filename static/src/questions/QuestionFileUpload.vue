@@ -4,17 +4,17 @@
     <p>{{ errorMessage }}</p>
   </error-bar>
   <div v-if="question.id">
-    <label class="btn btn-primary">
+    <button class="btn btn-primary">
       <span class="fe fe-upload mr-2"></span>
       Ajouter un fichier annexe
       <input type="file" ref="fileInput" v-on:change="handleFileUpload()" hidden/>
-    </label>
+    </button>
   </div>
   <div v-else>
-    <label class="btn btn-primary disabled" >
+    <button class="btn btn-primary disabled" disabled>
       <span class="fe fe-upload mr-2" ></span>
       Ajouter un fichier annexe
-    </label>
+    </button>
     <div class="small">
       Pour pouvoir ajouter des annexes,
     </div>

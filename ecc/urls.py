@@ -16,6 +16,7 @@ from demo import views as demo_views
 from editor import api_views as editor_api_views
 from faq import views as faq_views
 from magicauth import views as magicauth_views
+from .views import LoginView
 from magicauth.urls import urlpatterns as magicauth_urls
 from session import api_views as session_api_views
 from soft_deletion import api_views as deletion_api_views
@@ -44,7 +45,7 @@ router.register(r"deletion", deletion_api_views.DeleteViewSet, basename="deletio
 
 
 urlpatterns = [
-    path("", magicauth_views.LoginView.as_view(), name="login"),
+    path("", LoginView.as_view(), name="login"),
     path("cgu/", tos_views.tos, name="tos"),
     path(
         settings.ADMIN_URL + "login/",

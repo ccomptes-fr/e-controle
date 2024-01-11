@@ -53,7 +53,7 @@
         <p>
           <span class="fe fe-check-circle fg-success big-icon" aria-hidden="true"></span>
         </p>
-        <p id="modal_title" class="text-center">
+        <p id="delete_modal_title" class="text-center">
           Le questionnaire a bien été supprimé.
         </p>
       </div>

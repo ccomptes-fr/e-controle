@@ -5,7 +5,7 @@
         class="alert alert-warning alert-icon"
         v-if="!getAuditedUsers().length"
       >
-        <i class="fa fa-exclamation-circle mr-2" aria-hidden="true"></i>
+        <span class="fa fa-exclamation-circle mr-2" aria-hidden="true"></span>
         <div class="mb-4">
           <strong>Attention !</strong>
           Vous n'avez pas sélectionné d'organisme de contrôle. Êtes-vous sûr de
@@ -101,7 +101,7 @@
         <p>
           <span class="fe fe-check-circle fg-success big-icon" aria-hidden="true"></span>
         </p>
-        <div id="modal_title" class="text-center">
+        <div id="success_publish_modal_title" class="text-center">
           Bravo, votre questionnaire est publié!
         </div>
         <div class="mt-5">

@@ -1,4 +1,6 @@
-from pdfrw import PdfReader, PdfWriter, IndirectPdfDict
+from pdfrw import PdfReader
+import openpyxl
+from docx import Document
 from django.conf import settings
 import pytest
 
@@ -225,8 +227,7 @@ def test_uploaded_pdf_response_file_is_metadata_updated(client):
     assert pdf.Info.Author.decode() != dummy_pdf.Info.Author.decode()
     # TODO comparer la date de modification dans la metadonnees du pdf (pdf.Info.ModDate)
 
-@pytest.mark.skip(reason="A modifier")
-def test_uploaded_xls_response_file_is_same_size(client):
+def test_uploaded_xls_response_file_is_metadata_updated(client):
     audited = factories.UserProfileFactory(profile_type=UserProfile.AUDITED)
     question = factories.QuestionFactory()
     audited.access.create(
@@ -239,13 +240,16 @@ def test_uploaded_xls_response_file_is_same_size(client):
     utils.login(client, user=audited.user)
     url = reverse("response-upload")
     dummy_file = factories.dummy_xlsx_file
+    workbook = openpyxl.load_workbook(settings.BASE_DIR + "/tests/data/test.xlsx")
+    author_before_upload = workbook.properties.creator
     post_data = {"file": dummy_file.open(), "question_id": [question.id]}
     response = client.post(url, post_data, format="multipart")
     response_file = ResponseFile.objects.last()
-    assert response_file.file.size == dummy_file.size
+    workbook = openpyxl.load_workbook(response_file.file.path)
+    author_after_upload = workbook.properties.creator
+    assert author_after_upload != author_before_upload
 
-@pytest.mark.skip(reason="A modifier")
-def test_uploaded_doc_response_file_is_same_size(client):
+def test_uploaded_doc_response_file_is_metadata_updated(client):
     audited = factories.UserProfileFactory(profile_type=UserProfile.AUDITED)
     question = factories.QuestionFactory()
     audited.access.create(
@@ -261,5 +265,8 @@ def test_uploaded_doc_response_file_is_same_size(client):
     post_data = {"file": dummy_file.open(), "question_id": [question.id]}
     response = client.post(url, post_data, format="multipart")
     response_file = ResponseFile.objects.last()
-    print(response_file)
-    assert response_file.file.size == dummy_file.size
+    doc_after_upload = Document(response_file.file.path)
+    author_after_upload = doc_after_upload.core_properties.author
+    dummy_doc = Document(dummy_file)
+    author_before_upload = dummy_doc.core_properties.author
+    assert author_after_upload != author_before_upload

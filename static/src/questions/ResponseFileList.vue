@@ -2,7 +2,7 @@
   <div>
     <success-bar v-if="hasSucessMessage" @dismissed="clearSuccessMessage">
       <p>Le fichier "{{ successFilename }}" a bien été envoyé à la corbeille.
-      <a :href="trashUrl">Cliquez ici</a>
+      <a :href="trashUrl" class="trash-link">Cliquez ici</a>
       pour le voir dans la corbeille.</p>
     </success-bar>
     <error-bar v-if="errorMessage" @dismissed="clearErrorMessage">
@@ -13,7 +13,7 @@
         Fichier{{ answer_count===1 ? '': 's' }} déposé{{ answer_count===1 ? '': 's' }}:
       </div>
       <table class="response-file-list table table-hover table-outline table-vcenter text-nowrap
-                    card-table">
+                    card-table" title="Fichiers déposés">
         <thead>
           <tr>
             <th style="width: 16%;">Date de dépôt</th>
@@ -177,5 +177,8 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-
+.trash-link {
+  text-decoration: underline;
+  /* Ajoute un soulignement au lien */
+}
 </style>

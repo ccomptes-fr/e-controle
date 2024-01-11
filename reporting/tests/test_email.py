@@ -14,7 +14,6 @@ pytestmark = mark.django_db
 
 User = get_user_model()
 
-@pytest.mark.skip(reason="ImportError")
 def test_email_is_sent_if_there_is_a_response_file():
     response_file = factories.ResponseFileFactory()
     inspector = factories.UserProfileFactory(profile_type=UserProfile.INSPECTOR)
@@ -30,7 +29,6 @@ def test_email_is_sent_if_there_is_a_response_file():
     count_emails_after = len(mail.outbox)
     assert count_emails_after == count_emails_before + 1
 
-@pytest.mark.skip(reason="ImportError")
 def test_email_is_not_sent_if_sending_flag_is_disabled():
     response_file = factories.ResponseFileFactory()
     inspector = factories.UserProfileFactory(profile_type=UserProfile.INSPECTOR)

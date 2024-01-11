@@ -6,7 +6,7 @@
       when: manual
 
 .test:tests_back:
-  image: ${DOCKER_REGISTRY}python:3.9.13
+  image: ${DOCKER_REGISTRY}tools/python:3.9.17
   stage: test
   interruptible: true
   allow_failure: false
@@ -37,8 +37,8 @@
     paths:
       - .cache/pip
   before_script:
-    - pip install -r requirements.txt --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
-    - pip install -r requirements-dev.txt --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
+    - pip install -r requirements.txt --index-url ${NEXUS_URL} --trusted-host ${NEXUS_HOST}
+    - pip install -r requirements-dev.txt --index-url ${NEXUS_URL} --trusted-host ${NEXUS_HOST}
     # conflict version with soft-delete
     # - pip install coverage==5.5 --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
     - python manage.py migrate
@@ -100,7 +100,7 @@
     - docker run --rm -v $(pwd):/usr/src -e SONAR_HOST_URL=${SONAR_HOST_URL} ${DOCKER_REGISTRY}sonarqube
 
 .security:bandit:
-  image: ${DOCKER_REGISTRY}python:3.9.13
+  image: ${DOCKER_REGISTRY}tools/python:3.9.17
   interruptible: true
   allow_failure: true
   stage: security
@@ -111,12 +111,12 @@
     paths:
       - .cache/pip
   before_script:
-    - pip install bandit --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
+    - pip install bandit --index-url --index-url ${NEXUS_URL} --trusted-host ${NEXUS_HOST}
   script:
     - bandit -r .
 
 .security:safety:
-  image: ${DOCKER_REGISTRY}python:3.9.13
+  image: ${DOCKER_REGISTRY}tools/python:3.9.17
   interruptible: true
   allow_failure: true
   stage: security
@@ -127,7 +127,7 @@
     paths:
       - .cache/pip
   before_script:
-    - pip install safety --index-url http://${REGISTRY_DOMAINE}/repository/python/simple/ --trusted-host ${REGISTRY_DOMAINE}
+    - pip install safety --index-url --index-url ${NEXUS_URL} --trusted-host ${NEXUS_HOST}
     - export http_proxy=${PROXY_CC_URL}
     - export https_proxy=${PROXY_CC_URL}
   script:

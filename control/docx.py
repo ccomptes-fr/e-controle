@@ -40,7 +40,7 @@ def generate_questionnaire_file(questionnaire):
     absolute_path = os.path.join(settings.MEDIA_ROOT, relative_path)
     file_folder = ntpath.split(absolute_path)[0]
     if not os.path.exists(file_folder):
-        os.makedirs(file_folder)
+        os.makedirs(file_folder, mode = settings.CHOWN_MASK)
     doc.save(absolute_path)
     questionnaire.generated_file = relative_path
     questionnaire.save()
