@@ -10,13 +10,13 @@
     - set +o allexport
     - >
       cd-tools --host ${SSH_HOST} --user ${SSH_USER} --password ${SSH_PASSWORD}
-      ssh-command "docker rm -f ${IMAGE_NAME} || true"
+      ssh-command "docker rm -f ${CONTAINER_NAME} || true"
     - |
       export COMMAND
-      COMMAND="docker run --name ${IMAGE_NAME} --network=\"host\" --user ${USER_ID}:${GROUP_ID} --restart always -d"
-      COMMAND="$COMMAND -v /opt/e-controle-media:/code/e-controle-media"
-      COMMAND="$COMMAND -v /opt/e-controle-static:/var/ecc/static"
-      COMMAND="$COMMAND -v /opt/e-controle-log:/var/log"
+      COMMAND="docker run --name ${CONTAINER_NAME} --network=\"host\" --user ${USER_ID}:${GROUP_ID} --restart always -d"
+      COMMAND="$COMMAND -v ${MEDIA_PATH}:/code/e-controle-media"
+      COMMAND="$COMMAND -v ${STATIC_PATH}:/var/ecc/static"
+      COMMAND="$COMMAND -v ${LOG_PATH}:/var/log"
       COMMAND="$COMMAND -e DEBUG=False"
       COMMAND="$COMMAND -e SHOW_DEBUG_TOOLBAR=False"
       COMMAND="$COMMAND -e DATABASE_URL=\"${DATABASE_URL}\""
@@ -68,13 +68,13 @@
   script:
     - >
       cd-tools --host ${SSH_HOST} --user ${SSH_USER} --password ${SSH_PASSWORD}
-      ssh-command "docker rm -f ${IMAGE_NAME} || true"
+      ssh-command "docker rm -f ${CONTAINER_NAME} || true"
     - |
       export COMMAND
-      COMMAND="docker run --name ${IMAGE_NAME} --network=\"host\" -p 15672:15672 -p 5672:5672 --restart always -d"
+      COMMAND="docker run --name ${CONTAINER_NAME} -p ${RABBITMQ_UI_PORT}:15672 -p ${RABBITMQ_PORT}:5672 --restart always -d"
       COMMAND="$COMMAND -e RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}"
       COMMAND="$COMMAND -e RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}"
-      COMMAND="$COMMAND ${DOCKER_REGISTRY}${IMAGE_NAME}:${IMAGE_TAG}"
+      COMMAND="$COMMAND ${DOCKER_REGISTRY_RABBITMQ}${IMAGE_NAME}:${IMAGE_TAG}"
     - >
       cd-tools --host ${SSH_HOST} --user ${SSH_USER} --password ${SSH_PASSWORD}
       ssh-command "${COMMAND}"
@@ -88,7 +88,11 @@ deploy:commit:dev2_e-controle:
     <<: *deploy_variables
     IMAGE_TAG: $CI_COMMIT_SHA
     IMAGE_NAME: e-controle
+    CONTAINER_NAME: e-controle
     SERVER_PORT: 8080
+    MEDIA_PATH: /opt/e-controle-media
+    STATIC_PATH: /opt/e-controle-static
+    LOG_PATH: /opt/e-controle-log
   needs:
     - build:commit
   environment:
@@ -103,6 +107,9 @@ deploy:commit:dev2_e-controle-webdav:
     IMAGE_TAG: $CI_COMMIT_SHA
     IMAGE_NAME: e-controle-webdav
     SERVER_PORT: 8081
+    MEDIA_PATH: /opt/e-controle-media
+    STATIC_PATH: /opt/e-controle-static
+    LOG_PATH: /opt/e-controle-log
   needs:
     - build:commit_webdav
   environment:
@@ -115,5 +122,43 @@ deploy:commit:rabbitmq:
   variables:
     <<: *deploy_rabbitmq_variables
     IMAGE_TAG: 3.8.2-management
+    IMAGE_NAME: rabbitmq
+    CONTAINER_NAME: rabbitmq
+    RABBITMQ_UI_PORT: 15672
+    RABBITMQ_PORT: 5672
   environment:
     name: Dev2
+
+
+# Deploy to RepriseCollectePro env
+deploy:commit:reprise_collecte_pro_e-controle:
+  extends:
+    - .deploy
+  when: manual
+  variables:
+    <<: *deploy_variables
+    IMAGE_TAG: $CI_COMMIT_SHA
+    IMAGE_NAME: e-controle
+    CONTAINER_NAME: e-controle-collecte-pro
+    SERVER_PORT: 8082
+    MEDIA_PATH: /opt/e-controle-collecte-pro-media
+    STATIC_PATH: /opt/e-controle-collecte-pro-static
+    LOG_PATH: /opt/e-controle-collecte-pro-log
+  needs:
+    - build:commit
+  environment:
+    name: RepriseCollectePro
+
+deploy:commit:rabbitmq_reprise_collecte_pro:
+  extends:
+    - .deploy_rabbitmq
+  when: manual
+  variables:
+    <<: *deploy_rabbitmq_variables
+    IMAGE_TAG: 3.12.4
+    IMAGE_NAME: rabbitmq
+    CONTAINER_NAME: rabbitmq-collecte-pro
+    RABBITMQ_UI_PORT: 15673
+    RABBITMQ_PORT: 5673
+  environment:
+    name: RepriseCollectePro

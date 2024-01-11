@@ -80,7 +80,7 @@ class QuestionnaireDuplicateMixin(object):
         if queryset.count() > 1:
             self.message_user(
                 request,
-                "Megacontrôle : selectionnez un seul questionnaire à la fois.",
+                "Megaprocédure : selectionnez un seul questionnaire à la fois.",
                 level=messages.ERROR,
             )
             return
@@ -94,5 +94,5 @@ class QuestionnaireDuplicateMixin(object):
         )
 
     megacontrol_admin_action.short_description = (
-        "Mégacontrôle : copier ce questionnaire dans tous les espaces de la procédure"
+        "Megaprocédure : copier ce questionnaire dans tous les espaces de la procédure"
     )

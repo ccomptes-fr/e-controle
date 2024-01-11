@@ -1,18 +1,17 @@
 <template>
-    <div class="modal" tabindex="-1" role="dialog">
+    <div class="modal" tabindex="-1" role="dialog" aria-labelledby="labelForSwapEditoModal">
       <div class="modal-dialog large-modal" role="document">
         <div class="modal-content">
           <div class="modal-header border-bottom-0">
-            <i class="fa fa-exchange-alt mr-2 mt-3"></i>
-            <div class="modal-title">
-              <h3 class="modal-title">
+            <span class="fa fa-exchange-alt mr-2 mt-3" aria-hidden="true"></span>
+            <div id="swap_edit_modal_title" class="modal-title">
                 Transférer les droits de rédaction du questionnaire
-              </h3>
             </div>
             <button type="button"
                     class="close"
                     data-dismiss="modal"
-                    aria-label="Close">
+                    aria-label="Fermer">
+                    <span class="sr-only">Fermer</span>
             </button>
           </div>
 
@@ -23,7 +22,7 @@
 
             <error-bar v-if="errorMessage"
                        class="mx-5">
-              {{ errorMessage }}
+              <p>{{ errorMessage }}</p>
             </error-bar>
 
             <div class="card-body">
@@ -39,7 +38,7 @@
                         class="btn btn-primary"
                         title="Transférer"
                         @click="unsetEditor()">
-                          <i class="fa fa-lock-open mr-2"></i>
+                          <span class="fa fa-lock-open mr-2" aria-hidden="true"></span>
                           Libérer les droits
                       </button>
                     </div>
@@ -49,7 +48,7 @@
 
               <div class="card">
                 <div class="card-header justify-content-between">
-                  <h3 class="card-title"><i class="fa fa-university mr-2"></i><strong>Équipe de contrôle</strong></h3>
+                  <h3 class="card-title"><span class="fa fa-university mr-2" aria-hidden="true"></span><strong>Équipe d'instruction</strong></h3>
                 </div>
 
                 <editor-list :users="inspectorUsers()"

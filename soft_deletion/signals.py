@@ -1,10 +1,12 @@
+from django.conf import settings
 from django.dispatch import receiver
-
-from control.models import Control
-from user_profiles.models import UserProfile
 from utils.email import send_email
 from utils.file import delete_control_folder
+
+from control.models import Control
 from .api_views import soft_delete_signal
+from parametres.models import Parametre
+from user_profiles.models import UserProfile
 
 
 @receiver(soft_delete_signal, sender=Control)
@@ -13,12 +15,22 @@ def send_email_after_control_soft_delete(session_user, obj, *args, **kwargs):
     After a control is soft-deleted, we send an email to the inspector team.
     """
     control = obj
-    inspectors = control.user_profiles.filter(profile_type=UserProfile.INSPECTOR)
-    inspectors_emails = inspectors.values_list("user__email", flat=True)
+    inspectors = control.access.filter(access_type="demandeur")
+    inspectors_emails = inspectors.values_list("userprofile__user__email", flat=True)
+    support_email = (
+        Parametre.objects.filter(code="SUPPORT_EMAIL")
+        .filter(deleted_at__isnull=True)
+        .first()
+    )
+    if isinstance(support_email, dict):
+        support_email = support_email["url"]
+    else:
+        support_email = support_email.url
     context = {
         "deleter_user": session_user,
         "control": control,
         "inspectors": inspectors,
+        "support_team_email": support_email,
     }
     subject = f"e.contrôle - Suppression de l'espace - {control.title_display}"
 

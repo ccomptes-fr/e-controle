@@ -1,28 +1,44 @@
-from actstream import action
 from functools import partial
-from rest_framework import generics, mixins, status, viewsets
-from rest_framework import serializers
-from rest_framework import decorators
-from rest_framework.exceptions import PermissionDenied
+
+import django.dispatch
+import psycopg2
+from django.http import HttpResponse
+from django.db import connection
+from actstream import action
+from django.core.files import File
+from django.db.models import Q
+from rest_framework import decorators, generics, mixins, serializers, status, viewsets
+from rest_framework.exceptions import ParseError, PermissionDenied
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 
-import django.dispatch
-from django.core.files import File
-
-from . import serializers as control_serializers
-from .models import Control, Question, Questionnaire, Theme, QuestionFile, ResponseFile
 from control.permissions import (
     ControlIsNotDeleted,
+    OnlyRepondantCanAccess,
+    OnlyInspectorCanCreate,
+    OnlyAuthenticatedCanAccess,
+    OnlyEditorCanChangeQuestionnaire,
+    ControlDemandeurAccess,
     QuestionnaireIsDraft,
-    OnlyAuditedCanAccess,
 )
-from control.permissions import OnlyInspectorCanChange, OnlyEditorCanChangeQuestionnaire
-from user_profiles.serializers import UserProfileSerializer
+from user_profiles.models import Access
+from user_profiles.serializers import AccessSerializer, UserProfileSerializer
 
+from . import serializers as control_serializers
+from .models import (
+    Control,
+    Question,
+    QuestionFile,
+    Questionnaire,
+    QuestionnaireFile,
+    ResponseFile,
+    Theme,
+)
 
+# This signal is triggered after the questionnaire is created via the API
+questionnaire_api_post_save = django.dispatch.Signal()
 # This signal is triggered after the questionnaire is saved via the API
-questionnaire_api_post_save = django.dispatch.Signal(providing_args=["instance"])
+questionnaire_api_post_update = django.dispatch.Signal()
 
 
 class ControlViewSet(
@@ -31,17 +47,39 @@ class ControlViewSet(
     mixins.UpdateModelMixin,
     viewsets.GenericViewSet,
 ):
-    permission_classes = (OnlyInspectorCanChange,)
+    permission_classes_by_action = {
+        "create": (OnlyInspectorCanCreate,),
+        "update": (ControlDemandeurAccess,),
+    }
+
+    def get_permissions(self):
+        try:
+            return [
+                permission()
+                for permission in self.permission_classes_by_action[self.action]
+            ]
+        except KeyError:
+            return [
+                permission()
+                for permission in self.permission_classes_by_action["update"]
+            ]
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["profile"] = self.request.user.profile
+        return context
 
     def get_serializer_class(self):
         if self.action in ["update", "partial_update"]:
             return control_serializers.ControlUpdateSerializer
-        if self.request and self.request.user.profile.is_inspector:
-            return control_serializers.ControlSerializer
-        return control_serializers.ControlSerializerWithoutDraft
+        return control_serializers.ControlFilteredSerializer
 
     def get_queryset(self):
-        return self.request.user.profile.controls.active()
+        if not self.request.user.is_anonymous:
+            return Control.objects.filter(
+                Q(access__in=self.request.user.profile.access.all())
+                & Q(is_deleted=False)
+            )
 
     def add_log_entry(self, control, verb):
         action_details = {
@@ -54,8 +92,12 @@ class ControlViewSet(
     def create(self, request, *args, **kwargs):
         response = super(ControlViewSet, self).create(request, *args, **kwargs)
         control = Control.objects.active().get(id=response.data["id"])
+        access_type = "demandeur"
+        profile = request.user.profile
         # The current user is automatically added to the created control
-        self.request.user.profile.controls.add(control)
+        Access.objects.create(
+            access_type=access_type, userprofile=profile, control=control
+        )
         self.add_log_entry(control=control, verb="created control")
         return response
 
@@ -67,10 +109,59 @@ class ControlViewSet(
 
     @decorators.action(detail=True, methods=["get"], url_path="users")
     def users(self, request, pk):
-        serialized_users = UserProfileSerializer(
-            self.get_object().user_profiles.all(), many=True
-        )
+        users = []
+        for acc in self.get_object().access.all():
+            users.append(acc.userprofile)
+        serialized_users = UserProfileSerializer(list(set(users)), many=True)
         return Response(serialized_users.data)
+
+    @decorators.action(detail=True, methods=["get"], url_path="audited")
+    def audited(self, request, pk):
+        users = []
+        for acc in self.get_object().access.all():
+            if acc.access_type == "repondant":
+                users.append(acc.userprofile)
+        serialized_users = UserProfileSerializer(list(set(users)), many=True)
+        return Response(serialized_users.data)
+
+    @decorators.action(detail=True, methods=["get"], url_path="inspectors")
+    def inspectors(self, request, pk):
+        users = []
+        for acc in self.get_object().access.all():
+            if acc.access_type == "demandeur":
+                users.append(acc.userprofile)
+        serialized_users = UserProfileSerializer(list(set(users)), many=True)
+        return Response(serialized_users.data)
+
+    @decorators.action(detail=True, methods=["get"], url_path="depositors")
+    def depositors(self, request, pk):
+        users = []
+        for questionnaire in self.get_object().questionnaires.all():
+            for theme in questionnaire.themes.all():
+                for question in theme.questions.all():
+                    for response_file in question.response_files.all():
+                        users.append(response_file.author.profile)
+        serialized_users = UserProfileSerializer(list(set(users)), many=True)
+        return Response(serialized_users.data)
+
+    @decorators.action(detail=True, methods=["get"], url_path="access")
+    def access(self, request, pk):
+        serialized_access = AccessSerializer(
+            self.get_object()
+            .access.filter(
+                Q(userprofile=request.user.profile) & Q(control__is_deleted=False)
+            )
+            .all(),
+            many=True,
+        )
+        return Response(serialized_access.data)
+
+    @decorators.action(detail=True, methods=["get"], url_path="unique-code")
+    def check_unique_code(self, request, pk):
+        isCodeExist = Control.objects.filter(
+            reference_code=request.query_params.get("code")
+        ).exists()
+        return HttpResponse(isCodeExist)
 
 
 class QuestionViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
@@ -93,14 +184,17 @@ class QuestionFileViewSet(
     parser_classes = (MultiPartParser, FormParser)
     filterset_fields = ("question",)
     permission_classes = (
-        OnlyInspectorCanChange,
+        ControlDemandeurAccess,
         ControlIsNotDeleted,
         QuestionnaireIsDraft,
     )
 
     def get_queryset(self):
         queryset = QuestionFile.objects.filter(
-            question__theme__questionnaire__in=self.request.user.profile.questionnaires
+            Q(question__theme__questionnaire__control__is_deleted=False)
+            & Q(
+                question__theme__questionnaire__in=self.request.user.profile.questionnaires
+            )
         )
         return queryset
 
@@ -112,14 +206,45 @@ class QuestionFileViewSet(
         serializer.save(file=self.request.data.get("file"))
 
 
+class QuestionnaireFileViewSet(
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    viewsets.GenericViewSet,
+):
+    serializer_class = control_serializers.QuestionnaireFileSerializer
+    parser_classes = (MultiPartParser, FormParser)
+    filterset_fields = ("questionnaire",)
+    permission_classes = (
+        ControlDemandeurAccess,
+        ControlIsNotDeleted,
+        QuestionnaireIsDraft,
+    )
+
+    def get_queryset(self):
+        queryset = QuestionnaireFile.objects.filter(
+            questionnaire__in=self.request.user.profile.questionnaires
+        )
+        return queryset
+
+    def perform_create(self, serializer):
+        questionnaire = serializer.validated_data["questionnaire"]
+        # Before creating the QuestionFile, let's check that permission are ok for
+        # the associated Question object.
+        self.check_object_permissions(self.request, questionnaire)
+        serializer.save(file=self.request.data.get("file"))
+
+
 class ResponseFileTrash(mixins.UpdateModelMixin, generics.GenericAPIView):
     serializer_class = control_serializers.ResponseFileTrashSerializer
-    permission_classes = (OnlyAuditedCanAccess,)
+    permission_classes = (OnlyRepondantCanAccess,)
 
     def get_queryset(self):
         queryset = ResponseFile.objects.filter(
-            question__theme__questionnaire__control__in=self.request.user.profile.controls.active()
-        )
+            question__theme__questionnaire__control__in=Control.objects.filter(
+                access__in=self.request.user.profile.access.all()
+            )
+        )  # Modifier par les controls des access
         return queryset
 
     def put(self, request, *args, **kwargs):
@@ -158,12 +283,15 @@ class ResponseFileTrash(mixins.UpdateModelMixin, generics.GenericAPIView):
 
 class ThemeViewSet(mixins.UpdateModelMixin, viewsets.GenericViewSet):
     serializer_class = control_serializers.ThemeSerializer
-    permission_classes = (OnlyInspectorCanChange, QuestionnaireIsDraft)
+    permission_classes = (ControlDemandeurAccess, QuestionnaireIsDraft)
 
     def get_queryset(self):
-        queryset = Theme.objects.filter(
-            questionnaire__in=self.request.user.profile.questionnaires
+        questionnaires = Questionnaire.objects.filter(
+            control__in=Control.objects.filter(
+                access__in=self.request.user.profile.access.all()
+            )
         )
+        queryset = Theme.objects.filter(questionnaire__in=questionnaires)
         return queryset
 
 
@@ -173,11 +301,11 @@ class QuestionnaireViewSet(
     serializer_class = control_serializers.QuestionnaireSerializer
     permission_classes_by_action = {
         "create": (
-            OnlyInspectorCanChange,
+            ControlDemandeurAccess,
             OnlyEditorCanChangeQuestionnaire,
             QuestionnaireIsDraft,
         ),
-        "update": (),
+        "update": (OnlyAuthenticatedCanAccess, ControlIsNotDeleted),
     }
 
     def get_permissions(self):
@@ -187,31 +315,141 @@ class QuestionnaireViewSet(
                 for permission in self.permission_classes_by_action[self.action]
             ]
         except KeyError:
-            # TODO: default n'existe pas dans permission_classes_by_action
             return [
                 permission()
-                for permission in self.permission_classes_by_action["default"]
+                for permission in self.permission_classes_by_action["create"]
             ]
 
     def get_queryset(self):
+        try:
+            questionnaire = Questionnaire.objects.get(pk=self.request.data.get("id"))
+            control = questionnaire.control
+        except Exception:
+            control = Control.objects.get(pk=self.request.data.get("control"))
         queryset = Questionnaire.objects.filter(
-            control__in=self.request.user.profile.controls.active()
+            control__in=Control.objects.filter(
+                access__in=self.request.user.profile.access.all()
+            )
         )
-        if not self.request.user.profile.is_inspector:
+        if not self.request.user.profile.access.filter(
+            Q(control=control) & Q(access_type="demandeur")
+        ).exists():
             queryset = queryset.filter(is_draft=False)
         return queryset
 
     def __create_or_update(self, request, save_questionnaire_func, is_update):
         if is_update:
             pre_existing_qr = self.get_object()  # throws 404 if no qr
-            is_beeing_published = (
-                pre_existing_qr.is_draft is True
-                and request.data.get("is_draft") is False
-            )
-            if is_beeing_published:
-                verb = "published"
+            control = pre_existing_qr.control
+            verb = "updated"
+            if pre_existing_qr.is_draft is True:
+                # Only Inspector can publish a Questionnaire
+                if request.data.get("is_draft") is False:
+                    if not request.user.profile.access.filter(
+                        Q(control=control) & Q(access_type="demandeur")
+                    ).exists():
+                        e = PermissionDenied(
+                            detail=(
+                                "Only inspectors can publish questionnaires "
+                                "in active controls that they belong to."
+                            ),
+                            code=status.HTTP_403_FORBIDDEN,
+                        )
+                        raise e
+                    verb = "published"
+                else:
+                    # Only Editor can change a Questionnaire
+                    if not request.user.profile.access.filter(
+                        Q(control=control) & Q(access_type="demandeur")
+                    ).exists():
+                        e = PermissionDenied(
+                            detail=(
+                                "Only editors can edit questionnaires "
+                                "in active controls that they belong to."
+                            ),
+                            code=status.HTTP_403_FORBIDDEN,
+                        )
+                        raise e
+                    if (
+                        not pre_existing_qr.editor
+                        or pre_existing_qr.editor != request.user
+                    ):
+                        e = PermissionDenied(
+                            detail=(
+                                "Only inspectors can edit questionnaires "
+                                "in active controls that they belong to."
+                            ),
+                            code=status.HTTP_403_FORBIDDEN,
+                        )
+                        raise e
             else:
-                verb = "updated"
+                # Only Audited can answer a Questionnaire when published
+                if (
+                    pre_existing_qr.is_replied is False
+                    and request.data.get("is_replied") is True
+                ):
+                    if not request.user.profile.access.filter(
+                        Q(control=control) & Q(access_type="repondant")
+                    ).exists():
+                        e = PermissionDenied(
+                            detail=("Only auditeds can answer questionnaires."),
+                            code=status.HTTP_403_FORBIDDEN,
+                        )
+                        raise e
+                # Only Inspectors can finalize a Questionnaire Replied
+                elif (
+                    pre_existing_qr.is_replied is True
+                    and pre_existing_qr.is_finalized is False
+                    and request.data.get("is_finalized") is True
+                ):
+                    if not request.user.profile.access.filter(
+                        Q(control=control) & Q(access_type="demandeur")
+                    ).exists():
+                        e = PermissionDenied(
+                            detail=(
+                                "Only inspectors can finalize questionnaires "
+                                "in active controls that they belong to."
+                            ),
+                            code=status.HTTP_403_FORBIDDEN,
+                        )
+                        raise e
+                # Only Audited can change a Questionnaire statut from not closed to Replied
+                elif (
+                    pre_existing_qr.is_replied is True
+                    and pre_existing_qr.is_not_closed is True
+                    and request.data.get("is_not_closed") is False
+                ):
+                    if not request.user.profile.access.filter(
+                        Q(control=control) & Q(access_type="repondant")
+                    ).exists():
+                        e = PermissionDenied(
+                            detail=("Only Audited can change a Questionnaire from not closed to Replied."),
+                            code=status.HTTP_403_FORBIDDEN,
+                        )
+                        raise e
+                # Only Inspectors can change a published Questionnaire response date
+                elif (
+                    pre_existing_qr.is_draft is False
+                    and pre_existing_qr.end_date != request.data.get("end_date")
+                ):
+                    if not request.user.profile.access.filter(
+                        Q(control=control) & Q(access_type="demandeur")
+                    ).exists():
+                        e = PermissionDenied(
+                            detail=(
+                                "Only inspectors can change response date "
+                                "in active questionnaires that they belong to."
+                            ),
+                            code=status.HTTP_403_FORBIDDEN,
+                        )
+                        raise e
+                # No other modification is possible
+                else:
+                    e = PermissionDenied(
+                        detail="Changing this resource is not allowed.",
+                        code=status.HTTP_403_FORBIDDEN,
+                    )
+                    raise e
         else:
             pre_existing_qr = None
             verb = "created"
@@ -219,7 +457,9 @@ class QuestionnaireViewSet(
         def log(saved_object):
             self.__log_action(request.user, verb, saved_object, saved_qr.control)
 
-        validated_themes_and_questions = self.__validate_all(request, pre_existing_qr)
+        validated_themes_and_questions = self.__validate_all(
+            request, verb, pre_existing_qr
+        )
         response = save_questionnaire_func()
         saved_qr = Questionnaire.objects.get(id=response.data["id"])
         saved_qr.editor = request.user
@@ -252,6 +492,9 @@ class QuestionnaireViewSet(
         ).data
         if not is_update:
             questionnaire_api_post_save.send(sender=Questionnaire, instance=saved_qr)
+        questionnaire_api_post_update.send(
+            sender=Questionnaire, instance=saved_qr, session_user=self.request.user
+        )
         return response
 
     def create(self, request, *args, **kwargs):
@@ -270,7 +513,7 @@ class QuestionnaireViewSet(
 
         return self.__create_or_update(request, save_questionnaire_func, is_update=True)
 
-    def __validate_all(self, request, questionnaire_in_db=None):
+    def __validate_all(self, request, verb, questionnaire_in_db=None):
         """
         Validate the themes and questions coming from the request. If it's an update request, we validate that the
         request data is appropriate for updating the questionnaire already in db.
@@ -283,16 +526,40 @@ class QuestionnaireViewSet(
         serializer.is_valid(raise_exception=True)
 
         control = serializer.validated_data["control"]
+        if verb == "created" and (control is None or control.is_deleted):
+            e = PermissionDenied(
+                detail=("Users can only create questionnaires " "in active controls."),
+                code=status.HTTP_403_FORBIDDEN,
+            )
+            raise e
+        if request.user.is_anonymous:
+            e = PermissionDenied(
+                detail=("Can only create questionnaires when connected."),
+                code=status.HTTP_403_FORBIDDEN,
+            )
+            raise e
         if (
             control is not None
-            and not request.user.profile.controls.active()
-            .filter(id=control.id)
+            and not request.user.profile.access.all()
+            .filter(control__id=control.id)
             .exists()
         ):
             e = PermissionDenied(
                 detail=(
                     "Users can only create questionnaires "
                     "in active controls that they belong to."
+                ),
+                code=status.HTTP_403_FORBIDDEN,
+            )
+            raise e
+        if (
+            verb == "created"
+            and control is not None
+            and control not in request.user.profile.user_controls("demandeur")
+        ):
+            e = PermissionDenied(
+                detail=(
+                    "Users can only create questionnaires " "when they are Demandeur."
                 ),
                 code=status.HTTP_403_FORBIDDEN,
             )

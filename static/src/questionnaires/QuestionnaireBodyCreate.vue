@@ -2,12 +2,12 @@
   <div>
     <div class="card">
       <div class="card-header">
-        <div class="card-title">Etape 2 : Ajouter des questions</div>
+        <h2 class="card-title">Etape 2 : Ajouter des questions</h2>
       </div>
       <div class="card-body pb-6">
         <info-bar>
-          A cette étape, vous pouvez créer votre questionnaire en ajoutant des thèmes,
-          des questions et des annexes à vos questions.
+          <p>A cette étape, vous pouvez créer votre questionnaire en ajoutant des thèmes,
+          des questions et des annexes à vos questions.</p>
         </info-bar>
         <form ref="form">
           <div class="card"
@@ -17,12 +17,16 @@
             </div>
 
             <div class="border-bottom">
-              <div class="card-header border-0 pb-0">
-                <label v-bind:for="'theme' + (themeIndex + 1)" class="form-label-h3">
+              <div class="text-muted pt-2 pl-7" :id="'theme' + (themeIndex + 1) + 'Help'">
+                Ecrivez un thème ici. 255 caractères maximum.
+              </div>
+              <div class="card-header border-0 pb-0 pt-0">
+                <label v-bind:for="'theme' + (themeIndex + 1)" class="form-label-h3 mr-1">
                   <h3 class="card-title">{{themeIndex + 1}}.</h3>
                 </label>
                 <input class="form-control form-control-h3"
-                       placeholder="Ecrivez un thème ici"
+                       title="Ecrivez un thème ici"
+                       placeholder="Ressources Humaines"
                        type="text"
                        maxlength="255"
                        v-bind:id="'theme' + (themeIndex + 1)"
@@ -33,27 +37,29 @@
                        required>
                 <span>
                   <button v-if="themes[themeIndex].questions.length === 0"
+                          :id="'delete_theme_' + themeIndex"
                           @click.prevent="deleteTheme(themeIndex)"
                           role="button"
                           type="button"
                           class="btn btn-link"
                           title="Supprimer le thème"
                   >
-                    <i class="fe fe-trash-2"></i>
+                    <span class="fe fe-trash-2" aria-hidden="true"></span>
+                    <span class="sr-only">Supprimer le thème</span>
                   </button>
                   <button v-else
+                          :id="'delete_theme_' + themeIndex"
                           class="btn btn-link"
                           role="button"
                           type="button"
                           data-toggle="modal"
                           :data-target="'#deleteThemeConfirmModal' + themeIndex"
+                          title="Supprimer le thème"
                   >
-                    <i class="fe fe-trash-2"></i>
+                    <span class="fe fe-trash-2" aria-hidden="true"></span>
+                    <span class="sr-only">Supprimer le thème</span>
                   </button>
                 </span>
-              </div>
-              <div class="text-muted pb-2 pl-6" :id="'theme' + (themeIndex + 1) + 'Help'">
-                Exemple : "Ressources Humaines". 255 caractères maximum.
               </div>
               <confirm-modal v-if="themes.length > 1"
                             :id="'deleteThemeConfirmModal' + themeIndex"
@@ -90,15 +96,20 @@
                   :id="'theme-' + themeIndex + '-question-' + qIndex"
                   class="card border-0 m-0 pt-2"
                   :key="'question-' + question.id"> <!-- Card for each question -->
+                <div class="text-muted pt-2 pl-9" :id="'theme' + (themeIndex + 1) + 'Help'">
+                  Ecrivez une question ici.
+                </div>
                 <div class="card-header border-0">
                   <div class="flex-column align-items-center mr-4">
                     <button :class="{ disabled: qIndex === 0 }"
+                      :tabindex="qIndex === 0 ? -1 : 0"
                       class="btn btn-secondary btn-sm move-up-button"
                       role="button"
                       type="button"
                       title="Déplacer la question vers le haut"
                       @click="moveQuestionUp(themeIndex, qIndex)">
-                      <i class="fa fa-chevron-up"></i>
+                      <span class="fa fa-chevron-up" aria-hidden="true"></span>
+                      <span class="sr-only">Déplacer la question vers le haut</span>
                     </button>
                     <div class="my-1">
                       <label v-bind:for="'question' + (themeIndex + 1) + '-' + (qIndex + 1)"
@@ -109,16 +120,19 @@
                       </label>
                     </div>
                     <button :class="{ disabled: qIndex === (theme.questions.length - 1) }"
+                      :tabindex="qIndex === (theme.questions.length - 1) ? -1 : 0"
                       class="btn btn-secondary btn-sm move-down-button"
                       role="button"
                       type="button"
                       title="Déplacer la question vers le bas"
                       @click="moveQuestionDown(themeIndex, qIndex)">
-                      <i class="fa fa-chevron-down"></i>
+                      <span class="fa fa-chevron-down" aria-hidden="true"></span>
+                      <span class="sr-only">Déplacer la question vers le bas</span>
                     </button>
                   </div>
                   <textarea class="form-control"
-                            placeholder="Ecrivez une question ici"
+                            title="Ecrivez une question ici"
+                            placeholder="Règlement intérieur (au cours des 3 dernières années)"
                             rows="4"
                             v-bind:id="'question' + (themeIndex + 1) + '-' + (qIndex + 1)"
                             v-model="themes[themeIndex].questions[qIndex].description"
@@ -129,15 +143,18 @@
 
                   <span>
                     <button v-if="themes[themeIndex].questions.length > 1"
+                            :id="'delete_question_' + qIndex"
                             @click.prevent="deleteQuestion(themeIndex, qIndex)"
                             class="btn btn-link"
                             role="button"
                             type="button"
                             title="Supprimer la question"
                     >
-                      <i class="fe fe-trash-2"></i>
+                      <span class="fe fe-trash-2" aria-hidden="true"></span>
+                      <span class="sr-only">Supprimer la question</span>
                     </button>
                     <button v-else
+                            :id="'delete_question_' + qIndex"
                             class="btn btn-link"
                             role="button"
                             type="button"
@@ -145,7 +162,8 @@
                             data-toggle="modal"
                             :data-target="'#cannot-delete-question' + themeIndex + '-' + qIndex"
                     >
-                      <i class="fe fe-trash-2"></i>
+                      <span class="fe fe-trash-2" aria-hidden="true"></span>
+                      <span class="sr-only">Supprimer la question</span>
                     </button>
                     <confirm-modal
                             :id="'cannot-delete-question' + themeIndex + '-' + qIndex"
@@ -170,11 +188,12 @@
 
             <div class="card-footer">
               <button @click.prevent="addQuestion(themeIndex)"
+                      id="add_question"
                       class="btn btn-primary"
                       role="button"
                       type="button"
                       title="Ajouter une question">
-                <i class="fe fe-plus"></i> Ajouter une question
+                <span class="fe fe-plus" aria-hidden="true"></span> Ajouter une question
               </button>
             </div>
           </div>
@@ -184,11 +203,12 @@
               <div class="card-status card-status-top bg-blue">
               </div>
               <button @click="addTheme()"
+                      id="add_theme"
                       class="btn btn-primary"
                       role="button"
                       type="button"
                       title="Ajouter un thème">
-                <i class="fe fe-plus"></i>Ajouter un thème
+                <span class="fe fe-plus" aria-hidden="true"></span>Ajouter un thème
               </button>
             </div>
           </div>
@@ -248,12 +268,26 @@ export default Vue.extend({
       this.themes.push({ title: '', questions: [{ description: '' }] })
     },
     deleteQuestion: function(themeIndex, qIndex) {
-      this.themes[themeIndex].questions.splice(qIndex, 1)
-      this.swapMixin_updateOrderFields(this.themes[themeIndex].questions)
+      this.themes[themeIndex].questions.splice(qIndex, 1);
+      this.swapMixin_updateOrderFields(this.themes[themeIndex].questions);
+      if (this.themes[themeIndex].questions.length <= 1) {
+        $("#add_question").focus();
+      } else if (qIndex >= this.themes[themeIndex].questions.length) {
+        $("#delete_question_"+(qIndex-1)).focus();
+      } else {
+        $("#delete_question_"+(qIndex+1)).focus();
+      }
     },
     deleteTheme: function(themeIndex) {
-      this.themes.splice(themeIndex, 1)
-      this.swapMixin_updateOrderFields(this.themes)
+      this.themes.splice(themeIndex, 1);
+      this.swapMixin_updateOrderFields(this.themes);
+      if (this.themes.length <= 1) {
+        window.setTimeout(function() {$("#add_theme").focus();}, 300);
+      } else if (themeIndex >= this.themes.length) {
+        window.setTimeout(function() {$("#delete_theme_"+(themeIndex-1)).focus();}, 300);
+      } else {
+        window.setTimeout(function() {$("#delete_theme_"+(themeIndex)).focus();}, 300);
+      }
     },
     // Used in QuestionnaireCreate.
     validateForm: function() {

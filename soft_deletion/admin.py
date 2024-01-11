@@ -62,11 +62,11 @@ class IsActiveFilter(admin.SimpleListFilter):
         return queryset
 
 
-class SoftDeletedAdmin(AdminConfirmMixin, object):
+class SoftDeletedAdmin(object):
     actions = [soft_delete, undelete]
 
     def is_active(self, instance):
-        return not instance.is_deleted()
+        return not instance.is_deleted
 
     is_active.boolean = True
     is_active.short_description = "active"
@@ -75,7 +75,10 @@ class SoftDeletedAdmin(AdminConfirmMixin, object):
         return super().get_list_display(request) + ("deleted_at", "is_active")
 
     def get_readonly_fields(self, request, obj=None):
-        return super().get_readonly_fields(request, obj) + ("deleted_at",)
+        return super().get_readonly_fields(request, obj) + (
+            "is_deleted",
+            "deleted_at",
+        )
 
     def has_delete_permission(self, request, obj=None):
         return False

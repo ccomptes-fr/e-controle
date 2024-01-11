@@ -18,6 +18,7 @@
                       :key="displayedControl.id"
                       :control="displayedControl"
                       :user="user"
+                      :accessType="accessType"
         >
         </control-card>
       </template>
@@ -42,11 +43,15 @@ import NoControls from './NoControls'
 import RemoveUserModal from '../users/RemoveUserModal'
 import UpdateUserModal from '../users/UpdateUserModal'
 
+import axios from 'axios'
+import backendUrls from '../utils/backend'
+
 export default Vue.extend({
   name: 'ControlPage',
   data: function() {
     return {
       hash: '',
+      accessType: '',
     }
   },
   computed: {
@@ -77,7 +82,13 @@ export default Vue.extend({
       if (isNaN(controlId)) {
         return false
       }
-      return this.controls.map(control => control.id).includes(controlId)
+      if (this.controls.map(control => control.id).includes(controlId)) {
+        return true;
+      } else {
+        // Le contrôle souhaité n'est pas accessible, on le signale
+        this.$parent.noAccess = true;
+        return false;
+      }
     }
 
     const updateHash = () => {
@@ -97,6 +108,24 @@ export default Vue.extend({
       false)
 
     updateHash()
+
+    if (this.displayedControl) {
+      this.getAccessType(this.displayedControl.id);
+    }
+  },
+  methods: {
+    async getAccessType(displayedControlId) {
+      try {
+        const resp = await axios.get(backendUrls.getAccessToControl(displayedControlId))
+        this.accessType = (
+          resp.data &&
+          resp.data[0] &&
+          resp.data[0].access_type
+        ) ? resp.data[0].access_type : ''
+      } catch (error) {
+        console.error("Erreur sur l'access type : ", error)
+      }
+    },
   },
   components: {
     AddUserModal,
@@ -105,6 +134,16 @@ export default Vue.extend({
     RemoveUserModal,
     UpdateUserModal,
   },
-
+  watch: {
+    displayedControl: {
+      handler: function (newVal) {
+        if (newVal) {
+          this.getAccessType(newVal.id);
+        }
+      },
+      deep: true,
+      immediate: true,
+    },
+  },
 })
 </script>

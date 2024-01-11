@@ -1,57 +1,36 @@
 <template>
   <div class="mx-3">
     <breadcrumbs :control="control"></breadcrumbs>
-    <template v-if="isLoaded && user.is_inspector">
+    <template v-if="isLoaded && accessType === 'demandeur'">
       <request-editor-button :questionnaire='questionnaire' v-if="questionnaire.is_draft">
       </request-editor-button>
       <success-bar v-else>
-        Ce questionnaire est publié : il est visible par l'organisme contrôlé et n'est donc plus
+        Ce questionnaire est publié : il est visible par l'organisme interrogé et n'est plus
         modifiable.
       </success-bar>
     </template>
 
     <div class="page-header">
-      <div class="page-title">
-        <i class="fe fe-list mr-2"></i>
-        <template v-if="isLoaded && user.is_inspector">
+      <h2 class="page-title">
+        <span class="fe fe-list mr-2" aria-hidden="true"></span>
+        <template v-if="isLoaded && accessType === 'demandeur'">
           <span v-if="questionnaire.is_draft"
                 class="tag tag-azure big-tag round-tag font-italic mr-2">
             Brouillon
           </span>
-          <span v-else-if="questionnaire_has_replies() && !questionnaire_is_replied()" class="tag tag-yellow round-tag font-italic mr-2">En cours</span>
-          <span v-else-if="questionnaire_is_replied() && !questionnaire_is_finalized() && !questionnaire_is_not_closed()" class="tag tag-orange round-tag font-italic mr-2">Répondu</span>
-          <span v-else-if="questionnaire_is_not_closed() && !questionnaire_is_finalized()" class="tag tag-red round-tag font-italic mr-2">Non Terminé</span>
-          <span v-else-if="questionnaire_is_finalized()" class="tag tag-purple round-tag font-italic mr-2">Finalisé</span>
+          <span v-else-if="questionnaire_has_replies() && !questionnaire.is_replied" class="tag tag-yellow round-tag font-italic mr-2">En cours</span>
+          <span v-else-if="questionnaire.is_replied && !questionnaire.is_finalized && !questionnaire.is_not_closed" class="tag tag-orange round-tag font-italic mr-2">Répondu</span>
+          <span v-else-if="questionnaire.is_not_closed && !questionnaire.is_finalized" class="tag tag-red round-tag font-italic mr-2">Non Terminé</span>
+          <span v-else-if="questionnaire.is_finalized" class="tag tag-purple round-tag font-italic mr-2">Finalisé</span>
           <span v-else class="tag tag-green big-tag round-tag font-italic mr-2">Publié</span>
         </template>
         {{ questionnaire.title_display }}
-      </div>
+      </h2>
     </div>
     <div :class="{ preview: questionnaire.is_draft }">
-      <questionnaire-metadata :questionnaire="questionnaire" :with-trash="!questionnaire.is_draft">
+      <questionnaire-metadata :questionnaire="questionnaire" :control="control" :with-trash="!questionnaire.is_draft" :accessType="accessType">
       </questionnaire-metadata>
 
-      <div v-if="isLoaded && user.is_inspector && !questionnaire.is_draft"
-           class="alert alert-info alert-icon">
-        <i class="fe fe-info" aria-hidden="true"></i>
-        <div class="flex-row justify-content-end">
-          <div>
-            <p>
-              Toutes les réponses déposées sont automatiquement classées et renomées dans un dossier
-              dans votre Explorateur Windows. Découvrez comment les consulter !
-            </p>
-          </div>
-          <div class="col-3 text-right pr-0">
-            <button class="btn btn-primary parent-fake-icon" @click="showWebdavTip">
-              <i class="fe fe-folder mr-3"></i>
-              <img :src="'/static/img/file-explorer.png'"
-                  alt="Explorateur Windows"
-                  class="fake-icon" />
-              Voir les réponses
-            </button>
-          </div>
-        </div>
-      </div>
       <div>
         <theme-box v-for="(theme, themeIndex) in questionnaire.themes"
                    :key="theme.id"
@@ -69,9 +48,9 @@
             </question-file-list>
             <response-file-list :question="question"
                                 :questionnaire-id="questionnaire.id"
-                                :is-audited="isLoaded && user.is_audited">
+                                :is-audited="isLoaded && accessType === 'repondant'">
             </response-file-list>
-            <response-dropzone :is-audited="isLoaded && user.is_audited"
+            <response-dropzone :is-audited="isLoaded && accessType === 'repondant'"
                                :question-id="question.id">
             </response-dropzone>
 
@@ -81,13 +60,9 @@
 
       </div>
     </div>
-    <webdav-tip v-if="!questionnaire.is_draft"
-                ref="webdavTip"
-                :control-id="questionnaire.control"
-                :reference-code="control.reference_code">
-    </webdav-tip>
+    <update-date-reponse-modal :questionnaireId="questionnaireId" :questionnaire="questionnaire">
+    </update-date-reponse-modal>
   </div>
-
 </template>
 
 <script>
@@ -104,13 +79,21 @@ import ResponseDropzone from '../questions/ResponseDropzone'
 import ResponseFileList from '../questions/ResponseFileList'
 import SuccessBar from '../utils/SuccessBar'
 import ThemeBox from '../themes/ThemeBox'
-import WebdavTip from '../controls/WebdavTip'
+import UpdateDateReponseModal from '../questionnaires/UpdateDateReponseModal'
+
+import axios from 'axios'
+import backendUrls from '../utils/backend'
 
 export default Vue.extend({
   name: 'QuestionnaireDetailPage',
   props: {
     controlId: Number,
     questionnaireId: Number,
+  },
+  data: function() {
+    return {
+      accessType: '',
+    }
   },
   computed: {
     control() {
@@ -132,15 +115,21 @@ export default Vue.extend({
       return this.userLoadStatus === loadStatuses.SUCCESS
     },
   },
+  mounted() {
+    this.getAccessType(this.control.id);
+  },
   methods: {
-    questionnaire_is_replied() {
-      return this.questionnaire.is_replied
-    },
-    questionnaire_is_not_closed() {
-      return this.questionnaire.is_not_closed
-    },
-    questionnaire_is_finalized() {
-      return this.questionnaire.is_finalized
+    async getAccessType(controlId) {
+      try {
+        const resp = await axios.get(backendUrls.getAccessToControl(controlId))
+        this.accessType = (
+          resp.data &&
+          resp.data[0] &&
+          resp.data[0].access_type
+        ) ? resp.data[0].access_type : ''
+      } catch (error) {
+        console.error("Erreur sur l'access type : ", error)
+      }
     },
     questionnaire_has_replies() {
       const q = this.questionnaire
@@ -158,9 +147,7 @@ export default Vue.extend({
 
       return found_replies
     },
-    showWebdavTip() {
-      this.$refs.webdavTip.start()
-    },
+
   },
   components: {
     Breadcrumbs,
@@ -172,7 +159,7 @@ export default Vue.extend({
     ResponseFileList,
     SuccessBar,
     ThemeBox,
-    WebdavTip,
+    UpdateDateReponseModal,
   },
 })
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="flex-row justify-content-around mb-6">
+  <ul class="flex-row justify-content-around mb-6">
     <wizard-step v-for="(stepTitle, i) in stepTitles"
                  :key="'step-' + (i + 1)"
                  :number="i+1"
@@ -8,8 +8,10 @@
                  @clickedStep="clicked(i+1)"
     >
       {{ stepTitle }}
+      <span v-if="activeI === i" class="sr-only">En cours de consultation</span>
+      <span v-if="activeI > i" class="sr-only">Étape validée</span>
     </wizard-step>
-  </div>
+  </ul>
 </template>
 
 <script>

@@ -4,7 +4,15 @@ from rest_framework import serializers
 
 from utils.serializers import DateTimeFieldWihTZ
 
-from .models import Control, Question, QuestionFile, Questionnaire, ResponseFile, Theme
+from .models import (
+    Control,
+    Question,
+    QuestionFile,
+    Questionnaire,
+    QuestionnaireFile,
+    ResponseFile,
+    Theme,
+)
 
 
 User = get_user_model()
@@ -85,6 +93,12 @@ class ControlDetailUserSerializer(serializers.ModelSerializer):
         )
 
 
+class QuestionnaireFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuestionnaireFile
+        fields = ("id", "url", "basename", "file", "questionnaire")
+
+
 class QuestionnaireSerializer(serializers.ModelSerializer):
     themes = ThemeSerializer(many=True, read_only=True)
     editor = ControlDetailUserSerializer(read_only=True, required=False)
@@ -92,13 +106,14 @@ class QuestionnaireSerializer(serializers.ModelSerializer):
         source="modified", format="%a %d %B %Y", read_only=True
     )
     modified_time = DateTimeFieldWihTZ(source="modified", format="%X", read_only=True)
+    questionnaire_files = QuestionnaireFileSerializer(many=True, read_only=True)
 
     class Meta:
         model = Questionnaire
         fields = (
             'id', 'title', 'sent_date', 'end_date', 'description', 'control', 'themes',
             'is_draft','is_replied','is_closed','is_not_closed', 'is_finalized', 'editor', 'title_display', 'numbering', 'modified_date',
-            'modified_time')
+            'modified_time','questionnaire_files',)
 
         extra_kwargs = {'control': {'required': True}}
         # not serialized (yet) : file, order
@@ -128,6 +143,23 @@ class ControlSerializerWithoutDraft(ControlSerializer):
 
     def get_questionnaires(self, obj):
         questionnaires = obj.questionnaires.filter(is_draft=False)
+        serializer = QuestionnaireSerializer(instance=questionnaires, many=True)
+        return serializer.data
+
+
+class ControlFilteredSerializer(ControlSerializer):
+    """
+    Questionnaires are filtered to exclude draft if user is repondant.
+    """
+
+    questionnaires = serializers.SerializerMethodField()
+
+    def get_questionnaires(self, obj):
+        profile = self.context["profile"]
+        profile_controls_repondant = profile.user_controls("repondant")
+        questionnaires = obj.questionnaires
+        if profile_controls_repondant.filter(id=obj.id).exists():
+            questionnaires = obj.questionnaires.filter(is_draft=False)
         serializer = QuestionnaireSerializer(instance=questionnaires, many=True)
         return serializer.data
 
