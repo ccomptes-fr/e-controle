@@ -1,5 +1,7 @@
 import factory
 
+from datetime import datetime
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -11,24 +13,40 @@ from faker import Factory as FakerFactory
 faker = FakerFactory.create("fr_FR")
 
 
-dummy_file = SimpleUploadedFile(
-    name="test.pdf",
-    content=open(settings.BASE_DIR + "/tests/data/test.pdf", "rb").read(),
-    content_type="application/pdf",
-)
+with open(settings.BASE_DIR + "/tests/data/test.pdf", "rb") as file_handler:
+    dummy_file = SimpleUploadedFile(
+        name="test.pdf",
+        content=file_handler.read(),
+        content_type="application/pdf",
+    )
 
+with open(settings.BASE_DIR + "/tests/data/test.exe", "rb") as file_handler:
+    dummy_exe_file = SimpleUploadedFile(
+        name="test.exe",
+        content=file_handler.read(),
+        content_type="application/x-dosexec",
+    )
 
-dummy_exe_file = SimpleUploadedFile(
-    name="test.exe",
-    content=open(settings.BASE_DIR + "/tests/data/test.exe", "rb").read(),
-    content_type="application/x-dosexec",
-)
+with open(settings.BASE_DIR + "/tests/data/test.sh", "rb") as file_handler:
+    dummy_text_file_with_sh_extension = SimpleUploadedFile(
+        name="test.sh",
+        content=file_handler.read(),
+        content_type="text/plain",
+    )
 
-dummy_text_file_with_sh_extension = SimpleUploadedFile(
-    name="test.sh",
-    content=open(settings.BASE_DIR + "/tests/data/test.sh", "rb").read(),
-    content_type="text/plain",
-)
+with open(settings.BASE_DIR + "/tests/data/test.xlsx", "rb") as file_handler:
+    dummy_xlsx_file = SimpleUploadedFile(
+        name="test.xlsx",
+        content=file_handler.read(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+with open(settings.BASE_DIR + "/tests/data/test.docx", "rb") as file_handler:
+    dummy_docx_file = SimpleUploadedFile(
+        name="test.docx",
+        content=file_handler.read(),
+        content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    )
 
 
 @register
@@ -39,7 +57,7 @@ class UserFactory(factory.django.DjangoModelFactory):
     username = factory.LazyAttribute(lambda a: a.email)
     password = factory.PostGenerationMethodCall("set_password", "123")
     is_active = True
-    is_staff = True
+    is_staff = False
 
     class Meta:
         model = get_user_model()
@@ -57,10 +75,21 @@ class UserProfileFactory(factory.django.DjangoModelFactory):
 @register
 class ControlFactory(factory.django.DjangoModelFactory):
     title = factory.LazyFunction(faker.name)
-    reference_code = factory.LazyAttribute(lambda c: slugify(c.title))
+    reference_code = factory.LazyAttribute(
+        lambda c: f"{datetime.today().year}_{slugify(c.title)[:25]}"
+    )
 
     class Meta:
         model = "control.Control"
+
+
+@register
+class AccessFactory(factory.django.DjangoModelFactory):
+    userprofile = factory.SubFactory(UserProfileFactory)
+    control = factory.SubFactory(ControlFactory)
+
+    class Meta:
+        model = "user_profiles.Access"
 
 
 @register
@@ -69,6 +98,8 @@ class QuestionnaireFactory(factory.django.DjangoModelFactory):
     control = factory.SubFactory(ControlFactory)
     uploaded_file = dummy_file
     is_draft = True
+    is_replied = False
+    is_finalized = False
 
     class Meta:
         model = "control.Questionnaire"
@@ -109,3 +140,14 @@ class QuestionFileFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = "control.QuestionFile"
+
+
+@register
+class ParameterFactory(factory.django.DjangoModelFactory):
+    code = "SUPPORT_EMAIL"
+    title = "nowhere@example.org"
+    name = "nowhere@example.org"
+    url = "nowhere@example.org"
+
+    class Meta:
+        model = "parametres.Parametre"

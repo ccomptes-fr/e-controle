@@ -4,10 +4,10 @@
                  confirm-button="Terminer"
                  no-close="true">
     <error-bar v-if="errorMessage !== undefined" noclose="true">
-      {{ errorMessage }}
+      <p>{{ errorMessage }}</p>
     </error-bar>
     <div class="table-responsive border">
-      <table class="table card-table">
+      <table class="table card-table" role="presentation">
         <transition-group name="theme-list" tag="tbody">
 
           <tr v-for="(theme, themeIndex) in themes"
@@ -22,7 +22,7 @@
                   type="button"
                   title="Déplacer le thème vers le haut"
                   @click="moveThemeUp(themeIndex)">
-                  <i class="fa fa-chevron-up"></i>
+                  <span class="fa fa-chevron-up" aria-hidden="true"></span>
                 </button>
                 <div>
                   {{ themeIndex + 1 }}
@@ -33,7 +33,7 @@
                   type="button"
                   title="Déplacer le thème vers le bas"
                   @click="moveThemeDown(themeIndex)">
-                  <i class="fa fa-chevron-down"></i>
+                  <span class="fa fa-chevron-down" aria-hidden="true"></span>
                 </button>
               <div>
             </td>

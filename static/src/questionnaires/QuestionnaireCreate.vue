@@ -1,5 +1,6 @@
 <template>
 <div>
+  <a name="contenu"> </a>
   <div class="mx-3">
     <breadcrumbs v-if="state !== STATES.LOADING" :control="currentControl"></breadcrumbs>
     <swap-editor-button v-if="state !== STATES.LOADING && controlHasMultipleInspectors"
@@ -8,7 +9,7 @@
     </swap-editor-button>
     <div class="page-header">
       <div class="page-title flex-wrap">
-        <i class="fe fe-list mr-2"></i>
+        <span class="fe fe-list mr-2" aria-hidden="true"></span>
         <span v-if="currentQuestionnaire.is_draft || currentQuestionnaire.id === undefined"
               class="tag tag-azure big-tag round-tag font-italic mr-2">
           Brouillon
@@ -21,7 +22,7 @@
         </span>
       </div>
     </div>
-    <div v-if="hasErrors" class="alert alert-danger" id="questionnaire-create-error">
+    <div v-if="hasErrors" class="alert alert-danger" id="questionnaire-create-error" role="alert">
       {{ errorMessage }}
     </div>
 
@@ -47,6 +48,7 @@
               id="questionnaire-metadata-create"
               ref="questionnaireMetadataCreate"
               :questionnaire-numbering="questionnaireNumbering"
+              :questionnaire="currentQuestionnaire"
               v-show="state === STATES.START">
       </questionnaire-metadata-create>
       <questionnaire-body-create
@@ -72,7 +74,7 @@
               class="btn btn-secondary"
               @click="saveDraftAndGoHome"
       >
-        <i class="fa fa-chevron-left mr-2"></i>
+        <span class="fa fa-chevron-left mr-2" aria-hidden="true"></span>
         Retour
       </button>
       <div>
@@ -80,7 +82,7 @@
                 id="back-button"
                 @click="back"
                 class="btn btn-secondary">
-          <i class="fa fa-chevron-left mr-2"></i>
+          <span class="fa fa-chevron-left mr-2" aria-hidden="true"></span>
           Etape {{ state - 1 }}
         </button>
         <button v-if="state === STATES.CREATING_BODY"
@@ -90,12 +92,12 @@
                 class="btn btn-secondary"
                 @click="saveAndShowMoveThemesModal"
                 title="Réorganiser les thèmes">
-          <i class="fa fa-exchange-alt fa-rotate-90"></i>
+          <span class="fa fa-exchange-alt fa-rotate-90" aria-hidden="true"></span>
           Réorganiser les thèmes
         </button>
         <button @click="validateFormAndSaveDraft"
                 class="btn btn-primary">
-          <i class="fe fe-save"></i>
+          <span class="fe fe-save" aria-hidden="true"></span>
           Enregistrer
         </button>
         <button v-if="state !== STATES.PREVIEW"
@@ -103,7 +105,7 @@
                 @click="next"
                 class="btn btn-secondary">
           Etape {{ state + 1 }}
-          <i class="fa fa-chevron-right ml-2"></i>
+          <span class="fa fa-chevron-right ml-2" aria-hidden="true"></span>
         </button>
         <button v-if="state === STATES.PREVIEW"
                 id="publishButton"
@@ -111,7 +113,7 @@
                 @click="startPublishFlow()"
                 class="btn btn-primary ml-5"
                 title="Publier le questionnaire à l'organisme interrogé">
-          <i class="fa fa-rocket mr-1"></i>
+          <span class="fa fa-rocket mr-1" aria-hidden="true"></span>
           Publier
         </button>
       </div>
@@ -119,15 +121,15 @@
     <div class="flex-row justify-content-end mt-2">
       <div v-if="saveMessage.isWaitingForMinDisplayTime || saveMessage.isSaveHappening"
            style="min-height: 1.5rem;">
-        <i class="fas fa-sync-alt mr-2"></i>
+        <span class="fas fa-sync-alt mr-2" aria-hidden="true"></span>
         Enregistrement en cours ...
       </div>
       <div v-else
            :class="{ 'text-danger': hasErrors, 'text-muted': !hasErrors }"
            class="flex-row align-items-center"
            style="min-height: 1.5rem;">
-        <i v-if="hasErrors" class="fe fe-alert-triangle mr-2"></i>
-        <i v-else class="fe fe-check-circle mr-2"></i>
+        <span v-if="hasErrors" class="fe fe-alert-triangle mr-2" aria-hidden="true"></span>
+        <span v-else class="fe fe-check-circle mr-2" aria-hidden="true"></span>
         {{ saveMessage.text }}
       </div>
     </div>
@@ -193,6 +195,7 @@ export default Vue.extend({
         isWaitingForMinDisplayTime: false,
         isSaveHappening: false,
       },
+      questionnaire: '',
     }
   },
   computed: {
@@ -291,6 +294,7 @@ export default Vue.extend({
         const foundQuestionnaires =
           control.questionnaires.filter(questionnaire => questionnaire.id === questionnaireId)
         if (foundQuestionnaires.length > 0) {
+          this.questionnaire = foundQuestionnaires[0]
           return foundQuestionnaires[0]
         }
       }
@@ -439,23 +443,24 @@ export default Vue.extend({
       this.saveMessage.isSaveHappening = false
     },
     saveDraft() {
-      this.currentQuestionnaire.is_draft = true
-      this.displaySaveInProgress()
-      return this._doSave()
+      const self = this
+      self.currentQuestionnaire.is_draft = true
+      self.displaySaveInProgress()
+      return self._doSave()
         .then((response) => {
-          console.log('Successful draft save.')
-          this.currentQuestionnaire = response.data
-          this.emitQuestionnaireUpdated()
+          console.debug('Successful draft save.')
+          self.currentQuestionnaire = response.data
+          self.emitQuestionnaireUpdated()
 
-          this.displaySavingDone(nowTimeString())
+          self.displaySavingDone(nowTimeString())
           return response.data
         })
         .catch((error) => {
           console.error('Error in draft save :', error)
           const errorToDisplay =
             (error.response && error.response.data) ? error.response.data : error
-          this.displayErrors('Erreur lors de la sauvegarde du brouillon.', errorToDisplay)
-          this.displaySavingDoneWithError()
+          self.displayErrors('Erreur lors de la sauvegarde du brouillon.', errorToDisplay)
+          self.displaySavingDoneWithError()
         })
     },
     startPublishFlow() {

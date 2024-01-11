@@ -12,6 +12,7 @@ class ConfigViewSet(viewsets.ViewSet):
             "site_url": f"https://{get_current_site(request).domain}",
             "static_files_url": settings.STATIC_URL,
             "support_team_email": settings.SUPPORT_TEAM_EMAIL,
+            "env_name": settings.ENV_NAME,
         }
         if request.user.profile.is_inspector:
             config.update(

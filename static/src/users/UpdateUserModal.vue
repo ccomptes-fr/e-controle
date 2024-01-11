@@ -1,13 +1,13 @@
 <template>
 
-<div class="modal fade update-user-modal" id="updateUserModal" tabindex="-1" role="dialog" aria-labelledby="updateUserModal" aria-hidden="true">
+<div class="modal fade update-user-modal" id="updateUserModal" tabindex="-1" role="dialog" aria-labelledby="labelForModalAddUser" aria-hidden="true" aria-modal="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title" id="labelForModalAddUser">{{ editingControl.title }}</h4>
+        <div class="modal-title" id="labelForModalAddUser">{{ editingControl.title }}</div>
       </div>
       <div class="modal-body">
-        <div v-if="hasErrors" class="alert alert-danger">
+        <div v-if="hasErrors" class="alert alert-danger" role="alert">
           La modification d'utilisateur n'a pas fonctionné.
         </div>
 
@@ -34,7 +34,7 @@
                      required
                      aria-labelledby="first-name-label">
               <p class="text-muted pl-2" v-if="errors.first_name">
-                <i class="fa fa-warning"></i>
+                <span class="fa fa-warning" aria-hidden="true"></span>
                 {{ errors.first_name.join(' / ')}}
               </p>
             </div>
@@ -50,7 +50,7 @@
                      required
                      aria-labelledby="last-name-label">
               <p class="text-muted pl-2" v-if="errors.last_name">
-                <i class="fa fa-warning"></i>
+                <span class="fa fa-warning" aria-hidden="true"></span>
                 {{ errors.last_name.join(' / ')}}
               </p>
             </div>

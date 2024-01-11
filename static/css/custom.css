@@ -63,7 +63,11 @@
 }
 
 .fg-success {
-    color: #5EBB00;
+    color: #448600;
+}
+
+.text-success {
+    color: #448600 !important;
 }
 
 /* Secondary button : you can't see it's disabled */
@@ -98,6 +102,11 @@
     margin-left: 10rem !important;
 }
 
+.entity-picture{
+    margin: auto;
+    margin-top: 0px;
+}
+
 /* Top bar */
 .nav-tabs .nav-link-thick-line {
     border-bottom-width: 4px;
@@ -129,6 +138,10 @@
     border-bottom-left-radius: 3px;
 }
 
+.clickable {
+    cursor: pointer;
+}
+
 /********************/
 /* Footer : at the bottom of viewport, and if content fills viewport vertically, then bottom of content. */
 #page {
@@ -138,14 +151,6 @@
 #non-footer {
     min-height: 100vh;
     padding-bottom: 140px; /* Footer height */
-}
-#footer {
-    position: absolute;
-    bottom: 0px;
-    left: 0px;
-    width: 100%;
-    height: 140px;
-    z-index: 99;
 }
 
 .big-icon {
@@ -158,6 +163,9 @@
 }
 .form-label-h3 {
     margin-bottom: 0px;
+}
+.form-label-h4 {
+    font-size: 1.125rem;
 }
 
 .preview {
@@ -269,12 +277,122 @@ table.trash-list {
     padding-right: 1em;
 }
 
-/* Image displayed on top of icon (fake icon). Used for WebdavTip button. */
-.parent-fake-icon {
-    position: relative;
+.france_relance {
+    font-size: 1.4em;
 }
-.fake-icon {
-    position: absolute;
-    top: 2px;
-    left: 5px;
+
+img.france_relance {
+width: 3em;
+margin-left: 6em;
+}
+
+.no-border {
+border: 0;
+}
+
+/* Alerts */
+.alert p{
+margin-bottom: 0;
+}
+
+/* Breadcrumbs */
+.breadcrumbs{
+font-size: 1rem;
+}
+
+ul.links {
+list-style-type: none;
+}
+
+/* Button for user */
+.btn-user {
+border: none;
+box-shadow: none;
+}
+
+/* Modal titles */
+.modal-title {
+font-size: 1rem;
+font-weight: bold;
+}
+
+/* Datepicker */
+.date-input{
+width: 8em !important;
+}
+
+.date-input input{
+width: 6.8em !important;
+overflow: hidden !important;
+}
+
+/* Sidebar */
+.hidden {
+display: none;
+}
+
+/* Footer */
+.logo_footer {
+max-height: 150px;
+min-width: 150px;
+}
+
+#footer .presentation {
+display: inline-block;
+height: 100px;
+padding-left: 2rem;
+}
+
+#footer .links {
+padding: 0px;
+}
+
+#footer .links li {
+font-weight: bold;
+}
+
+#footer .link {
+display: inline-block;
+padding-left: 1rem;
+padding-right: 1rem;
+}
+
+#footer .mainlink {
+font-size: 1.05rem;
+}
+
+#footer .sublink {
+border-right: 1px solid rgba(0, 40, 100, 0.22);
+}
+
+#footer hr {
+margin: 0px 0px 1rem 1rem;
+}
+
+/* Question */
+.question {
+text-align: left;
+white-space: normal;
+margin-bottom: 1rem;
+}
+
+/* Bandeau */
+.bandeau {
+text-align: center;
+font-size: 1.4rem;
+font-weight: bold;
+border-color: #f1c1c0;
+background-color: #f5d2d2;
+color: #6b1110;
+padding: 1rem 0;
+}
+
+/* tooltip */
+.tooltip {
+max-width: 26rem;
+}
+
+.tooltip-inner {
+text-align: left;
+max-width: 100%;
 }
