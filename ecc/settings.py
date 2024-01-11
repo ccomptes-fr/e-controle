@@ -10,6 +10,12 @@ env = environ.Env(
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# To secure access to files/dir, only the user used by the application can rw the files/dir.
+CHOWN_MASK=0o700
+# https://docs.djangoproject.com/en/3.2/ref/settings/#file-upload-directory-permissions
+FILE_UPLOAD_DIRECTORY_PERMISSIONS=CHOWN_MASK
+FILE_UPLOAD_PERMISSIONS=CHOWN_MASK
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
@@ -335,7 +341,6 @@ if DEBUG:
     )
 
 CELERY_BROKER_URL = env("CELERY_BROKER_URL")
-CELERY_QUEUE = env("CELERY_QUEUE", default="default")
 HTTP_AUTHORIZATION = env("HTTP_AUTHORIZATION", default=None)
 
 CKEDITOR_CONFIGS = {

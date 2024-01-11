@@ -109,7 +109,9 @@ export default Vue.extend({
 
     updateHash()
 
-    this.getAccessType(this.displayedControl.id)
+    if (this.displayedControl) {
+      this.getAccessType(this.displayedControl.id);
+    }
   },
   methods: {
     async getAccessType(displayedControlId) {
@@ -135,7 +137,9 @@ export default Vue.extend({
   watch: {
     displayedControl: {
       handler: function (newVal) {
-        this.getAccessType(newVal.id)
+        if (newVal) {
+          this.getAccessType(newVal.id);
+        }
       },
       deep: true,
       immediate: true,

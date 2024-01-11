@@ -4,7 +4,7 @@
       <form @submit.prevent="confirm">
 
         <div class="modal-header border-bottom-0">
-          <div id="modal_title" class="modal-title">
+          <div id="confirm_modal_title" class="modal-title">
             Vous êtes sur le point de forcer le transfert des droits
             de ce questionnaire, en conséquence :
           </div>

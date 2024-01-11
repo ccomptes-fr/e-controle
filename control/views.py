@@ -11,7 +11,6 @@ from django.views import View
 from django.views.generic import DetailView, CreateView, TemplateView
 from django.views.generic.detail import SingleObjectMixin
 from django.db.models import Q
-from django.db import close_old_connections
 
 from actstream import action
 from actstream.models import model_stream
@@ -157,7 +156,6 @@ class QuestionnaireDetail(LoginRequiredMixin, WithListOfControlsMixin, DetailVie
         return context
 
     def add_access_log_entry(self):
-        close_old_connections()  # Close any existing connections before accessing the questionnaire
         questionnaire = self.get_object()
         action_details = {
             "sender": self.request.user,

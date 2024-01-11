@@ -3,7 +3,7 @@
     <empty-modal :id="'webdav-tip-modal-' + controlId" class="webdav-tip">
       <div class="modal-header parent-fake-icon">
         <h4 class="modal-title">
-          <i class="fe fe-folder mr-4"></i>
+          <span class="fe fe-folder mr-4"></span>
           <img :src="'/static/img/file-explorer.png'"
                 alt="Explorateur Windows"
                 class="title-fake-icon" />
@@ -31,7 +31,7 @@
                 <div id="copy-success-message-parent">
                   <button class="btn btn-primary"
                           @click="copyLink">
-                    <i class="fe fe-copy"></i>
+                    <span class="fe fe-copy"></span>
                     Copier le lien
                   </button>
                   <transition name="fade" v-on:enter="enterFade">
@@ -52,7 +52,7 @@
         </div>
 
         <div class="alert alert-icon alert-primary" role="alert">
-          <i class="fe fe-help-circle mr-2" aria-hidden="true"></i>
+          <span class="fe fe-help-circle mr-2" aria-hidden="true"></span>
           <h5 class="mt-1">Besoin d’aide ?</h5>
           <p>
             Toutes les réponses déposées sont automatiquement classées et renommées dans un dossier
@@ -65,7 +65,7 @@
                     :data-target="'#file-explorer-video-modal-' + controlId"
                     class="btn btn-primary mr-4"
                     title="Voir les instructions en vidéo">
-              <i class="fa fa-play-circle mr-1"></i>
+              <span class="fa fa-play-circle mr-1"></span>
               Suivez les instructions en vidéo
             </button>
             <a target="_blank"
@@ -74,7 +74,7 @@
               class="btn btn-primary"
               title="Suivez les instructions en images."
             >
-              <i class="fe fe-image mr-1"></i>
+              <span class="fe fe-image mr-1"></span>
               Suivez les instructions en images
             </a>
           </div>

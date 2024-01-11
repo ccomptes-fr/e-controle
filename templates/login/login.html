@@ -2,6 +2,16 @@
 {% load static %}
 {% load email_obfuscator %}
 {% block content %}
+<style>
+  a {
+    color: #3473CB;
+    text-decoration: underline;
+  }
+
+  a:hover {
+    color: #0056b3;
+  }
+</style>
 <div id="page" class="page white">
   <div id="non-footer" class="container">
     <div class="row"
@@ -68,6 +78,16 @@
             </div>
           </div>
         </div>
+        {%if alerte%}
+        <div id="alerte">
+          <div class="justify-content-center align-items-center row">
+            <div class="alert alert-danger alert-icon" role="alert">
+              <i class="fe fe-alert-triangle" aria-hidden="true"></i>
+              <p>{{alerte.text}}</p>
+            </div>
+          </div>
+        </div>
+        {%endif%}
         <a href="#a-quoi-sert-e-controle" class="mb-4 btn btn-secondary btn-pill">
           En savoir plus sur e.contrôle
         </a>

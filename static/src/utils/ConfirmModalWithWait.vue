@@ -2,7 +2,7 @@
   <empty-modal :no-close="noClose">
     <form id="modalform">
       <div class="modal-header border-bottom-0">
-        <div id="modal_title" class="modal-title">{{ title }}</div>
+        <div id="modal_with_wait_title" class="modal-title">{{ title }}</div>
         <button v-if="!noClose"
                 type="button"
                 class="close"

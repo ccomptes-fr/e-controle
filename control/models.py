@@ -111,8 +111,8 @@ class Control(SoftDeleteModel):
     objects = DeletableQuerySet.as_manager()
 
     class Meta:
-        verbose_name = "Procédure"
-        verbose_name_plural = "Procédures"
+        verbose_name = "Contrôle"
+        verbose_name_plural = "Contrôles"
 
     def data(self):
         return {
@@ -455,7 +455,7 @@ class ResponseFile(TimeStampedModel, FileInfoMixin):
         on_delete=models.CASCADE,
     )
     file = models.FileField(
-        verbose_name="fichier", upload_to=response_file_path, max_length=2000
+        verbose_name="fichier", upload_to=response_file_path
     )
     author = models.ForeignKey(
         to=settings.AUTH_USER_MODEL,

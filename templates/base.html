@@ -16,7 +16,7 @@
         <div class="header flex-row justify-content-between"> <!--// opening: top_header  //-->
           <div class="flex-column justify-content-center mx-5">
             <a class="header-brand" href="/accueil">
-              <img src="{% static 'img/e-controle.png' %}" class="header-brand-img" alt="logo" />
+              <img src="{% static 'img/e-controle.png' %}" class="header-brand-img" alt="Accueil - e-contrôle" />
             </a>
           </div>
 
@@ -27,7 +27,7 @@
                   {% url 'faq' as faq_url %}
                   <a class="nav-link nav-link-thick-line {% if request.path == faq_url %}active{% endif %}"
                     href="{% url 'faq'%}">
-                    <i class="fe fe-help-circle"></i> FAQ
+                    <span class="fe fe-help-circle"></span> FAQ
                   </a>
                 </div>
               {% else %}
@@ -53,7 +53,7 @@
                 </a>
                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                   <a class="dropdown-item" href="{% url 'logout' %}">
-                    <i class="dropdown-icon fe fe-log-out"></i> Se déconnecter
+                    <span class="dropdown-icon fe fe-log-out"></span> Se déconnecter
                   </a>
                 </div>
               </div>

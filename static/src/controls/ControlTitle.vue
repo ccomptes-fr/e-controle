@@ -164,21 +164,22 @@
           <div class="page-title">{{ title }}</div>
         </div>
 
-        <div v-if="sessionUser.is_inspector" class="col-4 flex-column ie-flex-column-fix align-items-end ml-6">
+        <div v-if="accessType === 'demandeur'" class="col-4 flex-column ie-flex-column-fix align-items-end ml-6">
           <div class="mb-6 flex-column ie-flex-column-fix align-items-end">
             <div class="text-muted card-title mb-1 break-word text-right">
               <strong>../{{ control.reference_code }}</strong>
             </div>
             <a class="btn btn-secondary parent-fake-icon" @click="showWebdavTip">
-              <i class="fe fe-folder mr-3"></i>
+              <span class="fe fe-folder mr-3"></span>
               <img :src="'/static/img/file-explorer.png'" alt="Explorateur Windows" class="fake-icon" />
               Comment voir les réponses ?
             </a>
           </div>
-
           <div class="btn-group">
-            <button type="button" class="btn btn-secondary" @click="enterEditMode">
-              <i class="fe fe-edit mr-2"></i>
+            <button type="button"
+                    class="btn btn-secondary"
+                    @click="enterEditMode">
+              <span class="fe fe-edit mr-2" aria-hidden="true"></span>
               Modifier
             </button>
             <button type="button"
@@ -398,7 +399,7 @@ export default Vue.extend({
                     },
                   })
                 })
-              }) 
+              })
 
         await getUpdateMethod(qId)(newQ).then(response => {
           const updatedQ = response.data
@@ -487,8 +488,8 @@ export default Vue.extend({
                         questionId: q.order,
                         category: 'response_file',
                         basename: rf.basename,
-                        is_deleted: rf.is_deleted,
                         url: rf.url,
+                        is_deleted: rf.is_deleted,
                       }
                     }
                   })
@@ -526,7 +527,6 @@ export default Vue.extend({
         })
       );
 
-      const Files = responseFiles.filter( resp => resp.is_deleted === false)
       const zipFilename = this.control.reference_code + '.zip'
       const zip = new JSZip()
       let cnt = 0
