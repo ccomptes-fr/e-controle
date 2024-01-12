@@ -4,12 +4,13 @@
 
 
 securitycheck:
-  image: ${DOCKER_REGISTRY}docker:20.10.12
+  image: ${DOCKER_REGISTRY}aquasec/trivy:latest
   services:
     - name: ${DOCKER_REGISTRY}cicd/docker-dind:1.0.1
       alias: docker
   stage: securitycheck
   script:
     - echo securitycheck
+    - trivy --help
   rules: *securitycheck_rules
 
