@@ -1,0 +1,16 @@
+.securitycheck_rules:
+  rules: &securitycheck_rules
+    - if: $CI_PIPELINE_SOURCE == "schedule" && $SCHEDULE_TYPE == "security_check"'
+      when: always
+    - when: never
+
+
+securitycheck:
+  image: ${DOCKER_REGISTRY}docker:20.10.12
+  services:
+    - name: ${DOCKER_REGISTRY}cicd/docker-dind:1.0.1
+      alias: docker
+  stage: securitycheck
+  script:
+    - echo securitycheck
+
