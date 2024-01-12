@@ -1,5 +1,5 @@
 <template>
-  <div class="wizard-step">
+  <li class="wizard-step">
 
     <a v-if="clickable"
        class="wizard-step-graphics"
@@ -8,7 +8,7 @@
       <div class="wizard-step-thread"></div>
       <div class="wizard-step-bubble card-title">
         <span class="number">{{ number }}</span>
-        <i class="done-icon fe fe-check"></i>
+        <span class="done-icon fe fe-check" aria-hidden="true"></span>
       </div>
     </a>
 
@@ -17,12 +17,12 @@
       <div class="wizard-step-thread"></div>
       <div class="wizard-step-bubble card-title">
         <span class="number">{{ number }}</span>
-        <i class="done-icon fe fe-check"></i>
+        <span class="done-icon fe fe-check" aria-hidden="true"></span>
       </div>
     </div>
 
     <slot></slot>
-  </div>
+  </li>
 </template>
 
 <script>
@@ -78,17 +78,17 @@ export default Vue.extend({
     text-decoration-line: none;
 }
 .wizard-step a:hover .wizard-step-bubble, .wizard-step a:hover .wizard-step-thread {
-    background-color: #45aaf2;
+    background-color: #0e7ac7;
     color: white;
 }
 
 /* Active step */
 .active .wizard-step-thread {
-    background-color: #45aaf2;
+    background-color: #0c7bc6;
     color: #fff;
 }
 .active .wizard-step-bubble {
-    background-color: #45aaf2;
+    background-color: #0c7bc6;
     color: #fff;
 }
 

@@ -2,14 +2,14 @@ Bonjour,
 
 {{ deleter_user.first_name }} {{ deleter_user.last_name }} vient de supprimer l'espace de dépôt "{{ control.title_display }}".
 
-Cet espace n'est donc plus accessible pour les personnes qui y avaient accès, qu'elles soient membres de l'équipe de contrôle ou de l'organisme interrogé.
+Cet espace n'est donc plus accessible pour les personnes qui y avaient accès, qu'elles soient membres de l'équipe d'instruction ou de l'organisme interrogé.
 
-  Personnes concernées de l'équipe de contrôle :
+  Personnes concernées de l'équipe d'instruction :
   {% for profile in inspectors %}
-   -  {{ profile.user.first_name }} {{ profile.user.last_name }}
+   -  {{ profile.userprofile.user.first_name }} {{ profile.userprofile.user.last_name }}
   {% endfor %}
 
-Si vous pensez ne pas être le bon destinataire de ce message, ou si cette suppression est une erreur, vous pouvez nous contacter en répondant directement à cet email.
+Si vous pensez ne pas être le bon destinataire de ce message, ou si cette suppression est une erreur, vous pouvez nous contacter en écrivant au support : {{ support_team_email }}.
 
 Merci beaucoup,
 

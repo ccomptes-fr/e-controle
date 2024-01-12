@@ -16,7 +16,7 @@
         <div class="header flex-row justify-content-between"> <!--// opening: top_header  //-->
           <div class="flex-column justify-content-center mx-5">
             <a class="header-brand" href="/accueil">
-              <img src="{% static 'img/e-controle.png' %}" class="header-brand-img" alt="logo" />
+              <img src="{% static 'img/e-controle.png' %}" class="header-brand-img" alt="Accueil - e-contrôle" />
             </a>
           </div>
 
@@ -27,7 +27,7 @@
                   {% url 'faq' as faq_url %}
                   <a class="nav-link nav-link-thick-line {% if request.path == faq_url %}active{% endif %}"
                     href="{% url 'faq'%}">
-                    <i class="fe fe-help-circle"></i> FAQ
+                    <span class="fe fe-help-circle"></span> FAQ
                   </a>
                 </div>
               {% else %}
@@ -53,7 +53,7 @@
                 </a>
                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                   <a class="dropdown-item" href="{% url 'logout' %}">
-                    <i class="dropdown-icon fe fe-log-out"></i> Se déconnecter
+                    <span class="dropdown-icon fe fe-log-out"></span> Se déconnecter
                   </a>
                 </div>
               </div>
@@ -85,14 +85,14 @@
   </div> <!--// closing: page  //-->
 
 {% endblock content %}
-{% block session_management %}
+{% comment %} {% block session_management %}
   <div id="session-management-vm">
     {% if user.is_authenticated %}
       <session-timeout :logout-url="{% url 'logout' %}" :expire-seconds="{{ settings.SESSION_EXPIRE_SECONDS }}"></session-timeout>
     {% endif %}
   </div>
   <script src="{% static 'dist/session-management-bundle.js' %}"></script>
-{% endblock session_management %}
+{% endblock session_management %} {% endcomment %}
 
 {% block analytics %}
   {% if settings.PIWIK_SITE_ID and settings.PIWIK_TRACKER_BASE_URL %}

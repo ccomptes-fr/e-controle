@@ -1,4 +1,5 @@
 {% extends "base_email.html" %}
+{% load email_obfuscator %}
 {% block email_content %}
 
 <p>Bonjour,</p>
@@ -10,15 +11,15 @@
 
 <p>
   Cet espace n'est donc plus accessible pour les personnes qui y avaient accès, qu'elles soient
-  membres de l'équipe de contrôle ou de l'organisme interrogé.
+  membres de l'équipe d'instruction ou de l'organisme interrogé.
 </p>
 
 <p>
-  Personnes concernées de l'équipe de contrôle :
+  Personnes concernées de l'équipe d'instruction :
   <ul>
     {% for profile in inspectors %}
       <li>
-        {{ profile.user.first_name }} {{ profile.user.last_name }}
+        {{ profile.userprofile.user.first_name }} {{ profile.userprofile.user.last_name }}
       </li>
     {% endfor %}
   </ul>
@@ -26,7 +27,7 @@
 
 <p>
   Si vous pensez ne pas être le bon destinataire de ce message, ou si cette suppression est une
-  erreur, vous pouvez nous contacter en répondant directement à cet email.
+  erreur, vous pouvez nous contacter en {{ support_team_email|obfuscate_mailto:"écrivant au support" }}.
 </p>
 
 <p>Merci beaucoup,</p>

@@ -21,12 +21,12 @@
     {% if messages %}
       <div class="text-center" role="alert">
         {% for message in messages %}
-          <p {% if message.tags %}class="alert alert-{{ message.tags }}"{% endif %}>{{ message }}</p>
+          <p {% if message.tags %}class="alert alert-{{ message.tags }}" role="alert"{% endif %}>{{ message }}</p>
         {% endfor %}
       </div>
     {% endif %}
     <div class="form-group">
-      <label>
+      <label for="id_agree">
         <input type="checkbox"
                name="agree"
                id="id_agree"

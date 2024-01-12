@@ -3,7 +3,7 @@ import time
 from datetime import timedelta, datetime
 
 from actstream import action
-from celery import task
+from celery import shared_task
 from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -75,7 +75,7 @@ def get_admin_emails():
     # admin user has not a email
     return list(User.objects.filter(is_staff=True, is_active=True).exclude(email="").values_list("email", flat=True))
 
-
+@shared_task
 def sent_emails(recipient_list, subject, html_template, text_template, context, control, action_sent, action_not_sent):
     number_of_sent_email = send_email(
       to=recipient_list,
@@ -104,12 +104,12 @@ def sent_emails(recipient_list, subject, html_template, text_template, context, 
       f"Waiting {EMAIL_SPACING_TIME_SECONDS}s after emailing for control {control.id}"
     )
 
-@task
+@shared_task
 def send_files_report():
     html_template = "reporting/email/files_report.html"
     text_template = "reporting/email/files_report.txt"
     for control in Control.objects.all():
-        logger.info(f"Processing control: {control.id}")
+        logger.info(f"Contrôle : {control.id}")
         if control.depositing_organization:
             subject = control.depositing_organization
         else:
@@ -117,14 +117,17 @@ def send_files_report():
         subject += " - de nouveaux documents déposés !"
         files = get_files(control)
         if not files:
-            logger.info("No new documents, aborting.")
+            logger.info(f"Pas de nouveau document, arrêt.")
             continue
-        recipients = control.user_profiles.filter(send_files_report=True)
-        recipient_list = recipients.values_list("user__email", flat=True)
+        recipient_list = [
+            access.userprofile.user.email
+            for access in control.access.all()
+            if access.userprofile.send_files_report == True
+        ]
         if not recipient_list:
-            logger.info("No recipients, aborting.")
+            logger.info(f"Pas de destinataire, arrêt.")
             continue
-        logger.debug(f"Recipients: {len(recipient_list)}")
+        logger.debug(f"Destinataires : {len(recipient_list)}")
         date_cutoff = get_date_cutoff(control)
         context = {
             "control": control,
@@ -136,7 +139,7 @@ def send_files_report():
         time.sleep(EMAIL_SPACING_TIME_SECONDS)
 
 
-@task
+@shared_task
 def send_clean_controls_report():
     html_template = "reporting/email/clean_controls_report.html"
     text_template = "reporting/email/clean_controls_report.txt"
@@ -179,7 +182,7 @@ def send_clean_controls_report():
             logger.info(f"Active control not too old: {control.id}")
 
 
-@task
+@shared_task
 def send_orphans_controls_report():
     html_template = "reporting/email/orphans_controls_report.html"
     text_template = "reporting/email/orphans_controls_report.txt"

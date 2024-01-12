@@ -1,8 +1,9 @@
 <template>
-  <div class="alert alert-success alert-icon alert-dismissible">
-    <button v-if="!noclose" type="button" class="close" data-dismiss="alert" @click="dismissed">
+  <div class="alert alert-success alert-icon alert-dismissible" role="status">
+    <button v-if="!noclose" type="button" class="close" data-dismiss="alert" @click="dismissed">.
+    <span class="sr-only">Fermer</span>
     </button>
-    <i class="fe fe-check" aria-hidden="true"></i>
+    <span class="fe fe-check" aria-hidden="true"></span>
     <slot></slot>
   </div>
 </template>

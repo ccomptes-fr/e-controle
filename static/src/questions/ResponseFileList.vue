@@ -1,19 +1,19 @@
 <template>
   <div>
     <success-bar v-if="hasSucessMessage" @dismissed="clearSuccessMessage">
-      Le fichier "{{ successFilename }}" a bien été envoyé à la corbeille.
-      <a :href="trashUrl">Cliquez ici</a>
-      pour le voir dans la corbeille.
+      <p>Le fichier "{{ successFilename }}" a bien été envoyé à la corbeille.
+      <a :href="trashUrl" class="trash-link">Cliquez ici</a>
+      pour le voir dans la corbeille.</p>
     </success-bar>
     <error-bar v-if="errorMessage" @dismissed="clearErrorMessage">
-      {{ errorMessage }}
+      <p>{{ errorMessage }}</p>
     </error-bar>
     <div class="table-responsive question-box-child" v-if="files && files.length">
       <div class="form-label">
         Fichier{{ answer_count===1 ? '': 's' }} déposé{{ answer_count===1 ? '': 's' }}:
       </div>
       <table class="response-file-list table table-hover table-outline table-vcenter text-nowrap
-                    card-table">
+                    card-table" title="Fichiers déposés">
         <thead>
           <tr>
             <th style="width: 16%;">Date de dépôt</th>
@@ -43,6 +43,7 @@
                       :data-target="'#trash-confirm-modal-' + file.id"
                       class="fe fe-trash-2 btn btn-outline-primary"
               >
+              <span class="sr-only">Mettre à la corbeille</span>
               </button>
             </td>
           </tr>
@@ -69,6 +70,7 @@ import Vue from 'vue'
 
 import axios from 'axios'
 import backendUrls from '../utils/backend'
+import DateFormat from '../utils/DateFormat.js'
 import { clearCache } from '../utils/utils'
 import ConfirmModal from '../utils/ConfirmModal'
 import ErrorBar from '../utils/ErrorBar'
@@ -85,6 +87,9 @@ export default Vue.extend({
     question: Object,
     questionnaireId: Number,
     isAudited: Boolean,
+  },
+  filters: {
+    DateFormat,
   },
   data() {
     return {
@@ -172,5 +177,8 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-
+.trash-link {
+  text-decoration: underline;
+  /* Ajoute un soulignement au lien */
+}
 </style>

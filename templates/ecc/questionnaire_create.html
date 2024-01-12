@@ -4,6 +4,9 @@
 {% block extra_static_header %}
 {{ block.super }}
 {% endblock extra_static_header %}
+{% block site_title %}
+  <title>Questionnaire | e-controle</title>
+{% endblock site_title %}
 
 {% block page_main_container_with_sidebar %}
   <div id="questionnaire-create-vm" class="page-main flex-row">
@@ -11,7 +14,7 @@
       <sidebar></sidebar>
     </div>
 
-    <div class="mt-3 mt-md-5 flex-grow-1 ml-6 ie-flex-row-child">
+    <main class="mt-3 mt-md-5 flex-grow-1 ml-6 ie-flex-row-child" role="main">
       <div>
         {% if control is not None %}
           <questionnaire-create
@@ -30,7 +33,7 @@
           </questionnaire-create>
         {% endif %}
       </div>
-    </div>
+    </main>
   </div>
 {% endblock page_main_container_with_sidebar %}
 

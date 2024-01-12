@@ -4,13 +4,13 @@ import os
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
-from django.http import HttpResponseForbidden, HttpResponseBadRequest
+from django.http import HttpResponseForbidden, HttpResponseBadRequest, Http404
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views import View
 from django.views.generic import DetailView, CreateView, TemplateView
 from django.views.generic.detail import SingleObjectMixin
-
+from django.db.models import Q
 
 from actstream import action
 from actstream.models import model_stream
@@ -24,7 +24,14 @@ import openpyxl
 from pdfrw import PdfReader, PdfWriter, IndirectPdfDict
 from datetime import datetime
 
-from .models import Control, Questionnaire, QuestionFile, ResponseFile, Question
+from .models import (
+    Control,
+    Questionnaire,
+    QuestionFile,
+    QuestionnaireFile,
+    ResponseFile,
+    Question,
+)
 from .serializers import ControlDetailUserSerializer, ControlSerializerWithoutDraft
 from .serializers import ControlSerializer, ControlDetailControlSerializer
 
@@ -34,8 +41,10 @@ class WithListOfControlsMixin(object):
         context = super().get_context_data(**kwargs)
         # Questionnaires are grouped by control:
         # we get the list of questionnaire from the list of controls
-        user_controls = self.request.user.profile.controls.active()
-        control_list = Control.objects.filter(id__in=user_controls).order_by("-id")
+        user_access = self.request.user.profile.access.filter(
+            control__is_deleted=False
+        ).all()
+        control_list = Control.objects.filter(access__in=user_access).order_by("-id")
         context["controls"] = control_list
         return context
 
@@ -62,7 +71,9 @@ class Trash(LoginRequiredMixin, WithListOfControlsMixin, DetailView):
     template_name = "ecc/trash.html"
 
     def get_queryset(self):
-        user_controls = self.request.user.profile.controls.active()
+        user_controls = Control.objects.filter(
+            access__in=self.request.user.profile.access.all()
+        )
         queryset = Questionnaire.objects.filter(control__in=user_controls)
         return queryset
 
@@ -108,17 +119,32 @@ class QuestionnaireDetail(LoginRequiredMixin, WithListOfControlsMixin, DetailVie
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        user_controls = self.request.user.profile.controls.active()
-        queryset = Questionnaire.objects.filter(control__in=user_controls)
-        if not self.request.user.profile.is_inspector:
-            queryset = queryset.filter(is_draft=False)
+        user_controls = Control.objects.filter(
+            access__in=self.request.user.profile.access.all()
+        )
+        controls_questionnaires = Questionnaire.objects.filter(
+            control__in=user_controls
+        )
+        user_questionnaires = []
+        for result in controls_questionnaires:
+            if not (
+                result.is_draft
+                & self.request.user.profile.access.filter(
+                    Q(control=result.control) & Q(access_type="repondant")
+                ).exists()
+            ):
+                user_questionnaires.append(result.id)
+        queryset = Questionnaire.objects.filter(id__in=user_questionnaires)
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         serializer = ControlSerializerWithoutDraft
-        if self.request.user.profile.is_inspector:
+        questionnaire = context["object"]
+        if self.request.user.profile.access.filter(
+            Q(control=questionnaire.control) & Q(access_type="demandeur")
+        ).exists():
             serializer = ControlSerializer
         control_list = context["controls"]
         controls_serialized = []
@@ -144,9 +170,14 @@ class QuestionnaireEdit(LoginRequiredMixin, WithListOfControlsMixin, DetailView)
     context_object_name = "questionnaire"
 
     def get_queryset(self):
-        if not self.request.user.profile.is_inspector:
+        questionnaire = Questionnaire.objects.filter(id=self.kwargs["pk"]).first()
+        if not self.request.user.profile.access.filter(
+            Q(control=questionnaire.control) & Q(access_type="demandeur")
+        ).exists():
             return Control.objects.none()
-        user_controls = self.request.user.profile.controls.active()
+        user_controls = Control.objects.filter(
+            access__in=self.request.user.profile.access.all()
+        )
         questionnaires = Questionnaire.objects.filter(
             control__in=user_controls, editor=self.request.user
         )
@@ -162,10 +193,10 @@ class QuestionnaireCreate(LoginRequiredMixin, WithListOfControlsMixin, DetailVie
     context_object_name = "control"
 
     def get_queryset(self):
-        user_controls = self.request.user.profile.controls.active()
-        if not self.request.user.profile.is_inspector:
-            return Control.objects.none()
-        return Control.objects.filter(id__in=user_controls)
+        user_access = self.request.user.profile.access.filter(
+            access_type="demandeur"
+        ).all()
+        return Control.objects.filter(access__in=user_access)
 
 
 class UploadResponseFile(LoginRequiredMixin, CreateView):
@@ -218,14 +249,27 @@ class UploadResponseFile(LoginRequiredMixin, CreateView):
         return True
 
     def form_valid(self, form):
-        if not self.request.user.profile.is_audited:
+        if "x-infection-found" in [
+            header.lower() for header in self.request.headers
+        ] or "x-virus-name" in [header.lower() for header in self.request.headers]:
             return HttpResponseForbidden(
-                "User is not authorized to access this ressource"
+                "Ce fichier a été notifié comme contenant un virus, merci de vérifier"
+                " celui-ci avant de le déposer à nouveau."
             )
         try:
             question_id = form.data["question_id"]
         except KeyError:
             return HttpResponseBadRequest("Question ID was missing on file upload")
+        question = Question.objects.get(pk=question_id)
+        control = question.theme.questionnaire.control
+        if control.is_deleted:
+            return HttpResponseForbidden("Control is deleted.")
+        if not self.request.user.profile.access.filter(
+            Q(control=control) & Q(access_type="repondant")
+        ).exists():
+            return HttpResponseForbidden(
+                "User is not authorized to access this ressource"
+            )
         get_object_or_404(
             Question,
             pk=question_id,
@@ -234,7 +278,6 @@ class UploadResponseFile(LoginRequiredMixin, CreateView):
         self.object = form.save(commit=False)
         self.object.question_id = question_id
         self.object.author = self.request.user
-
         file_object = self.object.file
         file_extension = os.path.splitext(file_object.name)[1]
 
@@ -243,12 +286,19 @@ class UploadResponseFile(LoginRequiredMixin, CreateView):
             return HttpResponseForbidden(
                 f"Cette extension de fichier n'est pas autorisée : {file_extension}"
             )
+
         mime_type = magic.from_buffer(file_object.read(2048), mime=True)
         if not self.file_mime_type_is_valid(mime_type):
             self.add_invalid_mime_type_log(mime_type)
             return HttpResponseForbidden(
                 f"Ce type de fichier n'est pas autorisé: {mime_type}"
             )
+
+        if len(file_object.name) > settings.MAX_FILENAME_LENGTH:
+            extension_length = len(file_extension)
+            max_length = settings.MAX_FILENAME_LENGTH - extension_length
+            self.object.file.name = f"{file_object.name[:max_length]}{file_extension}"
+
         MAX_SIZE_BYTES = 1048576 * settings.UPLOAD_FILE_MAX_SIZE_MB
         if file_object.file.size > MAX_SIZE_BYTES:
             return HttpResponseForbidden(
@@ -317,7 +367,7 @@ class SendFileMixin(SingleObjectMixin):
     """
     Inheriting classes should override :
     - model to specify the data type of the file. The model class should implement
-      a basename property.
+      a downloadname property.
     - (optional) get_queryset() to restrict the accessible files.
     """
 
@@ -330,7 +380,10 @@ class SendFileMixin(SingleObjectMixin):
         obj = self.get_object()
         self.add_access_log_entry(accessed_object=obj)
         return sendfile(
-            request, obj.file.path, attachment=True, attachment_filename=obj.basename
+            request,
+            obj.file.path,
+            attachment=True,
+            attachment_filename=obj.downloadname,
         )
 
     def add_access_log_entry(self, accessed_object):
@@ -356,11 +409,20 @@ class SendQuestionnaireFile(SendFileMixin, LoginRequiredMixin, View):
         when the user downloads the file.
         """
         questionnaire = self.get_object()
+        if questionnaire.is_draft:
+            if not questionnaire.control in request.user.profile.user_controls(
+                "demandeur"
+            ):
+                raise Http404
         generate_questionnaire_file(questionnaire)
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        return self.request.user.profile.questionnaires
+        return Questionnaire.objects.filter(
+            control__in=Control.objects.filter(
+                access__in=self.request.user.profile.access.all()
+            )
+        )
 
 
 class SendQuestionFile(SendFileMixin, LoginRequiredMixin, View):
@@ -371,10 +433,26 @@ class SendQuestionFile(SendFileMixin, LoginRequiredMixin, View):
         # The user should only have access to files that belong to the control
         # he was associated with. That's why we filter-out based on the user's
         # control.
-        user_controls = self.request.user.profile.controls.active()
+        user_controls = Control.objects.filter(
+            access__in=self.request.user.profile.access.all()
+        )
         return self.model.objects.filter(
             question__theme__questionnaire__control__in=user_controls
         )
+
+
+class SendQuestionnairePjFile(SendFileMixin, LoginRequiredMixin, View):
+    model = QuestionnaireFile
+    file_type = "questionnaire-file"
+
+    def get_queryset(self):
+        # The user should only have access to files that belong to the control
+        # he was associated with. That's why we filter-out based on the user's
+        # control.
+        user_controls = Control.objects.filter(
+            access__in=self.request.user.profile.access.all()
+        )
+        return self.model.objects.filter(questionnaire__control__in=user_controls)
 
 
 class SendResponseFile(SendQuestionFile):
@@ -386,7 +464,9 @@ class SendResponseFileList(SingleObjectMixin, LoginRequiredMixin, View):
     model = Questionnaire
 
     def get_queryset(self):
-        user_controls = self.request.user.profile.controls.active()
+        user_controls = Control.objects.filter(
+            access__in=self.request.user.profile.access.all()
+        )
         queryset = Questionnaire.objects.filter(control__in=user_controls)
         queryset = queryset.filter(is_draft=False)
         return queryset

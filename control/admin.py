@@ -16,10 +16,17 @@ from ordered_model.admin import OrderedTabularInline, OrderedInlineModelAdminMix
 
 from soft_deletion.admin import SoftDeletedAdmin, IsActiveFilter
 
-from .models import Control, Questionnaire, Theme, Question, QuestionFile, ResponseFile
+from .models import (
+    Control,
+    Questionnaire,
+    Theme,
+    Question,
+    QuestionFile,
+    ResponseFile,
+    QuestionnaireFile,
+)
 from .questionnaire_duplicate import QuestionnaireDuplicateMixin
-from user_profiles.models import UserProfile
-
+from user_profiles.models import Access
 
 class ParentLinksMixin(object):
     def link_to_question(self, obj):
@@ -78,12 +85,10 @@ class QuestionnaireInline(OrderedTabularInline):
     extra = 1
 
 
-class UserProfileInline(admin.TabularInline):
-    model = UserProfile.controls.through
-    verbose_name_plural = "Profils Utilisateurs"
+class AccesInline(admin.TabularInline):
+    model = Access
+    verbose_name_plural = "Profiles Utilisateurs"
     extra = 1
-    fields = ("userprofile",)
-    raw_id_fields = ("userprofile",)
 
 
 @admin.register(Control)
@@ -97,7 +102,7 @@ class ControlAdmin(SoftDeletedAdmin, OrderedInlineModelAdminMixin, OrderedModelA
     )
     inlines = (
         QuestionnaireInline,
-        UserProfileInline,
+        AccesInline,
     )
     list_filter = (IsActiveFilter,)
 
@@ -105,6 +110,13 @@ class ControlAdmin(SoftDeletedAdmin, OrderedInlineModelAdminMixin, OrderedModelA
 class ThemeInline(OrderedTabularInline):
     model = Theme
     fields = ("id", "title", "order", "move_up_down_links")
+    readonly_fields = ("id", "order", "move_up_down_links")
+    extra = 1
+
+
+class QuestionnaireFileInline(OrderedTabularInline):
+    model = QuestionnaireFile
+    fields = ("id", "file", "order", "move_up_down_links")
     readonly_fields = ("id", "order", "move_up_down_links")
     extra = 1
 
@@ -129,12 +141,15 @@ class QuestionnaireAdmin(
         "end_date",
     )
     list_editable = ("order",)
-    readonly_fields = ("order",)
+    readonly_fields = ("order", "editor")
     search_fields = ("title", "description")
     list_filter = ("control", "is_draft")
     raw_id_fields = ("editor", "control")
     actions = ["megacontrol_admin_action"]
-    inlines = (ThemeInline,)
+    inlines = (
+        ThemeInline,
+        QuestionnaireFileInline,
+    )
 
 
 class QuestionInline(OrderedTabularInline):
