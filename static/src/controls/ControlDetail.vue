@@ -3,10 +3,11 @@
     <div id="sidebar-vm" class="border-right">
       <sidebar></sidebar>
     </div>
-    <div class="mt-3 mt-md-5 flex-grow-1 ml-6 ie-flex-row-child">
+    <main class="mt-3 mt-md-5 flex-grow-1 ml-6 ie-flex-row-child" role="main">
+      <a name="contenu"> </a>
       <control-page>
       </control-page>
-    </div>
+    </main>
   </div>
 </template>
 
@@ -17,6 +18,11 @@ import Vue from 'vue'
 
 export default Vue.extend({
   name: 'ControlDetail',
+  data: function() {
+    return {
+      noAccess: false,
+    }
+  },
   components: {
     ControlPage,
     Sidebar,

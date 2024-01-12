@@ -3,40 +3,41 @@
 
     <template v-slot:confirm-modal-form>
       <div class="modal-header border-bottom-0">
-        <h4 class="modal-title">
-          <div class="mb-4">
-            Vous êtes sur le point de supprimer définitivement l'espace de dépôt :
-          </div>
-          <div>
-            "{{ control.title }}"
-          </div>
-        </h4>
+        <div id="confirme_modal_title" class="modal-title">
+          Vous êtes sur le point de supprimer l'espace de dépôt "{{ control.reference_code }}"
+        </div>
       </div>
 
       <div class="modal-body">
-        <label class="custom-control custom-checkbox">
-          <input type="checkbox"
-                  class="custom-control-input"
-                  required>
-          <span class="custom-control-label">Les données ne seront pas récupérables.</span>
-        </label>
-        <label class="custom-control custom-checkbox">
-          <input type="checkbox"
-                  class="custom-control-input"
-                  required>
-          <span class="custom-control-label">
-            Tous les utilisateurs de cet espace n'y auront plus accès.
-          </span>
-        </label>
-        <label class="custom-control custom-checkbox">
-          <input type="checkbox"
-                  class="custom-control-input"
-                  required>
-          <span class="custom-control-label">
-            Je confirme avoir transféré dans le DLR les réponses utiles, notamment en cas de contentieux,
-            les autres documents peuvent être supprimés définitivement.
-          </span>
-        </label>
+        <fieldset class="form-fieldset">
+          <legend>Merci de cocher toutes les cases pour valider cette action</legend>
+          <label for="checkbox_1" class="custom-control custom-checkbox">
+            <input type="checkbox"
+                   id="checkbox_1"
+                    class="custom-control-input"
+                    required>
+            <span class="custom-control-label">Les données ne seront pas récupérables.</span>
+          </label>
+          <label for="checkbox_2" class="custom-control custom-checkbox">
+            <input type="checkbox"
+                   id="checkbox_2"
+                    class="custom-control-input"
+                    required>
+            <span class="custom-control-label">
+              Tous les utilisateurs de cet espace n'y auront plus accès.
+            </span>
+          </label>
+          <label for="checkbox_3" class="custom-control custom-checkbox">
+            <input type="checkbox"
+                   id="checkbox_3"
+                    class="custom-control-input"
+                    required>
+            <span class="custom-control-label">
+              Je confirme que la suppression des données n'impacte pas la suite
+              de la procédure, en cas de contentieux notamment.
+            </span>
+          </label>
+        </fieldset>
       </div>
 
       <div class="modal-footer border-top-0">
@@ -51,7 +52,7 @@
                 class="btn btn-primary btn-red"
                 title="Supprimer l'espace de dépôt"
         >
-          <i class="fe fe-trash-2 mr-1"></i>
+          <span class="fe fe-trash-2 mr-1" aria-hidden="true"></span>
           Supprimer
         </button>
       </div>
@@ -64,10 +65,10 @@
     <template v-slot:success-modal-body>
       <div class="modal-header border-bottom-0 flex-column align-items-center">
         <p>
-          <i class="fe fe-check-circle fg-success big-icon"></i>
+          <span class="fe fe-check-circle fg-success big-icon" aria-hidden="true"></span>
         </p>
-        <p class="text-center">
-          L'espace de dépôt <strong>"{{ control.title }}"</strong> à bien été supprimé.
+        <p id="succes_modal_title" class="text-center">
+          L'espace de dépôt <strong>"{{ control.title }}"</strong> a bien été supprimé.
         </p>
       </div>
       <div class="modal-footer border-top-0 d-flex justify-content-center">
@@ -75,7 +76,7 @@
                 class="btn btn-primary"
                 @click="goHome"
         >
-          <i class="fa fa-chevron-left mr-2"></i>
+          <span class="fa fa-chevron-left mr-2" aria-hidden="true"></span>
           Revenir à l'accueil
         </button>
       </div>

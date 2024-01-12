@@ -1,0 +1,20 @@
+{% extends "base_email.html" %}
+{% load email_obfuscator %}
+{% block email_content %}
+
+<p>Bonjour,</p>
+
+<p>Le questionnaire {{ questionnaire }} vient d'être déclaré comme répondu.</p>
+
+<ul>
+    <li>Espace de dépôt : {{ questionnaire.control.reference_code }}</li>
+    <li>Questionnaire : {{ questionnaire.title }}</li>
+</ul>
+
+<p>Vous pouvez accéder au questionnaire en vous rendant à <a href="https://{{ site.domain }}/questionnaire/{{ questionnaire.id }}">cette adresse</a></p>
+
+<p>Cordialement,</p>
+
+<p>L'équipe e-controle</p>
+
+{% endblock email_content %}

@@ -12,6 +12,7 @@ backend['questionnaire-edit'](4) ---> 'questionnaire/modifier/4/'
 // Todo : make query to /api/ to get this
 const apiUrls = {
   annexe: '/api/annexe/',
+  piecejointe: '/api/piecejointe/',
   control: '/api/control/',
   question: '/api/question/',
   questionnaire: '/api/questionnaire/',
@@ -54,13 +55,24 @@ for (const [name, url] of Object.entries(apiUrls)) {
 }
 
 urlMaker.currentUser = () => '/api/user/current/'
+urlMaker.getQuestionnaireAndThemes = (id) =>
+  '/api/user/' + id + '/questionnaire-themes/'
 urlMaker.getUsersInControl = (controlId) => '/api/control/' + controlId + '/users/'
+urlMaker.getAuditedUsersInControl = (controlId) => '/api/control/' + controlId + '/audited/'
+urlMaker.getInspectorUsersInControl = (controlId) => '/api/control/' + controlId + '/inspectors/'
+urlMaker.getDepositorsInControl = (controlId) => '/api/control/' + controlId + '/depositors/'
 urlMaker.removeUserFromControl = (id) => '/api/user/' + id + '/remove-control/'
 urlMaker.swapEditor = (questionnaireId) =>
   '/api/questionnaire/' + questionnaireId + '/changer-redacteur/'
 urlMaker.deleteControl = (controlId) => '/api/deletion/' + controlId + '/delete-control/'
 urlMaker.responseFileTrash = (responseFileId) =>
   '/api/fichier-reponse/corbeille/' + responseFileId + '/'
+urlMaker.getAccessToControl = (controlId) =>
+  '/api/control/' + controlId + '/access/'
+urlMaker.checkControlUniqueCode = (controlId, code) =>
+  '/api/control/' + controlId + '/unique-code/?code=' + code
+urlMaker.getControlsInspectedFromUser = (id) =>
+  '/api/user/' + id + '/controls-inspected/'
 
 for (const [name, url] of Object.entries(viewUrls)) {
   urlMaker[name] = (id) => {

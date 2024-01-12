@@ -1,0 +1,15 @@
+Bonjour,
+
+Le questionnaire {{ questionnaire }} vient d'être déclaré comme répondu.
+
+    Espace de dépôt : {{ questionnaire.control.reference_code }}
+
+    Questionnaire : {{ questionnaire.title }}
+
+Vous pouvez accéder au questionnaire en vous rendant à cette adresse
+
+https://{{ site.domain }}/questionnaire/{{ questionnaire.id }}
+
+Cordialement,
+
+L'équipe e-controle

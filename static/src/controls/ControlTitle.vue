@@ -1,28 +1,39 @@
 <template>
   <div class="card">
-    <confirm-modal ref="modal" cancel-button="Annuler" confirm-button-prevent="Dupliquer l'espace de dépôt"
-      title="Dupliquer un espace de dépôt" @confirm="cloneControl">
+    <confirm-modal
+      ref="modal"
+      cancel-button="Annuler"
+      confirm-button-prevent="Dupliquer l'espace de dépôt"
+      title="Dupliquer un espace de dépôt"
+      @confirm="checkUniqueReferenceCode"
+    >
       <info-bar>
-        Veuillez sélectionner les questionnaires que vous souhaitez dupliquer.
+        <p>Veuillez sélectionner les questionnaires que vous souhaitez dupliquer.</p>
       </info-bar>
       <error-bar v-if="referenceError" :noclose="true">
-        Ce nom abrégé est vide ou existe déjà. Veuillez saisir un nouveau nom abrégé.
+        <p>Ce nom abrégé est vide ou existe déjà. Veuillez saisir un nouveau nom abrégé.</p>
       </error-bar>
       <form>
         <div class="form-group mb-4">
-          <label id="reference-label" class="form-label">
+          <label id="reference-label" class="form-label" for="reference">
             Nom abrégé<span class="form-required">*</span>
           </label>
           <div class="flex-row align-items-center">
             <span class="input-group-prepend" id="prepend">
-              <span class="input-group-text">{{ new Date().getFullYear() }}_</span>
+              <span class="input-group-text">{{new Date().getFullYear()}}_</span>
             </span>
-            <input type="text" class="form-control" v-model="reference_code" required aria-labelledby="reference-label"
-              maxlength="25" title="Ce champ ne doit pas contenir de caractères spéciaux
-                           (. ! , @ # $ / \ ' &quot; + etc)" @focus="referenceChanged">
+            <input id="reference"
+                   type="text"
+                   class="form-control"
+                   v-model="reference_code"
+                   required aria-labelledby="reference-label"
+                   maxlength="25"
+                   title="Ce champ ne doit pas contenir de caractères spéciaux
+                         ( . ! , @ # $ / \ ' &quot; + etc)"
+                   @focus="referenceChanged">
           </div>
           <span class="text-danger" v-if="reference_code.length > 24">
-            Ce champ ne peut contenir plus de 25 caractères.
+            <p>Ce champ ne peut contenir plus de 25 caractères.</p>
           </span>
         </div>
         <div class="form-group mb-6">
@@ -30,69 +41,91 @@
             <input type="checkbox" class="custom-control-input" @click="checkAllQuestionnaires" v-model="allChecked">
             <span class="custom-control-label font-weight-bold">Sélectionner Tout
           </label>
-          <label v-for="q in accessibleQuestionnaires" :key="q.id" class="custom-control custom-checkbox">
-            <input type="checkbox" class="custom-control-input" :value="q.id" v-model="checkedQuestionnaires">
+          <label v-for="q in accessibleQuestionnaires"
+                :for="q.id"
+                :key="q.id"
+                class="custom-control custom-checkbox">
+            <input :id="q.id" type="checkbox" class="custom-control-input" :value="q.id" v-model="checkedQuestionnaires">
             <span class="custom-control-label">Questionnaire {{ q.numbering }} - {{ q.title }}</span>
           </label>
         </div>
       </form>
     </confirm-modal>
-    <confirm-modal ref="modalexp" cancel-button="Annuler" confirm-button-prevent="Exporter l'espace de dépôt"
-      title="Exporter un espace de dépôt" @confirm="exportControl">
+    <confirm-modal
+      ref="modalexp"
+      cancel-button="Annuler"
+      confirm-button-prevent="Exporter l'espace de dépôt"
+      title="Exporter un espace de dépôt"
+      @confirm="exportControl"
+    >
       <info-bar>
-        Veuillez sélectionner les questionnaires dont vous souhaitez exporter les fichiers-réponses.
+        <p>Veuillez sélectionner les questionnaires dont vous souhaitez exporter les fichiers-réponses.</p>
       </info-bar>
       <form>
         <div class="form-group mb-6">
-          <label class="custom-control custom-checkbox">
-            <input type="checkbox" class="custom-control-input" @click="checkAllQuestionnaires" v-model="allChecked">
+          <label for="checkAll" class="custom-control custom-checkbox">
+            <input id="checkAll" type="checkbox" class="custom-control-input" @click="checkAllQuestionnaires" v-model="allChecked">
             <span class="custom-control-label font-weight-bold">Sélectionner Tout
           </label>
-          <label v-for="q in accessibleQuestionnaires" :key="q.id" class="custom-control custom-checkbox">
-            <input type="checkbox" class="custom-control-input" :value="q.id" v-model="checkedQuestionnaires">
+          <label v-for="q in accessibleQuestionnaires"
+                :for="q.id"
+                :key="q.id"
+                class="custom-control custom-checkbox">
+            <input :id="q.id" type="checkbox" class="custom-control-input" :value="q.id" v-model="checkedQuestionnaires">
             <span class="custom-control-label">Questionnaire {{ q.numbering }} - {{ q.title }}</span>
           </label>
         </div>
       </form>
     </confirm-modal>
+    <div
+      v-if="this.loaderActive"
+      class="loader-container"
+    >
+      <div class="loader-wrapper">
+        <div class="loader"></div>
+        <p>Téléchargement en cours</p>
+      </div>
+    </div>
     <div class="card-status card-status-top bg-blue"></div>
     <template v-if="editMode">
       <div class="card-body">
         <error-bar v-if="hasErrors" :noclose="true">
-          L'espace de dépôt n'a pas pu être modifié. Erreur : {{ JSON.stringify(errors) }}
+            <p>L'espace de dépôt n'a pas pu être modifié. Erreur : {{JSON.stringify(errors)}}</p>
         </error-bar>
 
         <form @submit.prevent="updateControl">
-          <div class="card-title">Modifier l'espace de dépôt</div>
-          <fieldset class="form-fieldset">
+          <h2 class="card-title">Modifier l'espace de dépôt</h2>
+          <div class="form-fieldset">
             <div class="form-group">
-              <label id="organization-label" class="form-label">
+              <label id="organization-label" class="form-label" for="organisme">
                 Quel est le nom de l’organisme qui va déposer les réponses ?
                 <span class="form-required">*</span>
               </label>
               <div class="flex-row align-items-center">
-                <i class="fa fa-building mr-2 text-muted"></i>
-                <input type="text" class="form-control" v-model="organization" required
-                  aria-labelledby="organization-label" maxlength="255">
+                <span class="fa fa-building mr-2 text-muted" aria-hidden="true"></span>
+                <input id="organisme" type="text" class="form-control" v-model="organization" required aria-labelledby="organization-label" maxlength="255">
               </div>
             </div>
             <div class="form-group">
-              <label id="title-label" class="form-label">
+              <label id="title-label" class="form-label" for="procedure">
                 Quel est le nom de la procédure pour laquelle vous ouvrez cet espace de dépôt ?
                 <span class="form-required">*</span>
               </label>
               <div class="flex-row align-items-center">
-                <i class="fa fa-award mr-2 text-muted"></i>
-                <input type="text" class="form-control" v-model="title" required aria-labelledby="title-label"
-                  maxlength="255">
+                <span class="fa fa-award mr-2 text-muted" aria-hidden="true"></span>
+                <input id="procedure" type="text" class="form-control" v-model="title" required aria-labelledby="title-label" maxlength="255">
               </div>
             </div>
-          </fieldset>
+          </div>
           <div class="text-right">
-            <button @click="cancel" type="button" class="btn btn-secondary">
+            <button @click="cancel"
+                    type="button"
+                    class="btn btn-secondary">
               Annuler
             </button>
-            <button id="control-title-submit-button" type="submit" class="btn btn-primary">
+            <button id="control-title-submit-button"
+                    type="submit"
+                    class="btn btn-primary">
               Modifier l'espace de dépôt
             </button>
           </div>
@@ -107,60 +140,81 @@
         <div v-if="organization">
           <div class="mb-3">
             <div class="text-muted font-italic">
-              <i class="fa fa-building mr-2"></i>
+              <span class="fa fa-building mr-2" aria-hidden="true"></span>
               Organisme interrogé
             </div>
             <div class="page-title">{{ organization }}</div>
           </div>
           <div class="mb-3">
             <div class="text-muted font-italic">
-              <i class="fa fa-award mr-2"></i>
+              <span class="fa fa-award mr-2" aria-hidden="true"></span>
               Procédure
             </div>
             <div class="card-title">{{ title }}</div>
+          </div>
+          <div class="mb-3">
+            <div class="text-muted font-italic">
+              <span class="fa fa-user mr-2" aria-hidden="true"></span>
+              Accès
+            </div>
+            <div class="card-title">{{ getAccessTypeLibelle() }}</div>
           </div>
         </div>
         <div v-else>
           <div class="page-title">{{ title }}</div>
         </div>
 
-        <div v-if="sessionUser.is_inspector" class="col-4 flex-column ie-flex-column-fix align-items-end ml-6">
+        <div v-if="accessType === 'demandeur'" class="col-4 flex-column ie-flex-column-fix align-items-end ml-6">
           <div class="mb-6 flex-column ie-flex-column-fix align-items-end">
             <div class="text-muted card-title mb-1 break-word text-right">
               <strong>../{{ control.reference_code }}</strong>
             </div>
             <a class="btn btn-secondary parent-fake-icon" @click="showWebdavTip">
-              <i class="fe fe-folder mr-3"></i>
+              <span class="fe fe-folder mr-3"></span>
               <img :src="'/static/img/file-explorer.png'" alt="Explorateur Windows" class="fake-icon" />
               Comment voir les réponses ?
             </a>
           </div>
-
           <div class="btn-group">
-            <button type="button" class="btn btn-secondary" @click="enterEditMode">
-              <i class="fe fe-edit mr-2"></i>
+            <button type="button"
+                    class="btn btn-secondary"
+                    @click="enterEditMode">
+              <span class="fe fe-edit mr-2" aria-hidden="true"></span>
               Modifier
             </button>
-            <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"
-              aria-haspopup="true" aria-expanded="false">
+            <button type="button"
+                    class="btn btn-secondary dropdown-toggle dropdown-toggle-split"
+                    data-toggle="dropdown"
+                    aria-haspopup="true"
+                    aria-expanded="false">
               <span class="sr-only">Menu d'actions</span>
             </button>
             <div class="dropdown-menu dropdown-menu-right">
-              <button class="dropdown-item" type="button" @click="showCloneModal">
-                <i class="fas fa-file-export mr-2"></i>
+              <button
+                      v-if="this.accessibleQuestionnaires.length > 0 && sessionUser.is_inspector"
+                      class="dropdown-item"
+                      type="button"
+                      @click="showCloneModal"
+              >
+                <span class="fe fe-copy mr-2" aria-hidden="true"></span>
                 Dupliquer
-              </button>
-              <button class="dropdown-item" type="button" @click="showExportModal">
-                <i class="fas fa-file-export mr-2"></i>
+            </button>
+              <button class="dropdown-item"
+                      type="button"
+                      @click="showExportModal"
+              >
+                <span class="fas fa-file-export mr-2" aria-hidden="true"></span>
                 Exporter (.zip)
               </button>
-              <button class="dropdown-item text-danger" type="button" @click="startControlDeleteFlow">
-                <i class="fe fe-trash-2 mr-2"></i>
+              <button class="dropdown-item text-danger"
+                      type="button"
+                      @click="startControlDeleteFlow"
+              >
+                <span class="fe fe-trash-2 mr-2" aria-hidden="true"></span>
                 Supprimer cet espace...
               </button>
             </div>
           </div>
-
         </div>
 
       </div>
@@ -195,9 +249,10 @@ axios.defaults.xsrfHeaderName = 'X-CSRFTOKEN'
 
 export default Vue.extend({
   props: {
-    control: Object,
+    control: { type: Object, default: () => ({}) },
+    accessType: { type: String, default: '' },
   },
-  data: function () {
+  data: function() {
     return {
       editMode: false,
       title: '',
@@ -209,6 +264,7 @@ export default Vue.extend({
       allChecked: false,
       checkedQuestionnaires: [],
       users: [],
+      loaderActive: false,
     }
   },
   computed: {
@@ -235,6 +291,9 @@ export default Vue.extend({
   },
   methods: {
     showCloneModal() {
+      this.allChecked = false
+      this.reference_code = ''
+      this.checkedQuestionnaires = []
       $(this.$refs.modal.$el).modal('show')
     },
     hideCloneModal() {
@@ -249,12 +308,28 @@ export default Vue.extend({
           this.users = response.data
         })
     },
-    cloneControl() {
+    checkUniqueReferenceCode() {
       // reference code given by user (2021_SOMETHING)
       const newRefCode = new Date().getFullYear() + '_' + this.reference_code
-
+      this.referenceError = false
+      axios.get(backendUrls.checkControlUniqueCode(this.control.id, newRefCode))
+        .then((response) => {
+          if (response.data === 'True') {
+            this.referenceError = true
+            return
+          }
+          this.cloneControl(newRefCode)
+        })
+    },
+    getAccessTypeLibelle() {
+      if (this.accessType === 'demandeur') {
+        return 'Demandeur'
+      }
+      return 'Répondant'
+    },
+    cloneControl(newRefCode) {
       const valid = this.reference_code &&
-        !this.controls.find(ctrl => ctrl.reference_code === newRefCode)
+                    !this.controls.find(ctrl => ctrl.reference_code === newRefCode)
 
       if (!valid) {
         this.referenceError = true
@@ -297,7 +372,9 @@ export default Vue.extend({
               return this.cloneQuestionnaire(newQ, themes, q.themes)
             })
 
-          Promise.all(promises)
+          Promise.all(promises).then((values) => {
+            setTimeout(() => { window.location.href = backendUrls.home(); }, 2000);
+          });
         })
 
         this.hideCloneModal()
@@ -310,6 +387,19 @@ export default Vue.extend({
       const promise = await getCreateMethod()(questionnaire).then(async response => {
         const qId = response.data.id
         const newQ = { ...questionnaire, themes: themes }
+
+          newQ.questionnaire_files.map(qf => {
+                axios.get(qf.url, { responseType: 'blob' }).then(response => {
+                  const formData = new FormData()
+                  formData.append('file', response.data, qf.basename)
+                  formData.append('questionnaire', qId)
+                  axios.post(backendUrls.piecejointe(), formData, {
+                    headers: {
+                      'Content-Type': 'multipart/form-data',
+                    },
+                  })
+                })
+              })
 
         await getUpdateMethod(qId)(newQ).then(response => {
           const updatedQ = response.data
@@ -324,6 +414,7 @@ export default Vue.extend({
                   const formData = new FormData()
                   formData.append('file', response.data, qf.basename)
                   formData.append('question', qId)
+                  console.log('fileresponse', response.data)
                   axios.post(backendUrls.annexe(), formData, {
                     headers: {
                       'Content-Type': 'multipart/form-data',
@@ -339,6 +430,8 @@ export default Vue.extend({
       return promise
     },
     showExportModal() {
+      this.allChecked = false;
+      this.checkedQuestionnaires = []
       $(this.$refs.modalexp.$el).modal('show')
     },
     hideExportModal() {
@@ -347,6 +440,7 @@ export default Vue.extend({
     checkAllQuestionnaires() {
       this.checkedQuestionnaires = []
       this.allChecked = !this.allChecked
+
       if (this.allChecked) {
         this.accessibleQuestionnaires.map(q => {
           this.checkedQuestionnaires.push(q.id)
@@ -354,17 +448,32 @@ export default Vue.extend({
       }
     },
     exportControl() {
-      if (!this.checkedQuestionnaires.length) return
-
-      const formatFilename = (rf) => {
-        const questionnaireNb = String(rf.questionnaireNb).padStart(2, '0')
-        const themeId = String(rf.themeId + 1).padStart(2, '0')
-        const questionId = String(rf.questionId + 1).padStart(2, '0')
-        const filename = `Q${questionnaireNb}-T${themeId}-${questionId}-${rf.basename}`
-        return { questionnaireNb, themeId, filename }
+      if (!this.checkedQuestionnaires.length) {
+        this.hideExportModal();
+        return;
       }
 
-      const responseFiles = this.accessibleQuestionnaires
+      this.loaderActive = true;
+      const formatFilename = (file) => {
+        const questionnaireNb = String(file.questionnaireNb).padStart(2, '0')
+        const questionnaireId = `Q${questionnaireNb}`;
+        let themeId = '';
+        let filename = ''
+        if (file.category == 'question_file') {
+          themeId = 'ANNEXES-AUX-QUESTIONS';
+          filename = `Q${questionnaireNb}-${file.basename}`;
+        } else if (file.is_deleted) {
+          themeId = 'CORBEILLE';
+          filename = `Q${questionnaireNb}-${file.basename}`;
+        } else {
+          themeId = 'T'+String(file.themeId + 1).padStart(2, '0');
+          const questionId = String(file.questionId + 1).padStart(2, '0');
+          filename = `Q${questionnaireNb}-${themeId}-${questionId}-${file.basename}`;
+        }
+        return { questionnaireId, themeId, filename };
+      }
+
+      let files = this.accessibleQuestionnaires
         .filter(aq => this.checkedQuestionnaires.includes(aq.id))
         .flatMap(fq => {
           if (fq.themes) {
@@ -377,9 +486,10 @@ export default Vue.extend({
                         questionnaireNb: fq.numbering,
                         themeId: t.order,
                         questionId: q.order,
+                        category: 'response_file',
                         basename: rf.basename,
-                        is_deleted: rf.is_deleted,
                         url: rf.url,
+                        is_deleted: rf.is_deleted,
                       }
                     }
                   })
@@ -388,26 +498,56 @@ export default Vue.extend({
             })
           }
         })
+      files.push.apply(
+        files,
+        this.accessibleQuestionnaires
+        .filter(aq => this.checkedQuestionnaires.includes(aq.id))
+        .flatMap(fq => {
+          if (fq.themes) {
+            return fq.themes.flatMap(t => {
+              if (t.questions) {
+                return t.questions.flatMap(q => {
+                  return q.question_files.flatMap(qf => {
+                    if (qf) {
+                      return {
+                        questionnaireNb: fq.numbering,
+                        themeId: t.order,
+                        questionId: q.order,
+                        category: 'question_file',
+                        basename: qf.basename,
+                        url: qf.url,
+                        is_deleted: qf.is_deleted,
+                      }
+                    }
+                  })
+                })
+              }
+            })
+          }
+        })
+      );
 
-      const Files = responseFiles.filter( resp => resp.is_deleted === false)
       const zipFilename = this.control.reference_code + '.zip'
       const zip = new JSZip()
       let cnt = 0
-      Files.map(rf => {
-        const url = window.location.origin + rf.url
 
+      if (files.length==0) {
+        this.loaderActive = false;
+      }
+
+      files.map(file => {
+        const url = window.location.origin + file.url;
         JSZipUtils.getBinaryContent(url, (err, data) => {
-          if (err) throw err
+          if (err) throw err;
+          const formatted = formatFilename(file);
+          zip.folder(formatted.questionnaireId)
+            .folder(formatted.themeId)
+            .file(formatted.filename, data, { binary: true });
 
-          const formatted = formatFilename(rf)
-
-          zip.folder(`Q${formatted.questionnaireNb}`)
-            .folder(`T${formatted.themeId}`)
-            .file(formatted.filename, data, { binary: true })
-
-          cnt++
-          if (cnt === Files.length) {
+          cnt++;
+          if (cnt === files.length) {
             zip.generateAsync({ type: 'blob' }).then((content) => {
+              this.loaderActive = false;
               saveAs(content, zipFilename)
             })
           }
@@ -436,7 +576,7 @@ export default Vue.extend({
       this.restoreForm()
       this.quitEditMode()
     },
-    updateControl: function () {
+    updateControl: function() {
       this.clearErrors()
       const payload = {
         title: this.title,
@@ -444,6 +584,7 @@ export default Vue.extend({
       }
       axios.put(backendUrls.control(this.control.id), payload)
         .then(response => {
+          console.debug(response)
           this.title = response.data.title
           this.organization = response.data.depositing_organization
 
@@ -453,6 +594,7 @@ export default Vue.extend({
           window.location.reload()
         })
         .catch((error) => {
+          console.error(error)
           this.errors = error.response.data
           this.hasErrors = true
         })
@@ -469,7 +611,44 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-.break-word {
-  word-break: break-all;
-}
+  .break-word {
+    word-break: break-all;
+  }
+  .loader-container {
+    text-align: center;
+    z-index:9999;
+    padding-top:100px;
+    position:fixed;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    overflow:auto;
+    background-color:rgba(0,0,0,.4);
+  }
+  .loader-wrapper {
+    background-color:rgba(255,255,255,.9);
+    width: 200px;
+    margin: auto;
+    padding: 6px;
+    border-radius: 6px;
+  }
+  .loader {
+    display: inline-block;
+    position: relative;
+    width: 80px;
+    height: 80px;
+  }
+  .loader div {
+    box-sizing: border-box;
+    display: block;
+    position: absolute;
+    width: 64px;
+    height: 64px;
+    margin: 8px;
+    border: 8px solid #6916a0;
+    border-radius: 50%;
+    animation: loader 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    border-color: #6916a0 transparent transparent transparent;
+  }
 </style>

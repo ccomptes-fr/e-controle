@@ -3,13 +3,13 @@
     <div class="alert alert-secondary" role="alert">
       <div class="flex-row justify-content-between align-items-center">
         <div>
-          <i class="fe fe-users mr-1"></i>
+          <span class="fe fe-users mr-1" aria-hidden="true"></span>
           <span v-if="questionnaire.editor">
-            <strong>{{ questionnaire.editor.first_name }} {{ questionnaire.editor.last_name }}</strong>
-            est actuellement la seule personne qui peut modifier ce questionnaire.
+            <p><strong>{{ questionnaire.editor.first_name }} {{ questionnaire.editor.last_name }}</strong>
+            est actuellement la seule personne qui peut modifier ce questionnaire.</p>
           </span>
           <span v-else>
-            Personne n'est actuellement affecté à la rédaction de ce questionnaire.
+            <p>Personne n'est actuellement affecté à la rédaction de ce questionnaire.</p>
           </span>
         </div>
         <div class="text-right">
@@ -19,7 +19,7 @@
             title="Obtenir les droits de rédaction..."
             data-toggle="modal"
             data-target="#requestEditorModal">
-            <i class="fa fa-exchange-alt mr-1"></i>
+            <span class="fa fa-exchange-alt mr-1" aria-hidden="true"></span>
             <span>Obtenir les droits de rédaction...</span>
           </button>
           <button v-else
@@ -28,13 +28,13 @@
             title="Obtenir les droits de rédaction..."
             @click="takeEditorRights"
             >
-            <i class="fa fa-exchange-alt mr-1"></i>
+            <span class="fa fa-exchange-alt mr-1" aria-hidden="true"></span>
             <span>Obtenir les droits de rédaction...</span>
           </button>
         </div>
       </div>
       <error-bar v-if="errorMessage.length > 0" class="mt-4">
-        {{ errorMessage }}
+        <p>{{ errorMessage }}</p>
       </error-bar>
     </div>
 

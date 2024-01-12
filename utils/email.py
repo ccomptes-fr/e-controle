@@ -6,15 +6,12 @@ from django.template import loader
 from actstream import action
 
 
-current_site = Site.objects.get_current()
-
-
 def add_log_entry(site, verb, to, cc, subject, error=""):
-    log_message = f'Sending email "{subject}" to: {to}.'
+    log_message = f'Envoi email "{subject}" à : {to}.'
     if cc:
-        log_message += f" Email CC: {cc}."
+        log_message += f" Email CC : {cc}."
     if error:
-        log_message += f" Failed with error: {error}"
+        log_message += f" Erreur : {error}"
     action_details = {
         "sender": site,
         "verb": verb,
@@ -32,11 +29,14 @@ def send_email(
     from_email=settings.DEFAULT_FROM_EMAIL,
     extra_context=None,
 ):
+    current_site = Site.objects.get_current()
     context = {"site": current_site}
     if extra_context:
         context.update(extra_context)
     text_message = loader.render_to_string(text_template, context)
     html_message = loader.render_to_string(html_template, context)
+    if settings.ENV_NAME != "" and not settings.ENV_NAME.startswith("production"):
+        subject = settings.ENV_NAME + " - " + subject
     email = EmailMultiAlternatives(
         to=to,
         cc=cc or [],
@@ -48,12 +48,12 @@ def send_email(
     try:
         number_of_sent_email = email.send(fail_silently=False)
         add_log_entry(
-            site=current_site, verb="email sent", to=to, cc=cc, subject=subject
+            site=current_site, verb="email envoyé", to=to, cc=cc, subject=subject
         )
     except Exception as e:
         add_log_entry(
             site=current_site,
-            verb="email not sent",
+            verb="email non envoyé",
             to=to,
             cc=cc,
             subject=subject,

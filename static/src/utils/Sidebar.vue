@@ -1,27 +1,31 @@
 <template>
-  <div class="sidebar" :class="{ collapsed: collapsed }">
+  <nav class="sidebar" :class="{ collapsed: collapsed }">
     <div v-if="showSidebar">
-      <button id="sidebar-toggle-button" class="btn btn-secondary" @click="toggleCollapse">
-        <i v-show="!collapsed" class="fa fa-chevron-left"></i>
-        <i v-show="collapsed" class="fa fa-chevron-down"></i>
+      <button id="sidebar-toggle-button" class="btn btn-secondary" @click="toggleCollapse" title="Replier le panneau latéral">
+        <span v-show="!collapsed" class="fa fa-chevron-left"></span>
+        <span v-show="collapsed" class="fa fa-chevron-down"></span>
         <span v-show="collapsed">Ouvrir le menu</span>
+        <span v-show="!collapsed" class="hidden">Replier le panneau latéral</span>
       </button>
       <sidebar-menu class="sidebar-body"
+                    id="sidebar"
                     :menu="menu"
                     :relative="true"
                     :hideToggle="true"
                     :show-one-child="true"
                     theme="white-theme"
                     :collapsed="collapsed"
+                    v-if="!collapsed"
+                    role="navigation"
                     widthCollapsed="0px"
                     @item-click="onItemClick"
       >
         <template v-slot:header>
           <div id="sidebar-title"
                class="card-header flex-row justify-content-center">
-            <div class="card-title text-nowrap text-center">
+            <h1 class="card-title text-nowrap text-center">
               Mes espaces de dépôt
-            </div>
+            </h1>
           </div>
 
           <div v-if="isLoaded && controls.length === 0">
@@ -53,13 +57,13 @@
 
           <error-bar id="sidebar-error-bar" v-if="hasError" noclose=true>
             <div>
-              Nous n'avons pas pu obtenir vos espaces de dépôt.
+              <p>Nous n'avons pas pu obtenir vos espaces de dépôt.</p>
             </div>
             <div class="mt-2">
-              Erreur : {{ errorMessage }}
+              <p>Erreur : {{ errorMessage }}</p>
             </div>
             <div class="mt-2">
-              Vous pouvez essayer de recharger la page
+              <p>Vous pouvez essayer de recharger la page
               <template v-if="!errorEmailLink">
                 .
               </template>
@@ -70,14 +74,14 @@
                   rel="noopener noreferrer"
                 >
                   cliquez ici pour nous contacter
-                </a>.
+                </a>.</p>
               </template>
             </div>
           </error-bar>
         </template>
       </sidebar-menu>
     </div>
-  </div>
+  </nav>
 </template>
 
 <script>
@@ -89,6 +93,7 @@ import { loadStatuses } from '../store'
 import { SidebarMenu } from 'vue-sidebar-menu'
 import Vue from 'vue'
 import 'vue-sidebar-menu/dist/vue-sidebar-menu.css'
+
 
 const ERROR_EMAIL_BODY = 'Bonjour,%0D%0A%0D%0A' +
     'Je voudrais vous signaler une erreur lors du chargement des espaces de dépôt dans le menu.' +
@@ -256,7 +261,11 @@ export default Vue.extend({
       this.menu = menu
     },
     toggleCollapse() {
-      this.collapsed = !this.collapsed
+      this.collapsed = !this.collapsed;
+      window.setTimeout(function() {
+        $("#sidebar").toggleClass("hidden");
+      },
+      300);
     },
   },
 })
@@ -346,4 +355,11 @@ export default Vue.extend({
     height: 80px;
   }
 
+  .v-sidebar-menu.vsm_white-theme.vsm_expanded .vsm--item_open .vsm--link_level-1 {
+    background-color: #3473cb;
+    color: #fff;
+  }
+  .v-sidebar-menu.vsm_white-theme.vsm_expanded .vsm--item_open .vsm--link_level-1 .vsm--icon {
+    background-color: #3473cb;
+  }
 </style>
