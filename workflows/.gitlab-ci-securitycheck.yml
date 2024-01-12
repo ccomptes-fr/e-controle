@@ -6,7 +6,6 @@
 
 
 securitycheck:
-  rules: *securitycheck_rules
   image: ${DOCKER_REGISTRY}docker:20.10.12
   services:
     - name: ${DOCKER_REGISTRY}cicd/docker-dind:1.0.1
@@ -14,4 +13,4 @@ securitycheck:
   stage: securitycheck
   script:
     - echo securitycheck
-
+  rules: *securitycheck_rules
