@@ -17,7 +17,7 @@ def find_parent_control(obj):
 
 def undelete(modeladmin, request, queryset):
     for item in queryset:
-        item.undelete()
+        item.restore()
         add_log_entry(
             verb="admin undeleted", session_user=request.user, obj=item, target=item
         )
