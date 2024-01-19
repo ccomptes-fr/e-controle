@@ -26,7 +26,7 @@ def undelete(modeladmin, request, queryset):
 @confirm_action
 def soft_delete(modeladmin, request, queryset):
     for item in queryset:
-        item.soft_delete()
+        item.delete()
         parent = find_parent_control(item)
         if isinstance(parent, Control):
             delete_control_folder(parent.reference_code)
@@ -62,7 +62,7 @@ class IsActiveFilter(admin.SimpleListFilter):
         return queryset
 
 
-class SoftDeletedAdmin(object):
+class SoftDeletedAdmin(AdminConfirmMixin, object):
     actions = [soft_delete, undelete]
 
     def is_active(self, instance):
@@ -75,10 +75,7 @@ class SoftDeletedAdmin(object):
         return super().get_list_display(request) + ("deleted_at", "is_active")
 
     def get_readonly_fields(self, request, obj=None):
-        return super().get_readonly_fields(request, obj) + (
-            "is_deleted",
-            "deleted_at",
-        )
+        return super().get_readonly_fields(request, obj) + ("deleted_at",)
 
     def has_delete_permission(self, request, obj=None):
         return False
