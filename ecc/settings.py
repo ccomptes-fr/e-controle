@@ -377,7 +377,7 @@ SESSION_EXPIRE_SECONDS = env("SESSION_EXPIRE_SECONDS", default=24 * 60 * 60)
 SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
 
 # Ip adress
-SAVE_IP_ADDRESS = env("SAVE_IP_ADDRESS", default=True)
+SAVE_IP_ADDRESS = env("SAVE_IP_ADDRESS", default=False)
 
 # Environnement name
 ENV_NAME = env("ENV_NAME", default="")
