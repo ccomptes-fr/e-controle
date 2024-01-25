@@ -390,39 +390,28 @@ ENV_NAME = env("ENV_NAME", default="")
 #  APP_NAME come from gunicorn config
 FILENAME = env("APP_NAME", default=None)
 
-if not DEBUG and FILENAME:
-    LOGGING = {
-        "version": 1,
-        "disable_existing_loggers": False,
-        "root": {"level": "ERROR", "handlers": ["file"]},
-        "formatters": {
-            "verbose": {
-                "format": "%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
-            },
+DISABLE_SERVER_SIDE_CURSORS = True
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
         },
-        "handlers": {
-            "file": {
-                "level": "ERROR",
-                "class": "logging.FileHandler",
-                "filename": f"/var/log/{FILENAME}.log",
-                "formatter": "verbose",
-            },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': '/var/log/logging.log',
         },
-        "loggers": {
-            "django": {"handlers": ["file"], "level": "ERROR", "propagate": True},
+    },
+    'loggers': {
+        'django.db.backends': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
         },
-    }
-else:
-    LOGGING = {
-        'version': 1,
-        'handlers': {
-            'console': {
-                'class': 'logging.StreamHandler',
-                'stream': sys.stdout,
-            }
-        },
-        'root': {
-            'handlers': ['console'],
-            'level': 'INFO'
-        }
-    }
+    },
+}

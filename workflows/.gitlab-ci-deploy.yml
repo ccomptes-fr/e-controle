@@ -17,7 +17,7 @@
       COMMAND="$COMMAND -v ${MEDIA_PATH}:/code/e-controle-media"
       COMMAND="$COMMAND -v ${STATIC_PATH}:/var/ecc/static"
       COMMAND="$COMMAND -v ${LOG_PATH}:/var/log"
-      COMMAND="$COMMAND -e DEBUG=False"
+      COMMAND="$COMMAND -e DEBUG=${DEBUG}"
       COMMAND="$COMMAND -e SHOW_DEBUG_TOOLBAR=False"
       COMMAND="$COMMAND -e DATABASE_URL=\"${DATABASE_URL}\""
       COMMAND="$COMMAND -e SECRET_KEY=\"${SECRET_KEY}\""
