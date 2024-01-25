@@ -389,6 +389,10 @@ ENV_NAME = env("ENV_NAME", default="")
 # https://mattsegal.dev/file-logging-django.html
 #  APP_NAME come from gunicorn config
 FILENAME = env("APP_NAME", default=None)
+
+# Activer DISABLE_SERVER_SIDE_CURSORS
+DISABLE_SERVER_SIDE_CURSORS = True
+
 if not DEBUG and FILENAME:
     LOGGING = {
         "version": 1,
