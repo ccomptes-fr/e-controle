@@ -62,7 +62,7 @@ openpyxl==3.0.9
 packaging==23.0
 pdfrw==0.4
 prompt-toolkit==3.0.38
-psycopg2-binary==2.9.5
+psycopg2-binary==2.9.9
 pyasn1==0.4.8
 pycparser==2.21
 pyOpenSSL==23.0.0
