@@ -1,5 +1,4 @@
-from django.http import HttpResponseForbidden
-
+from django.shortcuts import render
 
 class ExternalAccessMiddleware:
 
@@ -20,7 +19,7 @@ class ExternalAccessMiddleware:
       # Vérifier le domaine de l'e-mail
       if user_email and any(user_email.endswith(domain) or user_email.endswith(f'.{domain}') for domain in denied_domains ):
 
-        return HttpResponseForbidden("Votre accès est bloqué car l'utilisation de cet e-mail n'est pas autorisée. Veuillez utiliser le VPN de la Cour sur votre poste de travail pour accéder à e-Controle.")
+        return render(request, 'ecc/forbidden.html')
 
     response = self.get_response(request)
 
