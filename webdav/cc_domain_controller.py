@@ -158,7 +158,7 @@ class CCDomainController(BaseDomainController):
       control.reference_code
       """
       # TODO : isolate case realm == "", it was necessary for windows 7 only
-      if django_user.profile.controls.filter(reference_code=realm).exists() or realm == "":
+      if django_user.profile.user_controls("all").filter(reference_code=realm).exists() or realm == "":
         # The request is readonly (files should never be edited)
         environ["wsgidav.magicauth.roles"] = ("reader")
         return True
