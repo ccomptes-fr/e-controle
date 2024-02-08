@@ -106,6 +106,7 @@ deploy:commit:dev2_e-controle-webdav:
     <<: *deploy_variables
     IMAGE_TAG: $CI_COMMIT_SHA
     IMAGE_NAME: e-controle-webdav
+    CONTAINER_NAME: e-controle-webdav
     SERVER_PORT: 8081
     MEDIA_PATH: /opt/e-controle-media
     STATIC_PATH: /opt/e-controle-static

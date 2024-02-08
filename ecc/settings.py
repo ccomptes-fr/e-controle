@@ -105,6 +105,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "tos.middleware.WelcomeMiddleware",
+    "ecc.middleware.ExternalAccessMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.contrib.sites.middleware.CurrentSiteMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -389,6 +390,7 @@ ENV_NAME = env("ENV_NAME", default="")
 # https://mattsegal.dev/file-logging-django.html
 #  APP_NAME come from gunicorn config
 FILENAME = env("APP_NAME", default=None)
+
 if not DEBUG and FILENAME:
     LOGGING = {
         "version": 1,

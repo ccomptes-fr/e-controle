@@ -17,7 +17,7 @@ def find_parent_control(obj):
 
 def undelete(modeladmin, request, queryset):
     for item in queryset:
-        item.undelete()
+        item.restore()
         add_log_entry(
             verb="admin undeleted", session_user=request.user, obj=item, target=item
         )
@@ -26,7 +26,7 @@ def undelete(modeladmin, request, queryset):
 @confirm_action
 def soft_delete(modeladmin, request, queryset):
     for item in queryset:
-        item.soft_delete()
+        item.delete()
         parent = find_parent_control(item)
         if isinstance(parent, Control):
             delete_control_folder(parent.reference_code)
