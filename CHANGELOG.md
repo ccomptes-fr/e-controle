@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.0] - 2024-02-08
+
+### Added
+
+- Les contrôles supprimés sont affichés en rouge
+
+### Fixed
+
+- Supprimer un espace de dépôt depuis la page admin
+- Résoudre les problèmes de connexion aléatoires de la DB en utilisant la version 5.3.0 de Whitenoise
+
+### Security
+
+- Interdire l'accès à des internes depuis des postes non sécurisés
+
 ## [2.2.0] - 2024-01-23
 
 ### Added
@@ -19,7 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Un utilisateur peut être à la fois Demandeur et Répondant
 - Ajout d'une page de non conformité au RGAA
 
-
 ### Changed
 
 - Application des retours sur les règles RGAA : balises
@@ -28,7 +42,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Utilisation de la langue française au lieu de la langue anglaise pour le respect du RGAA
 - L'adresse de support est désormais paramétrable
 - Les boutons d'export et de duplication ne sont visibles que si des questionnaires sont présents
-- Mise à jour de CHANGELOG
 
 ### Fixed
 
@@ -41,7 +54,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 
 - Remplacement de la librairie obsolète soft-delete par django-soft-delete
-- Passage de Django 2.2 à Django 3.2
 - Mettre à jour le serveur RabbitMQ
 
 ## [2.1.0] - 2023-05-22
